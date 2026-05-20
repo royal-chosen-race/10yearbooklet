@@ -213,7 +213,7 @@
         };
         
         const GROUP_OPTIONS = [
-            '風吉小組', '風潔小組', '風豪小組', '風光小組', '風發小組', 
+            '牧者團隊', '長老團隊', '風吉小組', '風潔小組', '風豪小組', '風光小組', '風發小組', 
             '風欣小組', '風楚小組', '風玲小組', '風梁小組', '風炎小組', 
             '風誠小組', '風慢小組', '風大小組', '風冠小組', '風鳳小組', 
             '風儒小組', '風青小組', '銀寶團契', '風隴小組', '風勇小組', 
@@ -225,19 +225,32 @@
 
         let state = {
             zoom: 80, activeId: '1', viewMode: 'spread', smartSort: false, isLocked: false,
-            collapsedGroups: {}, lastScrolledId: null, // 🟢 新增：視角對焦鎖定快取
+            collapsedGroups: {}, lastScrolledId: null, groupOrder: [], 
             entries: [
-                { id: '1', layout: 'PASTOR', groupName: '風吉小組', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大能大力，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' },
+                { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大能大力，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂粡知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' },
                 { id: '2', layout: 'MEMBER_TITLE', groupName: '風潔小組', name: '何姊妹', role: '(一般組員)', title: '姊妹', headline: '一路走來，神的恩典滿滿', content: '轉眼間來到風一族八年了，感謝神，給予我機會。學鼓服事，在一次又一次的服事中進步、成長。委身在風一族教會的這幾年，很感謝牧師不辭辛勞地講道、以及弟兄姊妹彼此之間的代禱與扶持，使我在信仰上更加堅定，風一族教會十週年，一路走來神的恩典滿滿！' },
                 { id: '3', layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '彭依嵐', role: '小組長', title: '姊妹', headline: '五載恩典，一生家人', content: '邁向十週年神聖時刻，是主任牧師與師母用生命無私付出澆灌風一族，我心中除對神的敬畏與感恩，最想表達的是最誠摯的謝意。謝謝主任牧師是位領路牧者—您講道總成為我腳前的燈、路裝備。聽著您分享真理那分堅定的眼神，是知識傳遞，更是生命榜樣！' }
             ]
         };
 
+        function ensureGroupOrder() {
+            if (!state.groupOrder || !Array.isArray(state.groupOrder) || state.groupOrder.length === 0) {
+                state.groupOrder = [...GROUP_OPTIONS];
+            }
+            state.entries.forEach(e => {
+                if (e.groupName && !state.groupOrder.includes(e.groupName)) {
+                    state.groupOrder.push(e.groupName);
+                }
+            });
+        }
+
         function saveState() {
+            ensureGroupOrder();
             localStorage.setItem('royalChosenRaceBooklet', JSON.stringify({
                 zoom: state.zoom, activeId: state.activeId, viewMode: state.viewMode,
                 smartSort: state.smartSort, isLocked: state.isLocked,
-                collapsedGroups: state.collapsedGroups, entries: state.entries
+                collapsedGroups: state.collapsedGroups, entries: state.entries,
+                groupOrder: state.groupOrder
             }));
             const badge = document.getElementById('safetyBadge');
             if (badge && !badge.innerHTML.includes('警告')) {
@@ -259,12 +272,16 @@
                         state.smartSort = parsed.smartSort || false;
                         state.isLocked = parsed.isLocked || false;
                         state.collapsedGroups = parsed.collapsedGroups || {};
+                        state.groupOrder = parsed.groupOrder || [];
                     }
+                    ensureGroupOrder();
                     setTimeout(() => {
                         if(document.getElementById('chkSmartSort')) document.getElementById('chkSmartSort').checked = state.smartSort;
                         if(document.getElementById('chkLockLayout')) document.getElementById('chkLockLayout').checked = state.isLocked;
                     }, 50);
-                } catch(e) { console.error("加載持久化資料緩衝出錯", e); }
+                } catch(e) { console.error("持久化資料加載出錯", e); }
+            } else {
+                ensureGroupOrder();
             }
         }
 
@@ -325,20 +342,32 @@
             const viewLabel = document.getElementById('lblViewMode');
             if (viewLabel) viewLabel.innerText = state.viewMode === 'spread' ? '單頁' : '跨頁';
             saveState();
-            // 🟢 視角變更時，強制重置對焦鎖，讓轉換後能重新校準畫面
             state.lastScrolledId = null; 
             renderCanvas();
         }
 
-        // ── 🟢 修正一：升級為「群組內獨立排序演算法」，點擊 ▲/▼ 時只會在同一小組內移動，牧者也能完美互換順序 ──
+        function moveGroup(groupName, direction) {
+            if (state.isLocked) return;
+            ensureGroupOrder();
+            const idx = state.groupOrder.indexOf(groupName);
+            if (idx === -1) return;
+
+            const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+            if (targetIdx < 0 || targetIdx >= state.groupOrder.length) return;
+
+            [state.groupOrder[idx], state.groupOrder[targetIdx]] = [state.groupOrder[targetIdx], state.groupOrder[idx]];
+            
+            state.lastScrolledId = null; 
+            saveState();
+            render();
+        }
+
         function moveEntry(id, direction) {
             if (state.isLocked) return;
             const index = state.entries.findIndex(e => e.id === id);
             if (index === -1) return;
 
             const targetGroup = state.entries[index].groupName;
-
-            // 搜集同群組所有組員的 global 陣列索引
             let sameGroupIndices = [];
             state.entries.forEach((e, idx) => {
                 if (e.groupName === targetGroup) sameGroupIndices.push(idx);
@@ -346,15 +375,11 @@
 
             const currentPosInGroup = sameGroupIndices.indexOf(index);
             const targetPosInGroup = direction === 'up' ? currentPosInGroup - 1 : currentPosInGroup + 1;
-
             if (targetPosInGroup < 0 || targetPosInGroup >= sameGroupIndices.length) return;
 
             const targetGlobalIndex = sameGroupIndices[targetPosInGroup];
-
-            // 進行組內元素對調
             [state.entries[index], state.entries[targetGlobalIndex]] = [state.entries[targetGlobalIndex], state.entries[index]];
             
-            // 🟢 排序變更時，重置對焦鎖，使畫布跟隨移動後的新卡片位置
             state.lastScrolledId = null; 
             saveState();
             render();
@@ -409,6 +434,7 @@
         function renderSidebar() {
             const list = document.getElementById('sidebarList');
             if (!list) return;
+            ensureGroupOrder();
             const keyword = document.getElementById('searchFilter') ? document.getElementById('searchFilter').value.toLowerCase().trim() : '';
             
             let grouped = {};
@@ -418,8 +444,10 @@
                 grouped[gName].push(e);
             });
 
-            list.innerHTML = Object.keys(grouped).map(groupName => {
+            list.innerHTML = state.groupOrder.map(groupName => {
                 let items = grouped[groupName];
+                if (!items || items.length === 0) return ''; 
+
                 let isFiltered = items.some(e => (((e.name || '').toLowerCase().includes(keyword) || (groupName || '').toLowerCase().includes(keyword))));
                 if (keyword && !isFiltered) return '';
 
@@ -427,8 +455,14 @@
                 let arrow = isCollapsed ? '▶' : '▼';
                 
                 let groupHeaderHtml = `
-                    <div onclick="state.collapsedGroups['${groupName}'] = !${isCollapsed}; saveState(); renderSidebar();" class="text-xs font-bold text-[#F5A623] cursor-pointer bg-slate-900/80 p-2 rounded-lg flex items-center justify-between select-none hover:bg-slate-800">
-                        <span>${arrow} ${groupName} (${items.length})</span>
+                    <div class="text-xs font-bold text-[#F5A623] bg-slate-900/80 p-2 rounded-lg flex items-center justify-between select-none hover:bg-slate-800 transition-colors">
+                        <span class="cursor-pointer flex-1 py-0.5" onclick="state.collapsedGroups['${groupName}'] = !${isCollapsed}; saveState(); renderSidebar();">
+                            ${arrow} ${groupName} (${items.length})
+                        </span>
+                        <div class="flex gap-2 text-[10px] text-gray-400 ${state.isLocked ? 'hidden' : ''}" onclick="event.stopPropagation();">
+                            <button onclick="moveGroup('${groupName}','up')" class="hover:text-white p-0.5" title="組別上移">▲</button>
+                            <button onclick="moveGroup('${groupName}','down')" class="hover:text-white p-0.5" title="組別下移">▼</button>
+                        </div>
                     </div>
                 `;
 
@@ -510,6 +544,11 @@
 
         function renderCanvas() {
             const container = document.getElementById('canvas'); if (!container) return;
+            ensureGroupOrder();
+            
+            const viewport = document.getElementById('scrollViewport');
+            const savedScrollTop = viewport ? viewport.scrollTop : 0;
+
             container.innerHTML = ''; 
             let scratchpad = document.createElement('div');
             scratchpad.style.cssText = "position: absolute; visibility: hidden; width: 210mm; top: -9999px; left: -9999px; z-index:-100;";
@@ -545,24 +584,51 @@
                 } else { initialFlattenedEntries.push(entry); }
             });
 
-            let sortedFlowItems = []; let pastorItems = [];
-            initialFlattenedEntries.forEach(e => { if(e.layout === 'PASTOR') pastorItems.push(e); else sortedFlowItems.push(e); });
-            
-            let balancedFlowItems = [];
-            if (state.smartSort) {
-                sortedFlowItems.sort((a, b) => (b.content || '').length - (a.content || '').length);
-                while(sortedFlowItems.length > 0) {
-                    balancedFlowItems.push(sortedFlowItems.shift());
-                    if(sortedFlowItems.length > 0) balancedFlowItems.push(sortedFlowItems.pop());
-                }
-            } else { balancedFlowItems = sortedFlowItems; }
+            // ── 🟢 修正二：徹底重構智慧路由封裝。全書所有肢體不分牧者或會眾，全面依據自訂的 state.groupOrder 大章節進行落版 ──
+            let itemsByGroup = {};
+            state.groupOrder.forEach(g => itemsByGroup[g] = []);
+            initialFlattenedEntries.forEach(entry => {
+                let g = entry.groupName || '未分配小組';
+                if (!itemsByGroup[g]) itemsByGroup[g] = [];
+                itemsByGroup[g].push(entry);
+            });
 
-            let finalQueue = [...pastorItems, ...balancedFlowItems];
+            let finalQueue = [];
+            state.groupOrder.forEach(groupName => {
+                let groupItems = itemsByGroup[groupName] || [];
+                if (groupItems.length === 0) return;
+
+                let groupPastors = groupItems.filter(e => e.layout === 'PASTOR');
+                let groupMembers = groupItems.filter(e => e.layout !== 'PASTOR');
+
+                if (state.smartSort) {
+                    groupMembers.sort((a, b) => (b.content || '').length - (a.content || '').length);
+                    let balanced = [];
+                    while(groupMembers.length > 0) {
+                        balanced.push(groupMembers.shift());
+                        if(groupMembers.length > 0) balanced.push(groupMembers.pop());
+                    }
+                    groupMembers = balanced;
+                } else {
+                    groupMembers.sort((a, b) => {
+                        let cleanIdA = a.id.replace('_cont', '');
+                        let cleanIdB = b.id.replace('_cont', '');
+                        let entIdxA = state.entries.findIndex(x => x.id === cleanIdA);
+                        let entIdxB = state.entries.findIndex(x => x.id === cleanIdB);
+                        if (entIdxA !== entIdxB) return entIdxA - entIdxB;
+                        return a.id.includes('_cont') ? 1 : -1;
+                    });
+                }
+                // 在該群組內部：牧者排版最前，會眾流動緊接在後，且完美跟隨大章節排序移位
+                finalQueue.push(...groupPastors, ...groupMembers);
+            });
+
             let pages = []; let currentFlowItems = []; let lastGroup = "";
             const MAX_PRINTABLE_HEIGHT = 810; 
 
             finalQueue.forEach((entry) => {
-                if (entry.layout !== 'PASTOR' && entry.groupName !== lastGroup) {
+                // 修正章節切換邊界檢測，確保牧者團隊換位時能完美更新 z-index 分頁
+                if (entry.groupName !== lastGroup) {
                     if (currentFlowItems.length > 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
                     if (groupStats[entry.groupName] >= 3) {
                         let projectedPageNum = 7 + pages.length;
@@ -571,6 +637,7 @@
                     }
                     lastGroup = entry.groupName;
                 }
+
                 if (entry.layout === 'PASTOR') {
                     if (currentFlowItems.length > 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
                     pages.push({ type: 'PASTOR', items: [entry] });
@@ -643,16 +710,26 @@
                 pc.querySelectorAll('.book-page').forEach(el => el.style.boxShadow = 'none');
             }
 
+            if (viewport) viewport.scrollTop = savedScrollTop;
+
             setTimeout(validateOverflowGuardrails, 300);
 
-            // ── 🟢 修正三：視角定位追蹤優化（改採 behavior: 'auto' 進行快閃對焦，防止打字時反覆緩慢重播） ──
+            // 精準物理矩陣無感對焦
             if (state.lastScrolledId !== state.activeId) {
                 setTimeout(() => {
-                    const targetCard = document.querySelector(`[data-id="${state.activeId}"], [data-id="${state.activeId}_cont"]`);
-                    if (targetCard) {
-                        targetCard.scrollIntoView({ behavior: 'auto', block: 'center' });
+                    const targetCard = document.querySelector(`#canvas [data-id="${state.activeId}"], #canvas [data-id="${state.activeId}_cont"]`);
+                    if (targetCard && viewport && canvas) {
+                        const cardRect = targetCard.getBoundingClientRect();
+                        const canvasRect = canvas.getBoundingClientRect();
+                        const relativeTop = cardRect.top - canvasRect.top;
+                        const targetScrollTop = relativeTop - (viewport.clientHeight / 2) + (cardRect.height / 2);
+                        
+                        viewport.scrollTo({
+                            top: targetScrollTop,
+                            behavior: 'auto'
+                        });
                     }
-                    state.lastScrolledId = state.activeId; // 綁定對焦鎖，打字更新時阻斷反覆定位
+                    state.lastScrolledId = state.activeId; 
                 }, 50);
             }
         }
@@ -713,9 +790,9 @@
                 const titleText = (item.title && item.title !== '(無稱謂)') ? item.title : '';
                 
                 contentHTML = `
-                    <div class="white-layer" style="${pd}" data-id="${item.id}">                    
+                    <div class="white-layer" style="${pd}" data-id="${item.id}">                        
                         <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-6 font-serif">
-                            <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言總勉</span></div>
+                            <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言</span></div>
                             <div class="text-[#F5A623] text-xs font-bold tracking-widest uppercase font-sans">${(item.groupName || '').substring(0,2)}</div>
                         </div>
                         <div class="flex flex-col flex-1 h-full pt-4">
