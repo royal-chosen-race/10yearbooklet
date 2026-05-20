@@ -72,11 +72,9 @@
         }
 
         .grid-flow-engine {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14mm;
-            align-items: stretch; 
             width: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .pastor-content {
@@ -227,7 +225,7 @@
             zoom: 80, activeId: '1', viewMode: 'spread', smartSort: false, isLocked: false,
             collapsedGroups: {}, lastScrolledId: null, groupOrder: [], 
             entries: [
-                { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大能大力，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂粡知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' },
+                { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大能大力，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' },
                 { id: '2', layout: 'MEMBER_TITLE', groupName: '風潔小組', name: '何姊妹', role: '(一般組員)', title: '姊妹', headline: '一路走來，神的恩典滿滿', content: '轉眼間來到風一族八年了，感謝神，給予我機會。學鼓服事，在一次又一次的服事中進步、成長。委身在風一族教會的這幾年，很感謝牧師不辭辛勞地講道、以及弟兄姊妹彼此之間的代禱與扶持，使我在信仰上更加堅定，風一族教會十週年，一路走來神的恩典滿滿！' },
                 { id: '3', layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '彭依嵐', role: '小組長', title: '姊妹', headline: '五載恩典，一生家人', content: '邁向十週年神聖時刻，是主任牧師與師母用生命無私付出澆灌風一族，我心中除對神的敬畏與感恩，最想表達的是最誠摯的謝意。謝謝主任牧師是位領路牧者—您講道總成為我腳前的燈、路裝備。聽著您分享真理那分堅定的眼神，是知識傳遞，更是生命榜樣！' }
             ]
@@ -584,7 +582,6 @@
                 } else { initialFlattenedEntries.push(entry); }
             });
 
-            // ── 🟢 修正二：徹底重構智慧路由封裝。全書所有肢體不分牧者或會眾，全面依據自訂的 state.groupOrder 大章節進行落版 ──
             let itemsByGroup = {};
             state.groupOrder.forEach(g => itemsByGroup[g] = []);
             initialFlattenedEntries.forEach(entry => {
@@ -619,35 +616,64 @@
                         return a.id.includes('_cont') ? 1 : -1;
                     });
                 }
-                // 在該群組內部：牧者排版最前，會眾流動緊接在後，且完美跟隨大章節排序移位
                 finalQueue.push(...groupPastors, ...groupMembers);
             });
 
+            // ── 🟢 修正一：完全拔除 CHAPTER 滿版扉頁生成區，讓所有小組百分之百公平流動 ──
             let pages = []; let currentFlowItems = []; let lastGroup = "";
             const MAX_PRINTABLE_HEIGHT = 810; 
 
             finalQueue.forEach((entry) => {
-                // 修正章節切換邊界檢測，確保牧者團隊換位時能完美更新 z-index 分頁
-                if (entry.groupName !== lastGroup) {
-                    if (currentFlowItems.length > 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
-                    if (groupStats[entry.groupName] >= 3) {
-                        let projectedPageNum = 7 + pages.length;
-                        if (projectedPageNum % 2 !== 0) pages.push({ type: 'BLANK' });
-                        pages.push({ type: 'CHAPTER', groupName: entry.groupName });
-                    }
-                    lastGroup = entry.groupName;
-                }
-
                 if (entry.layout === 'PASTOR') {
                     if (currentFlowItems.length > 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
                     pages.push({ type: 'PASTOR', items: [entry] });
+                    lastGroup = entry.groupName;
                 } else {
                     let testItems = [...currentFlowItems, entry];
                     let testPage = document.createElement('div'); testPage.className = "book-page";
                     let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
                     let gridEngine = document.createElement('div'); gridEngine.className = "grid-flow-engine pt-2";
-                    let rows = []; for(let r = 0; r < testItems.length; r += 2) { rows.push([testItems[r], testItems[r+1]]); }
-                    gridEngine.innerHTML = rows.map(row => `<div class="flex gap-[14mm] mb-[20px] items-stretch w-full">${buildCardHTMLString(row[0])}${row[1] ? buildCardHTMLString(row[1]) : '<div class="flex-1"></div>'}</div>`).join('');
+                    
+                    // 組別感知橫列切斷演算法
+                    let rows = []; let currentRow = []; let currentGroup = "";
+                    testItems.forEach(item => {
+                        if (item.groupName !== currentGroup) {
+                            if (currentRow.length > 0) {
+                                while (currentRow.length < 2) currentRow.push(null);
+                                rows.push(currentRow); currentRow = [];
+                            }
+                            currentGroup = item.groupName;
+                        }
+                        currentRow.push(item);
+                        if (currentRow.length === 2) { rows.push(currentRow); currentRow = []; }
+                    });
+                    if (currentRow.length > 0) {
+                        while (currentRow.length < 2) currentRow.push(null);
+                        rows.push(currentRow);
+                    }
+
+                    let lastGroupHeading = "";
+                    gridEngine.innerHTML = rows.map(row => {
+                        let inlineHeaderHtml = '';
+                        if (row[0] && row[0].groupName !== lastGroupHeading) {
+                            inlineHeaderHtml = `
+                                <div class="flex items-center gap-4 mb-4 avoid-break font-serif text-[#0A2B66] w-full">
+                                    <span class="text-sm font-black tracking-widest">${row[0].groupName}</span>
+                                    <div class="h-[1px] bg-gradient-to-r from-[#F5A623]/60 to-transparent flex-1"></div>
+                                </div>
+                            `;
+                            lastGroupHeading = row[0].groupName;
+                        }
+                        return `
+                            <div class="w-full avoid-break">
+                                ${inlineHeaderHtml}
+                                <div class="flex gap-[14mm] mb-[20px] items-stretch w-full">
+                                    ${buildCardHTMLString(row[0])}
+                                    ${row[1] ? buildCardHTMLString(row[1]) : '<div class="flex-1"></div>'}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
                     
                     whiteLayer.appendChild(gridEngine); 
                     testPage.appendChild(whiteLayer); 
@@ -656,8 +682,12 @@
                     let measuredHeight = gridEngine.getBoundingClientRect().height; scratchpad.removeChild(testPage);
                     
                     if (measuredHeight > MAX_PRINTABLE_HEIGHT && currentFlowItems.length > 0) {
-                        pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = [entry];
-                    } else { currentFlowItems.push(entry); }
+                        pages.push({ type: 'FLOW', items: currentFlowItems }); 
+                        currentFlowItems = [entry];
+                    } else { 
+                        currentFlowItems.push(entry); 
+                    }
+                    lastGroup = entry.groupName;
                 }
             });
             if (currentFlowItems.length > 0) pages.push({ type: 'FLOW', items: currentFlowItems });
@@ -714,7 +744,7 @@
 
             setTimeout(validateOverflowGuardrails, 300);
 
-            // 精準物理矩陣無感對焦
+            // 高精縮放對焦定位
             if (state.lastScrolledId !== state.activeId) {
                 setTimeout(() => {
                     const targetCard = document.querySelector(`#canvas [data-id="${state.activeId}"], #canvas [data-id="${state.activeId}_cont"]`);
@@ -772,27 +802,15 @@
                 `;
             }
 
-            if (pageData.type === 'CHAPTER') {
-                contentHTML = `
-                    <div class="white-layer justify-center items-center" style="${pd}">
-                        <div class="text-center space-y-4 font-serif">
-                            <div class="text-[#F5A623] text-xl tracking-[0.4em] opacity-80 pl-2">✦ ✦</div>
-                            <h1 class="text-4xl font-black text-[#0A2B66] tracking-[0.3em] font-serif pl-3">${pageData.groupName}</h1>
-                            <div class="w-16 h-[2px] bg-[#F5A623] mx-auto my-6"></div>
-                            <p class="text-xs tracking-[0.2em] text-gray-400 font-sans uppercase">Royal Chosen Race Church Collection</p>
-                        </div>
-                    </div>
-                `;
-            } 
-            else if (pageData.type === 'PASTOR') {
+            if (pageData.type === 'PASTOR') {
                 const item = pageData.items[0];
                 const identityText = (item.role && item.role !== '(一般組員)') ? item.role : '';
                 const titleText = (item.title && item.title !== '(無稱謂)') ? item.title : '';
                 
                 contentHTML = `
-                    <div class="white-layer" style="${pd}" data-id="${item.id}">                        
+                    <div class="white-layer" style="${pd}" data-id="${item.id}">
                         <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-6 font-serif">
-                            <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言</span></div>
+                            <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言冊</span></div>
                             <div class="text-[#F5A623] text-xs font-bold tracking-widest uppercase font-sans">${(item.groupName || '').substring(0,2)}</div>
                         </div>
                         <div class="flex flex-col flex-1 h-full pt-4">
@@ -816,34 +834,36 @@
             } else {
                 let rows = []; for(let i = 0; i < pageData.items.length; i += 2) { rows.push([pageData.items[i], pageData.items[i+1]]); }
                 
-                contentHTML = rows.map((row, rIdx) => {
+                let lastGroupHeading = "";
+                contentHTML = rows.map((row) => {
                     let inlineHeaderHtml = '';
-                    if (rIdx === 0 && groupStats && groupStats[row[0].groupName] < 3) {
+                    if (row[0] && row[0].groupName !== lastGroupHeading) {
                         inlineHeaderHtml = `
-                            <div class="col-span-2 flex items-center gap-4 mb-4 avoid-break font-serif text-[#0A2B66]">
+                            <div class="flex items-center gap-4 mb-4 avoid-break font-serif text-[#0A2B66] w-full">
                                 <span class="text-sm font-black tracking-widest">${row[0].groupName}</span>
                                 <div class="h-[1px] bg-gradient-to-r from-[#F5A623]/60 to-transparent flex-1"></div>
                             </div>
                         `;
+                        lastGroupHeading = row[0].groupName;
                     }
                     return `
-                        ${inlineHeaderHtml}
-                        <div class="flex gap-[14mm] mb-[20px] items-stretch w-full">
-                            ${buildCardHTMLString(row[0])}
-                            ${row[1] ? buildCardHTMLString(row[1]) : '<div class="flex-1"></div>'}
+                        <div class="w-full avoid-break">
+                            ${inlineHeaderHtml}
+                            <div class="flex gap-[14mm] mb-[20px] items-stretch w-full">
+                                ${buildCardHTMLString(row[0])}
+                                ${row[1] ? buildCardHTMLString(row[1]) : '<div class="flex-1"></div>'}
+                            </div>
                         </div>
                     `;
                 }).join('');
 
                 contentHTML = `
                     <div class="white-layer" style="${pd}">
-                        <div class="absolute inset-0 border border-dashed border-red-500/10 pointer-events-none z-50 no-print m-[3mm]"></div>
-                        <div class="absolute inset-0 border border-dashed border-blue-500/10 pointer-events-none z-50 no-print m-[6mm]"></div>
                         <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-5 font-serif">
                             <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會 10 週年紀念</span></div>
                             <div class="text-[#F5A623] text-lg opacity-60">✦ ✦</div>
                         </div>
-                        <div class="flex-1 overflow-hidden pt-2">${contentHTML}</div>
+                        <div class="flex-1 overflow-hidden pt-2 grid-flow-engine">${contentHTML}</div>
                     </div>
                 `;
             }
