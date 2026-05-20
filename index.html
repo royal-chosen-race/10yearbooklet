@@ -206,6 +206,7 @@
     <script>
         const LAYOUTS = {
             'PASTOR': '大類一：牧者/長老專屬版 (獨立滿版頁)',
+            'PASTOR_NOTITLE': '大類一：牧者/長老專屬版 - 無標題金句 (獨立滿版頁)',
             'MEMBER_TITLE': '大類二：肢體同工版 - 有標題金句 (自動流動)',
             'MEMBER_NOTITLE': '大類二：肢體同工版 - 無標題標籤 (自動流動)'
         };
@@ -223,13 +224,22 @@
 
         let state = {
             zoom: 80, activeId: '1', viewMode: 'spread', smartSort: false, isLocked: false,
-            collapsedGroups: {}, lastScrolledId: null, groupOrder: [], 
-            entries: [
-                { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大能大力，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' },
-                { id: '2', layout: 'MEMBER_TITLE', groupName: '風潔小組', name: '何姊妹', role: '(一般組員)', title: '姊妹', headline: '一路走來，神的恩典滿滿', content: '轉眼間來到風一族八年了，感謝神，給予我機會。學鼓服事，在一次又一次的服事中進步、成長。委身在風一族教會的這幾年，很感謝牧師不辭辛勞地講道、以及弟兄姊妹彼此之間的代禱與扶持，使我在信仰上更加堅定，風一族教會十週年，一路走來神的恩典滿滿！' },
-                { id: '3', layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '彭依嵐', role: '小組長', title: '姊妹', headline: '五載恩典，一生家人', content: '邁向十週年神聖時刻，是主任牧師與師母用生命無私付出澆灌風一族，我心中除對神的敬畏與感恩，最想表達的是最誠摯的謝意。謝謝主任牧師是位領路牧者—您講道總成為我腳前的燈、路裝備。聽著您分享真理那分堅定的眼神，是知識傳遞，更是生命榜樣！' }
-            ]
+            collapsedGroups: {}, lastScrolledId: null, groupOrder: [], isEditing: false, shouldAutoScroll: false
         };
+        
+        state.entries = [
+            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大能大力，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' },
+            { id: '2', layout: 'MEMBER_TITLE', groupName: '風潔小組', name: '何姊妹', role: '(一般組員)', title: '姊妹', headline: '一路走來，神的恩典滿滿', content: '轉眼間來到風一族八年了，感謝神，給予我機會。學鼓服事，在一次又一次的服事中進步、成長。委身在風一族教會的這幾年，很感謝牧師不辭辛勞地講道、以及弟兄姊妹彼此之間的代禱與扶持，使我在信仰上更加堅定，風一族教會十週年，一路走來神的恩典滿滿！' },
+            { id: '3', layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '彭依嵐', role: '小組長', title: '姊妹', headline: '五載恩典，一生家人', content: '邁向十週年神聖時刻，是主任牧師與師母用生命無私付出澆灌風一族，我心中除對神的敬畏與感恩，最想表達的是最誠摯的謝意。謝謝主任牧師是位領路牧者—您講道總成為我腳前的燈、路裝備。聽著您分享真理那分堅定的眼神，是知識傳遞，更是生命榜樣！' }
+        ];
+
+        let renderTimer = null;
+        function scheduleCanvasRender() {
+            clearTimeout(renderTimer);
+            renderTimer = setTimeout(() => {
+                renderCanvas();
+            }, 300);
+        }
 
         function ensureGroupOrder() {
             if (!state.groupOrder || !Array.isArray(state.groupOrder) || state.groupOrder.length === 0) {
@@ -250,11 +260,6 @@
                 collapsedGroups: state.collapsedGroups, entries: state.entries,
                 groupOrder: state.groupOrder
             }));
-            const badge = document.getElementById('safetyBadge');
-            if (badge && !badge.innerHTML.includes('警告')) {
-                badge.className = "ml-8 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500 text-emerald-400 text-xs font-bold flex items-center gap-2 no-print";
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 系統狀態：出版編排安全 (✓ 已自動儲存)`;
-            }
         }
 
         function loadState() {
@@ -316,10 +321,8 @@
 
             const canvas = document.getElementById('canvas');
             if (canvas) canvas.style.transform = `scale(${state.zoom / 100})`;
-
             const zoomLabel = document.getElementById('zoomVal');
             if (zoomLabel) zoomLabel.innerText = `${state.zoom}%`;
-
             const viewLabel = document.getElementById('lblViewMode');
             if (viewLabel) viewLabel.innerText = state.viewMode === 'spread' ? '單頁' : '跨頁';
         }
@@ -340,7 +343,6 @@
             const viewLabel = document.getElementById('lblViewMode');
             if (viewLabel) viewLabel.innerText = state.viewMode === 'spread' ? '單頁' : '跨頁';
             saveState();
-            state.lastScrolledId = null; 
             renderCanvas();
         }
 
@@ -354,8 +356,7 @@
             if (targetIdx < 0 || targetIdx >= state.groupOrder.length) return;
 
             [state.groupOrder[idx], state.groupOrder[targetIdx]] = [state.groupOrder[targetIdx], state.groupOrder[idx]];
-            
-            state.lastScrolledId = null; 
+            state.shouldAutoScroll = true; 
             saveState();
             render();
         }
@@ -377,8 +378,7 @@
 
             const targetGlobalIndex = sameGroupIndices[targetPosInGroup];
             [state.entries[index], state.entries[targetGlobalIndex]] = [state.entries[targetGlobalIndex], state.entries[index]];
-            
-            state.lastScrolledId = null; 
+            state.shouldAutoScroll = true; 
             saveState();
             render();
         }
@@ -393,7 +393,7 @@
             } else if (state.entries.length === 0) {
                 state.activeId = null;
             }
-            state.lastScrolledId = null;
+            state.shouldAutoScroll = true; 
             saveState();
             render();
         }
@@ -408,7 +408,7 @@
                 newEntry = { id: newId, layout: source.layout, groupName: source.groupName, name: '新肢體成員', role: source.role, title: source.title, headline: source.headline, content: '' };
             }
             state.entries.splice(idx + 1, 0, newEntry); state.activeId = newId; 
-            state.lastScrolledId = null;
+            state.shouldAutoScroll = true; 
             saveState(); render();
         }
 
@@ -417,16 +417,45 @@
             const id = Date.now().toString();
             state.entries.push({ id, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...' });
             state.activeId = id; 
-            state.lastScrolledId = null;
+            state.shouldAutoScroll = true; 
             saveState(); render();
         }
 
+        // ── 🟢 修正二：優化下拉選單刷新防護，全數抽離同步 render，改為 schedule 去抖緩衝 ──
         function updateEntry(id, field, val) {
             if(state.isLocked) return;
             const entry = state.entries.find(e => e.id === id);
             if (entry) entry[field] = val;
-            renderCanvas(); saveState();
-            if (field === 'name' || field === 'groupName' || field === 'layout') renderSidebar();
+            saveState();
+
+            if (field === 'groupName' || field === 'layout' || field === 'role' || field === 'title') {
+                renderSidebar();
+                scheduleCanvasRender();
+                return;
+            }
+            scheduleCanvasRender();
+        }
+
+        function getCanvasRelativeTop(el) {
+            const canvas = document.getElementById('canvas');
+            let top = 0;
+            while (el && el !== canvas) {
+                top += el.offsetTop;
+                el = el.offsetParent;
+            }
+            return top;
+        }
+
+        // ── 🟢 修正一：新增 handleEditorBlur 延遲欄位檢測機制，切換同面板欄位時不重排 ──
+        function handleEditorBlur() {
+            requestAnimationFrame(() => {
+                const editor = document.getElementById('editorUI');
+                if (editor && editor.contains(document.activeElement)) {
+                    return;
+                }
+                state.isEditing = false;
+                renderCanvas();
+            });
         }
 
         function renderSidebar() {
@@ -468,7 +497,7 @@
                     if (keyword && !(e.name || '').toLowerCase().includes(keyword) && !(groupName || '').toLowerCase().includes(keyword)) return '';
                     return `
                         <div class="flex items-center gap-1 group">
-                            <div onclick="state.activeId='${e.id}'; state.lastScrolledId=null; render();" class="flex-1 p-2.5 rounded-xl cursor-pointer border transition-all ${state.activeId === e.id ? 'bg-[#F5A623]/20 border-[#F5A623]' : 'border-transparent hover:bg-white/5'}">
+                            <div onclick="state.activeId='${e.id}'; state.shouldAutoScroll=true; render();" class="flex-1 p-2.5 rounded-xl cursor-pointer border transition-all ${state.activeId === e.id ? 'bg-[#F5A623]/20 border-[#F5A623]' : 'border-transparent hover:bg-white/5'}">
                                 <div class="text-xs font-bold font-serif text-white">${e.name || '未命名'}</div>
                             </div>
                             <div class="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity pr-1 ${state.isLocked ? 'hidden' : ''}">
@@ -513,7 +542,7 @@
                                 ${GROUP_OPTIONS.map(g => `<option value="${g}" ${e.groupName===g?'selected':''}>${g}</option>`).join('')}
                             </select>
                         </div>
-                        <div><label class="text-[11px] text-white/60 font-bold">姓名</label><input oninput="updateEntry('${e.id}','name',this.value)" value="${e.name || ''}" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none"/></div>
+                        <div><label class="text-[11px] text-white/60 font-bold">姓名</label><input onfocus="state.isEditing=true;" onblur="handleEditorBlur();" oninput="updateEntry('${e.id}','name',this.value)" value="${e.name || ''}" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none"/></div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div><label class="text-[11px] text-white/60 font-bold">身份 (職分)</label>
@@ -527,8 +556,8 @@
                             </select>
                         </div>
                     </div>
-                    <div class="${e.layout === 'MEMBER_NOTITLE' ? 'hidden' : 'block'}"><label class="text-[11px] text-[#F5A623] font-bold uppercase tracking-widest">金句破題大標題</label><input oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#F5A623]/10 border border-[#F5A623]/30 rounded-lg p-3 text-sm text-[#F5A623] font-serif font-black outline-none"/></div>
-                    <div class="space-y-1"><div class="flex justify-between text-[10px] uppercase font-bold tracking-widest"><span class="text-white/40">感恩見證內文</span><span class="font-bold ${badgeColor}">${badgeText}</span></div><textarea oninput="updateEntry('${e.id}','content',this.value);" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm leading-relaxed text-white outline-none font-sans" style="height: 180px;">${e.content || ''}</textarea></div>
+                    <div class="${(e.layout === 'MEMBER_NOTITLE' || e.layout === 'PASTOR_NOTITLE') ? 'hidden' : 'block'}"><label class="text-[11px] text-[#F5A623] font-bold uppercase tracking-widest">金句破題大標題</label><input onfocus="state.isEditing=true;" onblur="handleEditorBlur();" oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#F5A623]/10 border border-[#F5A623]/30 rounded-lg p-3 text-sm text-[#F5A623] font-serif font-black outline-none"/></div>
+                    <div class="space-y-1"><div class="flex justify-between text-[10px] uppercase font-bold tracking-widest"><span class="text-white/40">感恩見證內文</span><span class="font-bold ${badgeColor}">${badgeText}</span></div><textarea onfocus="state.isEditing=true;" onblur="handleEditorBlur();" oninput="updateEntry('${e.id}','content',this.value);" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm leading-relaxed text-white outline-none font-sans" style="height: 180px;">${e.content || ''}</textarea></div>
                     <div class="pt-4 border-t border-white/10 space-y-2">
                         <div class="grid grid-cols-2 gap-2">
                             <button onclick="duplicateEntry('${e.id}', 'same_group')" class="py-2.5 rounded-lg bg-blue-950 border border-blue-700/60 text-blue-300 text-xs font-bold hover:bg-blue-900/40 flex items-center justify-center gap-1">👥 ＋ 同小組新增</button>
@@ -545,7 +574,20 @@
             ensureGroupOrder();
             
             const viewport = document.getElementById('scrollViewport');
-            const savedScrollTop = viewport ? viewport.scrollTop : 0;
+            const canvas = document.getElementById('canvas');
+            const zoomRatio = state.zoom / 100;
+
+            // ── 🟢 修正一（最關鍵一刀）：只要後台面板正有任一焦點聚焦，硬性斷流，不允許任何重排 ──
+            const editorHasFocus = document.querySelector('.editor-panel :focus');
+            if (editorHasFocus) return;
+
+            let activeRect = null;
+            if (viewport) {
+                const activeCard = document.querySelector(`#canvas [data-id="${state.activeId}"], #canvas [data-id="${state.activeId}_cont"]`);
+                if (activeCard) {
+                    activeRect = (getCanvasRelativeTop(activeCard) * zoomRatio) - viewport.scrollTop;
+                }
+            }
 
             container.innerHTML = ''; 
             let scratchpad = document.createElement('div');
@@ -560,7 +602,7 @@
                 let testCard = document.createElement('div'); testCard.style.width = "85mm"; testCard.innerHTML = buildCardHTMLString(entry);
                 scratchpad.appendChild(testCard); let fullHeight = testCard.getBoundingClientRect().height; scratchpad.removeChild(testCard);
 
-                if (fullHeight > 390 && paragraphs.length > 1 && entry.layout !== 'PASTOR') {
+                if (fullHeight > 390 && paragraphs.length > 1 && entry.layout !== 'PASTOR' && entry.layout !== 'PASTOR_NOTITLE') {
                     let chunk1 = []; let chunk2 = [];
                     for (let i = 0; i < paragraphs.length; i++) {
                         let currentTest = [...chunk1, paragraphs[i]];
@@ -595,8 +637,8 @@
                 let groupItems = itemsByGroup[groupName] || [];
                 if (groupItems.length === 0) return;
 
-                let groupPastors = groupItems.filter(e => e.layout === 'PASTOR');
-                let groupMembers = groupItems.filter(e => e.layout !== 'PASTOR');
+                let groupPastors = groupItems.filter(e => e.layout === 'PASTOR' || e.layout === 'PASTOR_NOTITLE');
+                let groupMembers = groupItems.filter(e => e.layout !== 'PASTOR' && e.layout !== 'PASTOR_NOTITLE');
 
                 if (state.smartSort) {
                     groupMembers.sort((a, b) => (b.content || '').length - (a.content || '').length);
@@ -619,12 +661,16 @@
                 finalQueue.push(...groupPastors, ...groupMembers);
             });
 
-            // ── 🟢 修正一：完全拔除 CHAPTER 滿版扉頁生成區，讓所有小組百分之百公平流動 ──
             let pages = []; let currentFlowItems = []; let lastGroup = "";
             const MAX_PRINTABLE_HEIGHT = 810; 
 
             finalQueue.forEach((entry) => {
-                if (entry.layout === 'PASTOR') {
+                if (entry.groupName !== lastGroup) {
+                    if (currentFlowItems.length > 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
+                    lastGroup = entry.groupName;
+                }
+
+                if (entry.layout === 'PASTOR' || entry.layout === 'PASTOR_NOTITLE') {
                     if (currentFlowItems.length > 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
                     pages.push({ type: 'PASTOR', items: [entry] });
                     lastGroup = entry.groupName;
@@ -634,7 +680,6 @@
                     let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
                     let gridEngine = document.createElement('div'); gridEngine.className = "grid-flow-engine pt-2";
                     
-                    // 組別感知橫列切斷演算法
                     let rows = []; let currentRow = []; let currentGroup = "";
                     testItems.forEach(item => {
                         if (item.groupName !== currentGroup) {
@@ -682,11 +727,8 @@
                     let measuredHeight = gridEngine.getBoundingClientRect().height; scratchpad.removeChild(testPage);
                     
                     if (measuredHeight > MAX_PRINTABLE_HEIGHT && currentFlowItems.length > 0) {
-                        pages.push({ type: 'FLOW', items: currentFlowItems }); 
-                        currentFlowItems = [entry];
-                    } else { 
-                        currentFlowItems.push(entry); 
-                    }
+                        pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = [entry];
+                    } else { currentFlowItems.push(entry); }
                     lastGroup = entry.groupName;
                 }
             });
@@ -740,26 +782,29 @@
                 pc.querySelectorAll('.book-page').forEach(el => el.style.boxShadow = 'none');
             }
 
-            if (viewport) viewport.scrollTop = savedScrollTop;
+            if (viewport) { const forceLayout = viewport.scrollHeight; }
 
-            setTimeout(validateOverflowGuardrails, 300);
+            // ── 🟢 修正三：引入 state.shouldAutoScroll 導航閥門，只有在點名與換位事件時才放行座標補償 ──
+            if (activeRect !== null && viewport && state.shouldAutoScroll) {
+                const newCard = document.querySelector(`#canvas [data-id="${state.activeId}"], #canvas [data-id="${state.activeId}_cont"]`);
+                if (newCard) {
+                    viewport.scrollTop = (getCanvasRelativeTop(newCard) * zoomRatio) - activeRect;
+                }
+            }
 
-            // 高精縮放對焦定位
-            if (state.lastScrolledId !== state.activeId) {
+            if (state.shouldAutoScroll && !editorHasFocus) {
                 setTimeout(() => {
                     const targetCard = document.querySelector(`#canvas [data-id="${state.activeId}"], #canvas [data-id="${state.activeId}_cont"]`);
                     if (targetCard && viewport && canvas) {
-                        const cardRect = targetCard.getBoundingClientRect();
-                        const canvasRect = canvas.getBoundingClientRect();
-                        const relativeTop = cardRect.top - canvasRect.top;
-                        const targetScrollTop = relativeTop - (viewport.clientHeight / 2) + (cardRect.height / 2);
+                        const absTop = getCanvasRelativeTop(targetCard);
+                        const targetScrollTop = (absTop * zoomRatio) - (viewport.clientHeight / 2) + ((targetCard.clientHeight * zoomRatio) / 2);
                         
                         viewport.scrollTo({
                             top: targetScrollTop,
                             behavior: 'auto'
                         });
                     }
-                    state.lastScrolledId = state.activeId; 
+                    state.shouldAutoScroll = false; 
                 }, 50);
             }
         }
@@ -807,18 +852,27 @@
                 const identityText = (item.role && item.role !== '(一般組員)') ? item.role : '';
                 const titleText = (item.title && item.title !== '(無稱謂)') ? item.title : '';
                 
+                let headlineBlockHtml = '';
+                if (item.layout !== 'PASTOR_NOTITLE') {
+                    headlineBlockHtml = `
+                        <div class="mb-10 font-serif flex items-center justify-center p-6 border border-[#F5A623]/25 bg-[#F5A623]/5 rounded-2xl relative max-w-[90%] mx-auto shadow-sm min-h-[96px]">
+                            <span class="text-[#F5A623] text-4xl font-black leading-none self-center -mt-1">“</span>
+                            <span class="text-[#0A2B66] font-black text-[22px] px-4 tracking-wide text-center leading-relaxed flex-1">${item.headline || ''}</span>
+                            <span class="text-[#F5A623] text-4xl font-black leading-none self-center mt-3">”</span>
+                        </div>
+                    `;
+                } else {
+                    headlineBlockHtml = `<div class="mb-6"></div>`; 
+                }
+
                 contentHTML = `
                     <div class="white-layer" style="${pd}" data-id="${item.id}">
                         <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-6 font-serif">
-                            <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言冊</span></div>
+                            <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言總勉</span></div>
                             <div class="text-[#F5A623] text-xs font-bold tracking-widest uppercase font-sans">${(item.groupName || '').substring(0,2)}</div>
                         </div>
                         <div class="flex flex-col flex-1 h-full pt-4">
-                            <div class="mb-10 font-serif flex items-center justify-center p-6 border border-[#F5A623]/25 bg-[#F5A623]/5 rounded-2xl relative max-w-[90%] mx-auto shadow-sm min-h-[96px]">
-                                <span class="text-[#F5A623] text-4xl font-black leading-none self-center -mt-1">“</span>
-                                <span class="text-[#0A2B66] font-black text-[22px] px-4 tracking-wide text-center leading-relaxed flex-1">${item.headline || ''}</span>
-                                <span class="text-[#F5A623] text-4xl font-black leading-none self-center mt-3">”</span>
-                            </div>
+                            ${headlineBlockHtml}
                             <div class="text-center mb-8">
                                 <div class="inline-flex items-center justify-center gap-3 border-b-2 border-[#F5A623] pb-2 px-6 font-serif">
                                     <span class="text-[20px] font-black text-[#0A2B66] tracking-widest">${item.name || ''}</span>
