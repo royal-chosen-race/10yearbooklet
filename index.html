@@ -1,0 +1,678 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.5">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="zh-TW"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;風一族職場教會 - 十週年感言手冊產生系統&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* 匯入出版級明體(標題)與黑體(內文) */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap');</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body { background-color: #0F172A; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.font-sans { font-family: 'Noto Sans TC', sans-serif !important; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.font-serif { font-family: 'Noto Serif TC', serif !important; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* ── 絕對硬性三欄鋼骨佈局 ── */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.app-container { display: flex; width: 100vw; height: 100vh; overflow: hidden; position: relative; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.sidebar-panel { width: 280px; min-width: 280px; max-width: 280px; height: 100%; z-index: 40; border-right: 1px solid rgba(245,166,35,0.2); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.editor-panel { width: 380px; min-width: 380px; max-width: 380px; height: 100%; z-index: 30; border-right: 1px solid rgba(255,255,255,0.1); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.preview-area { position: absolute; inset: 0; padding-left: 660px; padding-top: 64px; background-color: #020617; z-index: 20; display: flex; flex-direction: column; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* ── A4 實體畫布：柔軟護角底圖設計 ── */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.book-page {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 210mm; height: 297mm; min-width: 210mm; min-height: 297mm;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #0A2B66; /* 皇家亮藍底色 */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: relative; overflow: hidden;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex; flex-direction: column; box-sizing: border-box;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin-bottom: 50px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* 白色內容區域：高規格內縮大留白，提供高級刊物呼吸感 */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.white-layer {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: absolute;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>inset: 12mm;<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #FFFFFF;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 45px;<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>z-index: 10;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 24mm 20mm; /* 大留白邊距，確保文字絕不靠邊 */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-direction: column;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: inset 0 0 20px rgba(10,43,102,0.03);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* 智慧流動落版網格 (MUJI Grid Alignment) */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.grid-flow-engine {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: grid;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>grid-template-columns: 1fr 1fr;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gap: 14mm;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: stretch; /* 橫向底部自動等高拉齊 */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* 牧者/長老專用雙欄 */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.pastor-content {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>column-count: 2;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>column-gap: 16mm;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>column-rule: 1px dotted rgba(245,166,35,0.25);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* 出版級防漏字防跑版規範 (Baseline Grid) */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>p { orphans: 2 !important; widows: 2 !important; margin-bottom: 8px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>h2, h3, .avoid-break { break-inside: avoid; page-break-inside: avoid; break-after: avoid !important; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* 人物見證區塊：全面去卡片化，收斂為純淨 Editorial Flow */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.entry-card {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: #ffffff;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 12px;<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 12px 0px 16px 0px;<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-direction: column;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 100%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow: hidden;<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* 生產級溢出警告防呆紅框樣式 */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.card-overflow-error {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px dashed #EF4444 !important;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #FEF2F2 !important;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: relative;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* 柔軟角落裝飾 */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.corner-top-right {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: absolute; top: 0; right: 0; width: 85mm; height: 85mm;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: radial-gradient(circle at top right, #F5A623 0%, #0A2B66 45%, transparent 70%);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>opacity: 0.8; z-index: 1;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.corner-bottom-left {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: absolute; bottom: 0; left: 0; width: 105mm; height: 105mm;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: radial-gradient(circle at bottom left, #F5A623 0%, #0A2B66 40%, transparent 70%);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>opacity: 0.8; z-index: 1;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* 星空背景 (操作介面用) */</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.star { position: absolute; border-radius: 50%; background: #F5A623; animation: twinkle 4s infinite ease-in-out; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.1); } }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@media print {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>@page { size: A4; margin: 0; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>.no-print { display: none !important; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>.print-area { display: block !important; position: static !important; width: 100% !important; padding: 0 !important; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>.book-spread { display: block !important; margin: 0 !important; box-shadow: none !important; filter: none !important; transform: none !important;}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>.book-page { margin: 0 !important; box-shadow: none !important; page-break-after: always; page-break-inside: avoid; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>.spine-line { display: none !important; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body class="text-white selection:bg-[#F5A623] selection:text-[#0A2B66]"&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="starField" class="fixed inset-0 pointer-events-none opacity-40"&gt;&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;header class="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-[#0A2B66] to-[#030712] border-b border-[#F5A623]/30 z-50 flex items-center px-6 no-print"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="flex items-center gap-3 font-serif whitespace-nowrap"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F5A623] to-[#FBBF24] flex items-center justify-center text-[#0A2B66] font-black text-xl shadow-lg"&gt;風&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;h1 class="text-sm font-bold text-[#FBBF24] leading-tight tracking-wider"&gt;十週年感言手冊產生系統&lt;/h1&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p class="text-[10px] text-white/50 font-sans uppercase tracking-[2px]"&gt;Royal Chosen Race Editorial Book System&lt;/p&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="safetyBadge" class="ml-8 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500 text-emerald-400 text-xs font-bold flex items-center gap-2 no-print"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"&gt;&lt;/span&gt; 系統狀態：✓ 已全自動儲存</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="ml-auto flex gap-4 whitespace-nowrap"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button class="px-4 py-2 rounded-lg border border-white/20 text-white/80 text-sm font-medium hover:bg-white/10 transition-colors" onclick="toggleViewMode()"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>切換至 &lt;span id="lblViewMode"&gt;單頁&lt;/span&gt; 視角</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button id="btnExportPdf" onclick="window.print()" class="px-6 py-2 rounded-full bg-gradient-to-r from-[#F5A623] to-[#D97706] text-white font-bold text-sm hover:scale-105 transition-all shadow-lg"&gt;📥 匯出印刷 PDF&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/header&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="app-container pt-16"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;aside class="sidebar-panel bg-slate-950 flex flex-col no-print"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="p-4 border-b border-white/10 flex-1 flex flex-col overflow-hidden"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="text-[10px] font-bold text-[#F5A623] uppercase tracking-widest mb-4"&gt;肢體名單 (手動優先排序)&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="sidebarList" class="flex-1 space-y-2 overflow-y-auto pr-2 mb-4"&gt;&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button onclick="triggerFullBookChecker()" class="w-full py-2.5 bg-blue-950 border border-blue-500/40 text-blue-300 hover:bg-blue-900/50 text-xs font-bold rounded-xl transition-all shadow mb-2"&gt;🔍 執行全書出版前安全檢查&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button onclick="addEntry()" class="w-full py-2.5 border border-dashed border-[#F5A623]/50 text-[#F5A623] text-xs font-bold rounded-xl hover:bg-[#F5A623]/10 transition-all"&gt;＋ 新增肢體感言&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="p-4 bg-black/40 text-center shrink-0 border-t border-white/5"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="text-2xl font-serif text-[#F5A623] font-black" id="statCount"&gt;0&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="text-[10px] text-white/40 font-sans tracking-widest"&gt;TOTAL TESTIMONIES&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/aside&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;main class="editor-panel bg-slate-900 flex flex-col no-print"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="editorUI" class="flex flex-col h-full overflow-y-auto"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/main&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;section class="preview-area no-print font-sans"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="h-12 bg-white/5 border-b border-white/10 flex items-center px-6 justify-between shrink-0"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="flex items-center gap-2"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span class="text-[10px] text-white/40 uppercase tracking-widest font-bold"&gt;A4 實體出版物預覽 (DOM 實體高度排版)&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="flex items-center gap-4"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;button onclick="adjustZoom(-10)" class="text-white/40 hover:text-white font-bold text-xl"&gt;－&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span id="zoomVal" class="text-xs font-mono font-bold text-[#F5A623]"&gt;80%&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;button onclick="adjustZoom(10)" class="text-white/40 hover:text-white font-bold text-xl"&gt;＋&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="flex-1 overflow-auto p-12 flex flex-col items-center scroll-smooth bg-slate-950 w-full"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="canvas" class="origin-top transition-transform duration-200"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="printArea" class="hidden print-area"&gt;&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const LAYOUTS = {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>'PASTOR': '大類一：牧者/長老專屬版 (獨立滿版頁)',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>'MEMBER_TITLE': '大類二：肢體同工版 - 有標題金句 (自動流動)',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>'MEMBER_NOTITLE': '大類二：肢體同工版 - 無標題標籤 (自動流動)'</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const GROUP_OPTIONS = ['牧者團隊', '長老團隊', '風吉小組', '風潔小組', '風豪小組', '風光小組', '風發小組', '風大小組', '招待事工', '影音同工'];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const ROLE_OPTIONS = ['主任牧師', '牧師', '長老', '師母', '傳道', '姊妹', '弟兄'];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const TITLE_OPTIONS = ['無職稱', '小組長', '副小組長', '區長'];</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let state = {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>zoom: 80, activeId: '1', viewMode: 'spread',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>entries: [</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>{ id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '無職稱', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大能大力，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' },</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>{ id: '2', layout: 'MEMBER_TITLE', groupName: '風潔小組', name: '何姊妹', role: '姊妹', title: '無職稱', headline: '一路走來，神的恩典滿滿', content: '轉眼間來到風一族八年了，感謝神，給予我機會。學鼓服事，在一次又一次的服事中進步、成長。委身在風一族教會的這幾年，很感謝牧師不辭辛勞地講道、以及弟兄姊妹彼此之間的代禱與扶持，使我在信仰上更加堅定，風一族教會十週年，一路走來神的恩典滿滿！' },</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>{ id: '3', layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '彭依嵐', role: '姊妹', title: '無職稱', headline: '五載恩典，一生家人', content: '邁向十週年神聖時刻，是主任牧師與師母用生命無私付出澆灌風一族，我心中除對神的敬畏與感恩，最想表達的是最誠摯的謝意。謝謝主任牧師是位領路牧者—您講道總成為我腳前的燈、路上的光。聽著您分享真理那分堅定的眼神，是知識傳遞，更是生命榜樣！' }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>]</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// ── 實作全自動儲存 Fail-Safe 機制 (LocalStorage 級) ──</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function saveState() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>localStorage.setItem('royalChosenRaceBookletData', JSON.stringify({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>entries: state.entries, activeId: state.activeId, zoom: state.zoom, viewMode: state.viewMode</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const safetyBadge = document.getElementById('safetyBadge');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(safetyBadge) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>safetyBadge.className = "ml-8 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500 text-emerald-400 text-xs font-bold flex items-center gap-2 no-print";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>safetyBadge.innerHTML = `&lt;span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"&gt;&lt;/span&gt; 系統狀態：✓ 已全自動儲存`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function loadState() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const saved = localStorage.getItem('royalChosenRaceBookletData');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (saved) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const parsed = JSON.parse(saved);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if(parsed.entries &amp;&amp; parsed.entries.length &gt; 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>state.entries = parsed.entries; state.activeId = parsed.activeId;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>state.zoom = parsed.zoom || state.zoom; state.viewMode = parsed.viewMode || state.viewMode;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} catch(e) { console.error("資料庫復原失敗", e); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function moveEntry(id, direction) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const idx = state.entries.findIndex(e =&gt; e.id === id);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (direction === 'up' &amp;&amp; idx &gt; 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>[state.entries[idx], state.entries[idx-1]] = [state.entries[idx-1], state.entries[idx]];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else if (direction === 'down' &amp;&amp; idx &lt; state.entries.length - 1) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>[state.entries[idx], state.entries[idx+1]] = [state.entries[idx+1], state.entries[idx]];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>saveState(); render();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function addEntry() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const id = Date.now().toString();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>state.entries.push({ id, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體', role: '姊妹', title: '無職稱', headline: '請輸入金句標題', content: '在此輸入感恩感言...' });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>state.activeId = id; saveState(); render();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// ── 智慧行政快捷工作流按鈕組 ──</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function duplicateEntry(id, mode) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const idx = state.entries.findIndex(e =&gt; e.id === id);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (idx === -1) return;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const source = state.entries[idx];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const newId = Date.now().toString();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let newEntry = {};</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (mode === 'clone') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>newEntry = { ...source, id: newId, name: source.name + ' (副本)' };</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else if (mode === 'same_group') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>newEntry = {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>id: newId, layout: source.layout, groupName: source.groupName,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>name: '新肢體成員', role: source.role, title: source.title, headline: '', content: ''</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>};</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>state.entries.splice(idx + 1, 0, newEntry);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>state.activeId = newId; saveState(); render();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 🔍 實作全書出版前安全檢查器 (100% 專家防呆掃描)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function triggerFullBookChecker() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let errors = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let warnings = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let totalItems = state.entries.length;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>state.entries.forEach((e, idx) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let num = idx + 1;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(!e.name || e.name === '新肢體成員' || e.name === '新肢體') warnings.push(`[第 ${num} 筆] 姓名可能尚未填寫完整。`);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(!e.content || e.content.trim() === '在此輸入感恩感言...' || e.content.length &lt; 5) errors.push(`[肢體: ${e.name}] 見證感言內文為空白或字數不足。`);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(e.layout === 'MEMBER_TITLE' &amp;&amp; !e.headline) warnings.push(`[肢體: ${e.name}] 設定了有標題版型，但金句大標留空。`);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(e.content.length &gt; 450) warnings.push(`[肢體: ${e.name}] 字數極長 (${e.content.length}字)，已自動拆頁，請至右側確認。`);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let overflowCards = document.querySelectorAll('#canvas .card-overflow-error');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(overflowCards.length &gt; 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>errors.push(`偵測到有 ${overflowCards.length} 處區塊內容發生印刷溢出（紅虛線框），請務必手動分段！`);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let score = 100 - (errors.length * 15) - (warnings.length * 4);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>score = Math.max(0, Math.min(100, score));</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let report = `【 Royal Chosen Race 出版安全檢查報告 】\n\n`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>report += `📊 全冊總計落版人數：${totalItems} 位\n`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>report += `🛡️ 出版安全度評分：${score} %\n`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>report += `-------------------------------------------\n`;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(errors.length === 0 &amp;&amp; warnings.length === 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>report += `✓ 完美！全冊結構極其安全，無任何印刷與漏字風險，可以放心導出印刷 PDF！`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(errors.length &gt; 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>report += `❌ 嚴重出版事故隱患 (${errors.length} 處)：\n` + errors.map(x=&gt;"<span class="Apple-converted-space">  </span>" + x).join("\n") + "\n\n";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(warnings.length &gt; 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>report += `⚠️ 建議微調警告 (${warnings.length} 處)：\n` + warnings.map(x=&gt;"<span class="Apple-converted-space">  </span>" + x).join("\n");</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(score &lt; 80) report += `\n\n提示：安全評分較低時，系統將自動鎖定高畫質 PDF 導出按鈕以保護印製品質。`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>alert(report);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function render() { renderSidebar(); renderEditor(); renderCanvas(); }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function renderSidebar() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const list = document.getElementById('sidebarList');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>list.innerHTML = state.entries.map(e =&gt; `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="flex items-center gap-1 group"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div onclick="state.activeId='${e.id}'; render();" class="flex-1 p-3 rounded-xl cursor-pointer border transition-all ${state.activeId === e.id ? 'bg-[#F5A623]/20 border-[#F5A623]' : 'border-transparent hover:bg-white/5'}"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="text-xs font-bold font-serif text-white"&gt;${e.name}&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="text-[9px] text-white/40 font-sans uppercase tracking-wider"&gt;${e.groupName.replace('小組', '')}&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity pr-1"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button onclick="moveEntry('${e.id}','up')" class="text-[10px] hover:text-[#F5A623]"&gt;▲&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button onclick="moveEntry('${e.id}','down')" class="text-[10px] hover:text-[#F5A623]"&gt;▼&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>`).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('statCount').innerText = state.entries.length;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function renderEditor() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const ui = document.getElementById('editorUI');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const e = state.entries.find(x =&gt; x.id === state.activeId);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!e) { ui.innerHTML = ''; return; }</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 實作：字數色碼安全指示器熱區提示</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let len = e.content.length;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let gaugeColor = "text-emerald-400"; let gaugeText = "最佳長度";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(len &gt; 300 &amp;&amp; len &lt;= 450) { gaugeColor = "text-amber-400"; gaugeText = "偏長"; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>else if(len &gt; 450) { gaugeColor = "text-rose-500 animate-pulse"; gaugeText = "超長(將拆頁)"; }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ui.innerHTML = `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="p-6 space-y-5 flex-1 overflow-y-auto font-sans"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;label class="text-[11px] text-white/60 font-bold"&gt;手冊出版結構&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;select onchange="updateEntry('${e.id}','layout',this.value); render();" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none focus:border-[#F5A623]"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>${Object.keys(LAYOUTS).map(k =&gt; `&lt;option value="${k}" ${e.layout===k?'selected':''}&gt;${LAYOUTS[k]}&lt;/option&gt;`).join('')}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="grid grid-cols-2 gap-3"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;label class="text-[11px] text-white/60 font-bold"&gt;小組 / 團契別&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;select onchange="updateEntry('${e.id}','groupName',this.value); render();" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none focus:border-[#F5A623]"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>${GROUP_OPTIONS.map(g =&gt; `&lt;option value="${g}" ${e.groupName===g?'selected':''}&gt;${g}&lt;/option&gt;`).join('')}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div&gt;&lt;label class="text-[11px] text-white/60 font-bold"&gt;姓名&lt;/label&gt;&lt;input oninput="updateEntry('${e.id}','name',this.value)" value="${e.name}" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm focus:border-[#F5A623] outline-none font-serif font-bold text-white"/&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="grid grid-cols-2 gap-3"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;label class="text-[11px] text-white/60 font-bold"&gt;身份稱謂&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;select onchange="updateEntry('${e.id}','role',this.value)" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none focus:border-[#F5A623]"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>${ROLE_OPTIONS.map(r =&gt; `&lt;option value="${r}" ${e.role===r?'selected':''}&gt;${r}&lt;/option&gt;`).join('')}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;label class="text-[11px] text-white/60 font-bold"&gt;職稱 (選填)&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;select onchange="updateEntry('${e.id}','title',this.value)" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none focus:border-[#F5A623]"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>${TITLE_OPTIONS.map(t =&gt; `&lt;option value="${t}" ${e.title===t?'selected':''}&gt;${t}&lt;/option&gt;`).join('')}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="${e.layout === 'MEMBER_NOTITLE' ? 'hidden' : 'block'}"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;label class="text-[10px] text-[#F5A623] font-bold uppercase tracking-widest"&gt;金句破題大標題&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;input oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline}" class="w-full bg-[#F5A623]/10 border border-[#F5A623]/30 rounded-lg p-3 text-sm text-[#F5A623] font-serif font-black outline-none"/&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="space-y-1"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="flex justify-between text-[10px] font-bold uppercase tracking-widest"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;span class="text-white/40"&gt;感恩見證內文&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;span class="${gaugeColor} font-sans font-bold transition-colors"&gt;目前: ${len} 字 (${gaugeText})&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;textarea oninput="updateEntry('${e.id}','content',this.value);" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm leading-relaxed text-white outline-none" style="height: 180px;"&gt;${e.content}&lt;/textarea&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="pt-4 border-t border-white/10 space-y-2"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="grid grid-cols-2 gap-2"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button onclick="duplicateEntry('${e.id}', 'same_group')" class="py-2.5 rounded-lg bg-blue-950 border border-blue-700/60 text-blue-300 text-xs font-bold hover:bg-blue-900/40 transition-all"&gt;👥 同小組快速新增&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button onclick="duplicateEntry('${e.id}', 'clone')" class="py-2.5 rounded-lg bg-slate-800 border border-white/10 text-white/80 text-xs font-bold hover:bg-slate-700/50 transition-all"&gt;📋 完整複製肢體&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button onclick="handleDelete('${e.id}')" class="w-full py-2.5 rounded-lg border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-500/10 transition-all"&gt;❌ 刪除此肢體感言&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// ── 核心：真實現體高度排版與落頁引擎 (True-Height DOM Engine) ──</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function renderCanvas() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const container = document.getElementById('canvas');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const pc = document.getElementById('printArea');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>container.innerHTML = ''; pc.innerHTML = '';</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let scratchpad = document.createElement('div');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>scratchpad.style.cssText = "position: absolute; visibility: hidden; width: 210mm; top: -9999px; left: -9999px; z-index:-100;";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.body.appendChild(scratchpad);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 統計各小組的人數，用於執行「少於3人小組扉頁收斂優化」</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let groupStats = {};</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>state.entries.forEach(e =&gt; { groupStats[e.groupName] = (groupStats[e.groupName] || 0) + 1; });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let initialFlattenedEntries = [];</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 拆文演算法 (Paragraph Split Engine)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>state.entries.forEach(entry =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let paragraphs = entry.content.split('\n').filter(p =&gt; p.trim() !== '');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let testCard = document.createElement('div');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>testCard.style.width = "85mm";<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>testCard.innerHTML = buildCardHTMLString(entry, false);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>scratchpad.appendChild(testCard);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let cardHeight = testCard.getBoundingClientRect().height;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>scratchpad.removeChild(testCard);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (cardHeight &gt; 390 &amp;&amp; paragraphs.length &gt; 1 &amp;&amp; entry.layout !== 'PASTOR') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let chunk1 = []; let chunk2 = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let mid = Math.ceil(paragraphs.length / 2);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>for(let i=0; i&lt;paragraphs.length; i++) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>if(i &lt; mid) chunk1.push(paragraphs[i]); else chunk2.push(paragraphs[i]);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>initialFlattenedEntries.push({ ...entry, content: chunk1.join('\n'), headline: entry.headline ? `${entry.headline} (轉下頁)` : '(接續轉下頁)' });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>initialFlattenedEntries.push({ ...entry, id: entry.id + '_cont', content: chunk2.join('\n'), headline: entry.headline ? `(接續) ${entry.headline}` : '(接續上頁)' });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>initialFlattenedEntries.push(entry);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 智慧對稱配對 (Dynamic Height Pairing)<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let sortedFlowItems = []; let pastorItems = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>initialFlattenedEntries.forEach(e =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(e.layout === 'PASTOR') pastorItems.push(e); else sortedFlowItems.push(e);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>sortedFlowItems.sort((a, b) =&gt; b.content.length - a.content.length);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let balancedFlowItems = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>while(sortedFlowItems.length &gt; 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>balancedFlowItems.push(sortedFlowItems.shift());</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if(sortedFlowItems.length &gt; 0) balancedFlowItems.push(sortedFlowItems.pop());</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let finalQueue = [...pastorItems, ...balancedFlowItems];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let pages = []; let currentFlowItems = []; let lastGroup = "";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const MAX_PRINTABLE_HEIGHT = 810;<span class="Apple-converted-space"> </span></span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>finalQueue.forEach((entry) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// 智慧分流判定：當前小組總人數 &gt;= 3 人，才允許插入大扉頁；少於3人則改用 Inline Section Header</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (entry.layout !== 'PASTOR' &amp;&amp; entry.groupName !== lastGroup) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (currentFlowItems.length &gt; 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let count = groupStats[entry.groupName] || 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (count &gt;= 3) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>pages.push({ type: 'CHAPTER', groupName: entry.groupName });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>// 標記該組的第一個人，在落頁時生成 Inline 標頭飾帶</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>entry.isFirstOfInlineSection = true;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>lastGroup = entry.groupName;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (entry.layout === 'PASTOR') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (currentFlowItems.length &gt; 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>pages.push({ type: 'PASTOR', items: [entry] });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let testItems = [...currentFlowItems, entry];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let testPage = document.createElement('div'); testPage.className = "book-page";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let gridEngine = document.createElement('div'); gridEngine.className = "grid-flow-engine pt-2";</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let rows = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>for(let r = 0; r &lt; testItems.length; r += 2) { rows.push([testItems[r], testItems[r+1]]); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>gridEngine.innerHTML = rows.map(row =&gt; `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="flex gap-[14mm] mb-[20px] items-stretch w-full"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>${buildCardHTMLString(row[0], row[0]?.isFirstOfInlineSection)}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>${row[1] ? buildCardHTMLString(row[1], row[1]?.isFirstOfInlineSection) : '&lt;div class="flex-1"&gt;&lt;/div&gt;'}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>`).join('');</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>whiteLayer.appendChild(gridEngine); testPage.appendChild(whiteLayer); scratchpad.appendChild(testPage);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let measuredHeight = gridEngine.getBoundingClientRect().height;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>scratchpad.removeChild(testPage);</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (measuredHeight &gt; MAX_PRINTABLE_HEIGHT &amp;&amp; currentFlowItems.length &gt; 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>pages.push({ type: 'FLOW', items: currentFlowItems });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>currentFlowItems = [entry];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>currentFlowItems.push(entry);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (currentFlowItems.length &gt; 0) pages.push({ type: 'FLOW', items: currentFlowItems });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.body.removeChild(scratchpad);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// ── 正統奇數在右、偶數在左對開落頁調度 ──</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let pageNum = 7; // 全書起始頁碼由 P.7 (右頁) 開始</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (state.viewMode === 'spread') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// 正統出版規範：P.7 為單獨右頁，前方自動補空左頁（P.6）以對齊印刷排線</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const firstSpread = document.createElement('div');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>firstSpread.className = "flex shadow-2xl mb-12";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>firstSpread.innerHTML = `&lt;div class="book-page bg-slate-950/40 border border-dashed border-white/5 flex items-center justify-center text-white/20 text-xs font-mono"&gt;（前頁 Verso 留白）&lt;/div&gt;&lt;div class="w-[1.5px] bg-gray-400/30 z-20 no-print"&gt;&lt;/div&gt;` + buildPageHTML(pages[0], pageNum);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>firstSpread.querySelectorAll('.book-page').forEach(el =&gt; { el.style.boxShadow = 'none'; el.style.marginBottom = '0'; });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>container.appendChild(firstSpread);</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// 後續頁面進入 2x2 標準對開配對</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let i = 1;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>pageNum++; // 進入 P.8 (左頁)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>while (i &lt; pages.length) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const spread = document.createElement('div');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>spread.className = "flex shadow-2xl mb-12";</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let leftPageHtml = buildPageHTML(pages[i], pageNum); pageNum++; i++;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let rightPageHtml = (i &lt; pages.length) ? buildPageHTML(pages[i], pageNum) : `&lt;div class="book-page bg-slate-950/40"&gt;&lt;/div&gt;`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>pageNum++; i++;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>spread.innerHTML = leftPageHtml + `&lt;div class="w-[1.5px] bg-gray-400/30 z-20 no-print"&gt;&lt;/div&gt;` + rightPageHtml;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>spread.querySelectorAll('.book-page').forEach(el =&gt; { el.style.boxShadow = 'none'; el.style.marginBottom = '0'; });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>container.appendChild(spread);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>pages.forEach(p =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const div = document.createElement('div'); div.className = "mb-12 shadow-2xl";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>div.innerHTML = buildPageHTML(p, pageNum); div.querySelector('.book-page').style.boxShadow = 'none';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>container.appendChild(div); pageNum++;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 完全同步到印刷快取</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let pNumCache = 7;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pc.innerHTML = pages.map(p =&gt; { let html = buildPageHTML(p, pNumCache); pNumCache++; return html; }).join('');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pc.querySelectorAll('.book-page').forEach(el =&gt; el.style.boxShadow = 'none');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 最終防呆溢出紅框檢驗</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>setTimeout(validateOverflowGuardrails, 300);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function validateOverflowGuardrails() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let cards = document.querySelectorAll('#canvas .entry-card');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let hasOverflow = false;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>cards.forEach(card =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (card.scrollHeight &gt; card.clientHeight + 4) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>card.classList.add('card-overflow-error'); hasOverflow = true;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if(!card.querySelector('.error-tag')) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>let tag = document.createElement('div');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>tag.className = "error-tag absolute top-2 right-2 bg-red-600 text-white font-sans text-[10px] px-2 py-0.5 rounded font-bold z-50 shadow";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>tag.innerText = "⚠️ 內容溢出，請手動分段"; card.appendChild(tag);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const safetyBadge = document.getElementById('safetyBadge');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const btnExport = document.getElementById('btnExportPdf');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (hasOverflow) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>safetyBadge.className = "ml-8 px-4 py-1.5 rounded-full bg-red-950/80 border border-red-500 text-red-400 text-xs font-bold flex items-center gap-2 no-print";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>safetyBadge.innerHTML = `&lt;span class="w-2 h-2 rounded-full bg-red-500 animate-ping"&gt;&lt;/span&gt; 出版警告：偵測到內容溢出`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>btnExport.disabled = true; btnExport.className = "px-6 py-2 rounded-full bg-gray-700 text-gray-400 text-sm font-bold cursor-not-allowed opacity-50";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>saveState(); // 只有在排版安全時，才寫入 LocalStorage</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function buildPageHTML(pageData, pageNum) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const isLeft = pageNum % 2 === 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const pd = isLeft ? 'padding: 24mm 22mm 24mm 18mm;' : 'padding: 24mm 18mm 24mm 22mm;';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let innerHTML = '';</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (pageData.type === 'CHAPTER') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>innerHTML = `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="white-layer justify-center items-center" style="${pd}"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="text-center space-y-4 font-serif"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="text-[#F5A623] text-xl tracking-[0.4em] opacity-80 pl-2"&gt;✦ ✦&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h1 class="text-4xl font-black text-[#0A2B66] tracking-[0.3em] font-serif pl-3"&gt;${pageData.groupName}&lt;/h1&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="w-16 h-[2px] bg-[#F5A623] mx-auto my-6"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;p class="text-xs tracking-[0.2em] text-gray-400 font-sans uppercase"&gt;Royal Chosen Race Church Collection&lt;/p&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>else if (pageData.type === 'PASTOR') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const item = pageData.items[0];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>innerHTML = `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="white-layer" style="${pd}"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-6 font-serif no-print"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]"&gt;十載主恩 ‧ 憐憫無窮&lt;br&gt;&lt;span class="text-[9.5px] text-gray-400 font-sans font-normal"&gt;風一族職場教會十週年感言總勉&lt;/span&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="text-[#F5A623] text-xs font-bold tracking-widest uppercase font-sans"&gt;${item.groupName.replace('小組', '')}&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="flex flex-col flex-1 h-full pt-4"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="mb-4 flex justify-center no-print"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div class="w-16 h-16 rounded-full border border-dashed border-gray-300 bg-gray-50/50 flex items-center justify-center text-[10px] text-gray-400 font-sans"&gt;📷 牧者肖像&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="text-center mb-8 font-serif flex justify-center items-start gap-1"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;span class="text-[#F5A623] text-4xl font-black leading-none pt-1"&gt;“&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;span class="text-[#0A2B66] font-black text-[22px] px-2 block leading-snug tracking-wide max-w-[85%]"&gt;${item.headline}&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;span class="text-[#F5A623] text-4xl font-black leading-none pt-1"&gt;”&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="text-center mb-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div class="inline-flex items-center justify-center gap-3 border-b-2 border-[#F5A623] pb-2 px-6 font-serif"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;span class="text-[20px] font-black text-[#0A2B66] tracking-widest"&gt;${item.name}&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;span class="text-[14px] font-bold text-gray-500 font-sans tracking-widest"&gt;${item.role}&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="pastor-content text-[14px] leading-[1.9] text-gray-700 font-sans font-normal text-justify flex-1 tracking-[0.02em]"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>${item.content.split('\n').filter(p=&gt;p.trim()!=='').map(p =&gt; `&lt;p style="text-indent: 2em; margin-bottom: 1em;"&gt;${p}&lt;/p&gt;`).join('')}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let rows = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>for(let i = 0; i &lt; pageData.items.length; i += 2) { rows.push([pageData.items[i], pageData.items[i+1]]); }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const gridHTML = rows.map(row =&gt; `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="flex gap-[14mm] mb-[20px] items-stretch w-full"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>${buildCardHTMLString(row[0], row[0]?.isFirstOfInlineSection)}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>${row[1] ? buildCardHTMLString(row[1], row[1]?.isFirstOfInlineSection) : '&lt;div class="flex-1"&gt;&lt;/div&gt;'}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`).join('');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>contentHTML = `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="white-layer" style="${pd}"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-5 font-serif no-print"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]"&gt;十載主恩 ‧ 憐憫無窮&lt;br&gt;&lt;span class="text-[9.5px] text-gray-400 font-sans font-normal"&gt;風一族職場教會 10 週年紀念&lt;/span&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="text-[#F5A623] text-lg opacity-60"&gt;✦ ✦&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="flex-1 overflow-hidden pt-2"&gt;${gridHTML}&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="book-page"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="corner-top-right no-print"&gt;&lt;/div&gt;&lt;div class="corner-bottom-left no-print"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>${pageData.type === 'CHAPTER' || pageData.type === 'PASTOR' ? innerHTML : contentHTML}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="absolute bottom-[16mm] right-[24mm] text-[10px] font-sans font-black text-gray-300 tracking-[2px] z-20 no-print"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>Royal Chosen Race Testimonies ‧ P.${pageNum}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function buildCardHTMLString(item, showInlineSectionHeader = false) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(!item) return '';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="entry-card flex-1 flex flex-col h-full relative"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>${showInlineSectionHeader ? `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="mb-4 bg-[#0A2B66]/5 border-l-4 border-[#F5A623] px-3 py-1.5 rounded shrink-0 avoid-break"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span class="text-[11px] font-black text-[#0A2B66] tracking-widest font-serif"&gt;分區專欄 ➔ ${item.groupName}&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>` : ''}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="flex items-center gap-3 mb-4 font-serif shrink-0 no-print"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="w-[48px] h-[48px] rounded-full bg-[#0A2B66] border-[2px] border-[#F5A623] flex items-center justify-center text-[#F5A623] text-[15px] font-black shadow-sm shrink-0 font-serif"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>${item.groupName.substring(0,2)}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="text-[19px] font-black text-[#0A2B66] tracking-widest flex items-baseline"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span class="text-[#F5A623] text-[13px] mr-1.5 relative -top-0.5"&gt;✦&lt;/span&gt;${item.name}<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span class="text-[13px] font-bold text-gray-400 ml-2 font-sans tracking-normal"&gt;${item.role} ${item.title !== '無職稱' ? item.title : ''}&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>${item.layout === 'MEMBER_TITLE' &amp;&amp; item.headline ? `</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="text-left mb-4 font-serif border-l-[3px] border-[#F5A623] pl-3 shrink-0 avoid-break"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;h3 class="text-[14.5px] font-bold text-[#0A2B66] leading-relaxed tracking-wide"&gt;${item.headline}&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>` : ''}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="text-[15px] leading-[1.75] text-gray-700 font-sans font-normal text-justify tracking-[0.02em] flex-1 px-1"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>${item.content.split('\n').filter(p=&gt;p.trim()!=='').map(p =&gt; `&lt;p style="text-indent: 2em; margin-bottom: 0.6em;"&gt;${p}&lt;/p&gt;`).join('')}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="w-full mt-4 border-t-[1.5px] border-dotted border-[#F5A623]/40 opacity-60 shrink-0"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 開機初始化</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>loadState();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>fullRender();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>
