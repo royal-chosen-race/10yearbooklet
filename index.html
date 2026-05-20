@@ -343,6 +343,7 @@
             const viewLabel = document.getElementById('lblViewMode');
             if (viewLabel) viewLabel.innerText = state.viewMode === 'spread' ? '單頁' : '跨頁';
             saveState();
+            state.lastScrolledId = null; 
             renderCanvas();
         }
 
@@ -378,7 +379,8 @@
 
             const targetGlobalIndex = sameGroupIndices[targetPosInGroup];
             [state.entries[index], state.entries[targetGlobalIndex]] = [state.entries[targetGlobalIndex], state.entries[index]];
-            state.shouldAutoScroll = true; 
+            
+            state.lastScrolledId = null; 
             saveState();
             render();
         }
@@ -421,7 +423,6 @@
             saveState(); render();
         }
 
-        // ── 🟢 修正二：優化下拉選單刷新防護，全數抽離同步 render，改為 schedule 去抖緩衝 ──
         function updateEntry(id, field, val) {
             if(state.isLocked) return;
             const entry = state.entries.find(e => e.id === id);
@@ -446,7 +447,6 @@
             return top;
         }
 
-        // ── 🟢 修正一：新增 handleEditorBlur 延遲欄位檢測機制，切換同面板欄位時不重排 ──
         function handleEditorBlur() {
             requestAnimationFrame(() => {
                 const editor = document.getElementById('editorUI');
@@ -561,7 +561,7 @@
                     <div class="pt-4 border-t border-white/10 space-y-2">
                         <div class="grid grid-cols-2 gap-2">
                             <button onclick="duplicateEntry('${e.id}', 'same_group')" class="py-2.5 rounded-lg bg-blue-950 border border-blue-700/60 text-blue-300 text-xs font-bold hover:bg-blue-900/40 flex items-center justify-center gap-1">👥 ＋ 同小組新增</button>
-                            <button onclick="duplicateEntry('${e.id}', 'clone')" class="py-2.5 rounded-lg bg-slate-800 border border-white/10 text-white/80 text-xs font-bold hover:bg-slate-700/50 flex items-center justify-center gap-1">⧉ 複製目前肢體</button>
+                            <button onclick="duplicateEntry('${e.id}', 'clone')" class="py-2.5 rounded-lg bg-slate-800 border border-white/10 text-white/80 text-xs font-bold hover:bg-slate-700/50 transition-all flex items-center justify-center gap-1">⧉ 複製目前肢體</button>
                         </div>
                         <button onclick="handleDelete('${e.id}')" class="w-full py-2.5 rounded-lg border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-500/10 block text-center">❌ 刪除此肢體感言</button>
                     </div>
@@ -577,7 +577,6 @@
             const canvas = document.getElementById('canvas');
             const zoomRatio = state.zoom / 100;
 
-            // ── 🟢 修正一（最關鍵一刀）：只要後台面板正有任一焦點聚焦，硬性斷流，不允許任何重排 ──
             const editorHasFocus = document.querySelector('.editor-panel :focus');
             if (editorHasFocus) return;
 
@@ -619,8 +618,10 @@
                         }
                     }
                     if(chunk1.length === 0) chunk1.push(paragraphs[0]);
-                    initialFlattenedEntries.push({ ...entry, content: chunk1.join('\n'), headline: entry.headline ? `${entry.headline} (轉下頁)` : '(接續轉下頁)' });
-                    initialFlattenedEntries.push({ ...entry, id: entry.id + '_cont', content: chunk2.join('\n'), headline: entry.headline ? `(接續) ${entry.headline}` : '(接續上頁)' });
+                    
+                    // ── 🟢 語序修正：明確調校前半段與後半段切割文字，前半段為轉下頁，後半段為接續 ──
+                    initialFlattenedEntries.push({ ...entry, content: chunk1.join('\n'), headline: entry.headline ? `${entry.headline} (轉下頁)` : '(轉下頁)' });
+                    initialFlattenedEntries.push({ ...entry, id: entry.id + '_cont', content: chunk2.join('\n'), headline: entry.headline ? `(接續) ${entry.headline}` : '(接續)' });
                 } else { initialFlattenedEntries.push(entry); }
             });
 
@@ -640,25 +641,31 @@
                 let groupPastors = groupItems.filter(e => e.layout === 'PASTOR' || e.layout === 'PASTOR_NOTITLE');
                 let groupMembers = groupItems.filter(e => e.layout !== 'PASTOR' && e.layout !== 'PASTOR_NOTITLE');
 
+                // ── 🟢 核心修正一：優化續文排版序列，無論是否開啟智慧平衡，續文(Part 2)都死鎖綁定在正文(Part 1)正後方，絕不顛倒 ──
+                let baseMembers = groupMembers.filter(e => !e.id.includes('_cont'));
                 if (state.smartSort) {
-                    groupMembers.sort((a, b) => (b.content || '').length - (a.content || '').length);
-                    let balanced = [];
-                    while(groupMembers.length > 0) {
-                        balanced.push(groupMembers.shift());
-                        if(groupMembers.length > 0) balanced.push(groupMembers.pop());
+                    baseMembers.sort((a, b) => (b.content || '').length - (a.content || '').length);
+                    let balancedBases = [];
+                    while(baseMembers.length > 0) {
+                        balancedBases.push(baseMembers.shift());
+                        if(baseMembers.length > 0) balancedBases.push(baseMembers.pop());
                     }
-                    groupMembers = balanced;
+                    baseMembers = balancedBases;
                 } else {
-                    groupMembers.sort((a, b) => {
-                        let cleanIdA = a.id.replace('_cont', '');
-                        let cleanIdB = b.id.replace('_cont', '');
-                        let entIdxA = state.entries.findIndex(x => x.id === cleanIdA);
-                        let entIdxB = state.entries.findIndex(x => x.id === cleanIdB);
-                        if (entIdxA !== entIdxB) return entIdxA - entIdxB;
-                        return a.id.includes('_cont') ? 1 : -1;
+                    baseMembers.sort((a, b) => {
+                        return state.entries.findIndex(x => x.id === a.id) - state.entries.findIndex(x => x.id === b.id);
                     });
                 }
-                finalQueue.push(...groupPastors, ...groupMembers);
+
+                // 重新組合，把被切出的 _cont 續文本體精準縫合在父體正右側
+                let orderedGroupMembers = [];
+                baseMembers.forEach(base => {
+                    orderedGroupMembers.push(base);
+                    let cont = groupMembers.find(e => e.id === base.id + '_cont');
+                    if (cont) orderedGroupMembers.push(cont);
+                });
+
+                finalQueue.push(...groupPastors, ...orderedGroupMembers);
             });
 
             let pages = []; let currentFlowItems = []; let lastGroup = "";
@@ -784,7 +791,6 @@
 
             if (viewport) { const forceLayout = viewport.scrollHeight; }
 
-            // ── 🟢 修正三：引入 state.shouldAutoScroll 導航閥門，只有在點名與換位事件時才放行座標補償 ──
             if (activeRect !== null && viewport && state.shouldAutoScroll) {
                 const newCard = document.querySelector(`#canvas [data-id="${state.activeId}"], #canvas [data-id="${state.activeId}_cont"]`);
                 if (newCard) {
@@ -807,29 +813,6 @@
                     state.shouldAutoScroll = false; 
                 }, 50);
             }
-        }
-
-        function validateOverflowGuardrails() {
-            let cards = document.querySelectorAll('#canvas .entry-card'); let hasOverflow = false;
-            cards.forEach(card => {
-                if (card.scrollHeight > card.clientHeight + 8) {
-                    card.classList.add('card-overflow-error'); hasOverflow = true;
-                    if(!card.querySelector('.error-tag')) {
-                        let tag = document.createElement('div'); tag.className = "error-tag absolute top-2 right-2 bg-red-600 text-white font-sans text-[10px] px-2 py-0.5 rounded font-bold z-50 shadow";
-                        tag.innerText = "⚠️ 內容溢出，請點全書健檢"; card.appendChild(tag);
-                    }
-                }
-            });
-            const safetyBadge = document.getElementById('safetyBadge'); const btnExport = document.getElementById('btnExportPdf');
-            if (hasOverflow) {
-                if (safetyBadge) {
-                    safetyBadge.className = "ml-8 px-4 py-1.5 rounded-full bg-red-950/80 border border-red-500 text-red-400 text-xs font-bold flex items-center gap-2 no-print";
-                    safetyBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 出版警告：偵測到內容溢出`;
-                }
-                if (btnExport) {
-                    btnExport.disabled = true; btnExport.className = "px-6 py-2 rounded-full bg-gray-700 text-gray-400 text-sm font-bold cursor-not-allowed opacity-50";
-                }
-            } else { saveState(); }
         }
 
         function buildPageHTML(pageData, pageNum, groupStats) {
