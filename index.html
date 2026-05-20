@@ -713,9 +713,7 @@
                 const titleText = (item.title && item.title !== '(無稱謂)') ? item.title : '';
                 
                 contentHTML = `
-                    <div class="white-layer" style="${pd}" data-id="${item.id}">
-                        <div class="absolute inset-0 border border-dashed border-red-500/10 pointer-events-none z-50 no-print m-[3mm]"></div>
-                        <div class="absolute inset-0 border border-dashed border-blue-500/10 pointer-events-none z-50 no-print m-[6mm]"></div>
+                    <div class="white-layer" style="${pd}" data-id="${item.id}">                    
                         <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-6 font-serif">
                             <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言總勉</span></div>
                             <div class="text-[#F5A623] text-xs font-bold tracking-widest uppercase font-sans">${(item.groupName || '').substring(0,2)}</div>
