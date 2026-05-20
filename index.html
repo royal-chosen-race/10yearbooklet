@@ -13,7 +13,7 @@
         .font-sans { font-family: 'Noto Sans TC', sans-serif !important; }
         .font-serif { font-family: 'Noto Serif TC', serif !important; }
 
-        /* ── 標準現代大廠 Flexbox 三欄平行解構 (防跑版與遮罩) ── */
+        /* ── 標準現代大廠 Flexbox 三欄平行解構 ── */
         .app-container { 
             display: flex; 
             width: 100vw; 
@@ -379,8 +379,7 @@
 
             const targetGlobalIndex = sameGroupIndices[targetPosInGroup];
             [state.entries[index], state.entries[targetGlobalIndex]] = [state.entries[targetGlobalIndex], state.entries[index]];
-            
-            state.lastScrolledId = null; 
+            state.shouldAutoScroll = true; 
             saveState();
             render();
         }
@@ -440,22 +439,42 @@
         function getCanvasRelativeTop(el) {
             const canvas = document.getElementById('canvas');
             let top = 0;
-            while (el && el !== canvas) {
-                top += el.offsetTop;
-                el = el.offsetParent;
-            }
+            while (el && el !== canvas) { top += el.offsetTop; el = el.offsetParent; }
             return top;
         }
 
         function handleEditorBlur() {
             requestAnimationFrame(() => {
                 const editor = document.getElementById('editorUI');
-                if (editor && editor.contains(document.activeElement)) {
-                    return;
-                }
+                if (editor && editor.contains(document.activeElement)) return;
                 state.isEditing = false;
                 renderCanvas();
             });
+        }
+
+        // ── 🟢 修正二：抽取統一的 Row Chunking 引擎，完美解決第二層 FLOW 落頁錯位 Bug ──
+        function chunkItemsIntoRows(testItems) {
+            let rows = []; let currentRow = []; let currentGroup = "";
+            testItems.forEach(item => {
+                if (item.groupName !== currentGroup || item.isFullWidth) {
+                    if (currentRow.length > 0) {
+                        while (currentRow.length < 2) currentRow.push(null);
+                        rows.push(currentRow); currentRow = [];
+                    }
+                    currentGroup = item.groupName;
+                }
+                if (item.isFullWidth) {
+                    rows.push([item, "FULL_WIDTH"]);
+                } else {
+                    currentRow.push(item);
+                    if (currentRow.length === 2) { rows.push(currentRow); currentRow = []; }
+                }
+            });
+            if (currentRow.length > 0) {
+                while (currentRow.length < 2) currentRow.push(null);
+                rows.push(currentRow);
+            }
+            return rows;
         }
 
         function renderSidebar() {
@@ -515,6 +534,7 @@
             if (totalLabel) totalLabel.innerText = state.entries.length;
         }
 
+        // ── 🟢 修正一：完美修復被截斷的 template literal 錯誤，補上反引號與正確 join ──
         function renderEditor() {
             const ui = document.querySelector('.editor-panel');
             if (!ui) return;
@@ -582,7 +602,7 @@
 
             let activeRect = null;
             if (viewport) {
-                const activeCard = document.querySelector(`#canvas [data-id="${state.activeId}"], #canvas [data-id="${state.activeId}_cont"]`);
+                const activeCard = document.querySelector(`#canvas [data-id="${state.activeId}"]`);
                 if (activeCard) {
                     activeRect = (getCanvasRelativeTop(activeCard) * zoomRatio) - viewport.scrollTop;
                 }
@@ -601,28 +621,11 @@
                 let testCard = document.createElement('div'); testCard.style.width = "85mm"; testCard.innerHTML = buildCardHTMLString(entry);
                 scratchpad.appendChild(testCard); let fullHeight = testCard.getBoundingClientRect().height; scratchpad.removeChild(testCard);
 
-                if (fullHeight > 390 && paragraphs.length > 1 && entry.layout !== 'PASTOR' && entry.layout !== 'PASTOR_NOTITLE') {
-                    let chunk1 = []; let chunk2 = [];
-                    for (let i = 0; i < paragraphs.length; i++) {
-                        let currentTest = [...chunk1, paragraphs[i]];
-                        let pCard = document.createElement('div'); pCard.style.width = "85mm"; 
-                        pCard.innerHTML = buildCardHTMLString({ ...entry, content: currentTest.join('\n') });
-                        scratchpad.appendChild(pCard);
-                        let currentH = pCard.getBoundingClientRect().height;
-                        scratchpad.removeChild(pCard);
-
-                        if (currentH <= 390 && chunk2.length === 0) {
-                            chunk1.push(paragraphs[i]);
-                        } else {
-                            chunk2.push(paragraphs[i]);
-                        }
-                    }
-                    if(chunk1.length === 0) chunk1.push(paragraphs[0]);
-                    
-                    // ── 🟢 語序修正：明確調校前半段與後半段切割文字，前半段為轉下頁，後半段為接續 ──
-                    initialFlattenedEntries.push({ ...entry, content: chunk1.join('\n'), headline: entry.headline ? `${entry.headline} (轉下頁)` : '(轉下頁)' });
-                    initialFlattenedEntries.push({ ...entry, id: entry.id + '_cont', content: chunk2.join('\n'), headline: entry.headline ? `(接續) ${entry.headline}` : '(接續)' });
-                } else { initialFlattenedEntries.push(entry); }
+                if (fullHeight > 390 && entry.layout !== 'PASTOR' && entry.layout !== 'PASTOR_NOTITLE') {
+                    initialFlattenedEntries.push({ ...entry, isFullWidth: true });
+                } else { 
+                    initialFlattenedEntries.push(entry); 
+                }
             });
 
             let itemsByGroup = {};
@@ -641,31 +644,20 @@
                 let groupPastors = groupItems.filter(e => e.layout === 'PASTOR' || e.layout === 'PASTOR_NOTITLE');
                 let groupMembers = groupItems.filter(e => e.layout !== 'PASTOR' && e.layout !== 'PASTOR_NOTITLE');
 
-                // ── 🟢 核心修正一：優化續文排版序列，無論是否開啟智慧平衡，續文(Part 2)都死鎖綁定在正文(Part 1)正後方，絕不顛倒 ──
-                let baseMembers = groupMembers.filter(e => !e.id.includes('_cont'));
                 if (state.smartSort) {
-                    baseMembers.sort((a, b) => (b.content || '').length - (a.content || '').length);
-                    let balancedBases = [];
-                    while(baseMembers.length > 0) {
-                        balancedBases.push(baseMembers.shift());
-                        if(baseMembers.length > 0) balancedBases.push(baseMembers.pop());
+                    groupMembers.sort((a, b) => (b.content || '').length - (a.content || '').length);
+                    let balanced = [];
+                    while(groupMembers.length > 0) {
+                        balanced.push(groupMembers.shift());
+                        if(groupMembers.length > 0) balanced.push(groupMembers.pop());
                     }
-                    baseMembers = balancedBases;
+                    groupMembers = balanced;
                 } else {
-                    baseMembers.sort((a, b) => {
+                    groupMembers.sort((a, b) => {
                         return state.entries.findIndex(x => x.id === a.id) - state.entries.findIndex(x => x.id === b.id);
                     });
                 }
-
-                // 重新組合，把被切出的 _cont 續文本體精準縫合在父體正右側
-                let orderedGroupMembers = [];
-                baseMembers.forEach(base => {
-                    orderedGroupMembers.push(base);
-                    let cont = groupMembers.find(e => e.id === base.id + '_cont');
-                    if (cont) orderedGroupMembers.push(cont);
-                });
-
-                finalQueue.push(...groupPastors, ...orderedGroupMembers);
+                finalQueue.push(...groupPastors, ...groupMembers);
             });
 
             let pages = []; let currentFlowItems = []; let lastGroup = "";
@@ -687,23 +679,8 @@
                     let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
                     let gridEngine = document.createElement('div'); gridEngine.className = "grid-flow-engine pt-2";
                     
-                    let rows = []; let currentRow = []; let currentGroup = "";
-                    testItems.forEach(item => {
-                        if (item.groupName !== currentGroup) {
-                            if (currentRow.length > 0) {
-                                while (currentRow.length < 2) currentRow.push(null);
-                                rows.push(currentRow); currentRow = [];
-                            }
-                            currentGroup = item.groupName;
-                        }
-                        currentRow.push(item);
-                        if (currentRow.length === 2) { rows.push(currentRow); currentRow = []; }
-                    });
-                    if (currentRow.length > 0) {
-                        while (currentRow.length < 2) currentRow.push(null);
-                        rows.push(currentRow);
-                    }
-
+                    // ── 🟢 修正二：統一調用專用 Chunking 演算法，將 Full-Width 特性帶入高度測量沙盒 ──
+                    let rows = chunkItemsIntoRows(testItems);
                     let lastGroupHeading = "";
                     gridEngine.innerHTML = rows.map(row => {
                         let inlineHeaderHtml = '';
@@ -715,6 +692,9 @@
                                 </div>
                             `;
                             lastGroupHeading = row[0].groupName;
+                        }
+                        if (row[1] === "FULL_WIDTH") {
+                            return `<div class="w-full avoid-break">${inlineHeaderHtml}<div class="mb-[20px] w-full">${buildFullWidthCardHTMLString(row[0])}</div></div>`;
                         }
                         return `
                             <div class="w-full avoid-break">
@@ -791,8 +771,9 @@
 
             if (viewport) { const forceLayout = viewport.scrollHeight; }
 
-            if (activeRect !== null && viewport && state.shouldAutoScroll) {
-                const newCard = document.querySelector(`#canvas [data-id="${state.activeId}"], #canvas [data-id="${state.activeId}_cont"]`);
+            // 結構性絕對坐標恢復鏈，同步鎖定 A4 畫布高度
+            if (activeRect !== null && viewport) {
+                const newCard = document.querySelector(`#canvas [data-id="${state.activeId}"]`);
                 if (newCard) {
                     viewport.scrollTop = (getCanvasRelativeTop(newCard) * zoomRatio) - activeRect;
                 }
@@ -800,15 +781,11 @@
 
             if (state.shouldAutoScroll && !editorHasFocus) {
                 setTimeout(() => {
-                    const targetCard = document.querySelector(`#canvas [data-id="${state.activeId}"], #canvas [data-id="${state.activeId}_cont"]`);
+                    const targetCard = document.querySelector(`#canvas [data-id="${state.activeId}"]`);
                     if (targetCard && viewport && canvas) {
                         const absTop = getCanvasRelativeTop(targetCard);
                         const targetScrollTop = (absTop * zoomRatio) - (viewport.clientHeight / 2) + ((targetCard.clientHeight * zoomRatio) / 2);
-                        
-                        viewport.scrollTo({
-                            top: targetScrollTop,
-                            behavior: 'auto'
-                        });
+                        viewport.scrollTo({ top: targetScrollTop, behavior: 'auto' });
                     }
                     state.shouldAutoScroll = false; 
                 }, 50);
@@ -844,9 +821,7 @@
                             <span class="text-[#F5A623] text-4xl font-black leading-none self-center mt-3">”</span>
                         </div>
                     `;
-                } else {
-                    headlineBlockHtml = `<div class="mb-6"></div>`; 
-                }
+                } else { headlineBlockHtml = `<div class="mb-6"></div>`; }
 
                 contentHTML = `
                     <div class="white-layer" style="${pd}" data-id="${item.id}">
@@ -869,8 +844,8 @@
                     </div>
                 `;
             } else {
-                let rows = []; for(let i = 0; i < pageData.items.length; i += 2) { rows.push([pageData.items[i], pageData.items[i+1]]); }
-                
+                // ── 🟢 修正二：完備 buildPageHTML 下的分流器。全面對齊 chunkItemsIntoRows，拒絕粗暴的 i+=2 ──
+                let rows = chunkItemsIntoRows(pageData.items);
                 let lastGroupHeading = "";
                 contentHTML = rows.map((row) => {
                     let inlineHeaderHtml = '';
@@ -883,6 +858,18 @@
                         `;
                         lastGroupHeading = row[0].groupName;
                     }
+
+                    if (row[1] === "FULL_WIDTH") {
+                        return `
+                            <div class="w-full avoid-break">
+                                ${inlineHeaderHtml}
+                                <div class="mb-[20px] w-full">
+                                    ${buildFullWidthCardHTMLString(row[0])}
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     return `
                         <div class="w-full avoid-break">
                             ${inlineHeaderHtml}
@@ -909,7 +896,6 @@
             <div class="book-page">
                 <div class="corner-top-right no-print"></div><div class="corner-bottom-left no-print"></div>
                 ${contentHTML}
-                
                 ${pageNum ? `
                 <div class="absolute bottom-[16mm] ${isLeft ? 'left-[24mm]' : 'right-[24mm]'} text-[11px] font-sans font-bold text-gray-300 tracking-[3px] z-20">
                     Royal Chosen Race Church ‧ P.${pageNum}
@@ -918,9 +904,36 @@
             </div>`;
         }
 
+        function buildFullWidthCardHTMLString(item) {
+            if(!item) return '';
+            const identityText = (item.role && item.role !== '(一般組員)') ? item.role : '';
+            const titleText = (item.title && item.title !== '(無稱謂)') ? item.title : '';
+
+            return `
+            <div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
+                <div class="flex items-center gap-3 mb-4 font-serif shrink-0">
+                    <div class="w-[48px] h-[48px] rounded-full bg-[#0A2B66] border-[2px] border-[#F5A623] flex items-center justify-center text-[#F5A623] text-[16px] font-black shadow-sm shrink-0 font-sans tracking-wide">
+                        ${(item.groupName||'').substring(0,2)}
+                    </div>
+                    <div class="text-[19px] font-black text-[#0A2B66] tracking-widest flex items-baseline">
+                        <span class="text-[#F5A623] text-[13px] mr-1.5 relative -top-0.5">✦</span>${item.name || ''} 
+                        <span class="text-[13px] font-bold text-gray-400 ml-2 font-sans tracking-normal">${identityText} ${titleText}</span>
+                    </div>
+                </div>
+                ${item.layout === 'MEMBER_TITLE' && item.headline ? `
+                    <div class="text-left mb-4 font-serif border-l-[3px] border-[#F5A623] pl-3 shrink-0 avoid-break">
+                        <h3 class="text-[14.5px] font-bold text-[#0A2B66] leading-relaxed tracking-wide">${item.headline}</h3>
+                    </div>
+                ` : ''}
+                <div class="pastor-content text-[15px] leading-[1.75] text-gray-700 font-sans font-normal text-justify tracking-[0.02em] w-full px-1">
+                    ${(item.content || '').split('\n').filter(p=>p.trim()!=='').map(p => `<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}
+                </div>
+                <div class="w-full mt-4 border-t-[1.5px] border-dotted border-[#F5A623]/40 opacity-60 shrink-0"></div>
+            </div>`;
+        }
+
         function buildCardHTMLString(item) {
             if(!item) return '';
-            
             const identityText = (item.role && item.role !== '(一般組員)') ? item.role : '';
             const titleText = (item.title && item.title !== '(無稱謂)') ? item.title : '';
 
