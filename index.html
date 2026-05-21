@@ -593,8 +593,10 @@
                 if (activeCard) { activeRect = (getCanvasRelativeTop(activeCard) * zoomRatio) - viewport.scrollTop; }
             }
             container.innerHTML = ''; 
+            
             let scratchpad = document.createElement('div'); scratchpad.style.cssText = "position: absolute; visibility: hidden; width: 210mm; top: -9999px;"; document.body.appendChild(scratchpad);
             let groupStats = {}; state.entries.forEach(e => { groupStats[e.groupName] = (groupStats[e.groupName] || 0) + 1; });
+            
             let flattened = [];
             state.entries.forEach(entry => {
                 let testCard = document.createElement('div'); testCard.style.width = "85mm"; testCard.innerHTML = buildCardHTMLString(entry);
@@ -602,8 +604,10 @@
                 if (h > 390 && !['PASTOR','PASTOR_NOTITLE'].includes(entry.layout)) { flattened.push({ ...entry, isFullWidth: true }); }
                 else { flattened.push(entry); }
             });
+            
             let itemsByGroup = {}; state.groupOrder.forEach(g => itemsByGroup[g] = []);
             flattened.forEach(e => { (itemsByGroup[e.groupName || '未分配'] = itemsByGroup[e.groupName || '未分配'] || []).push(e); });
+            
             let finalQueue = [];
             state.groupOrder.forEach(g => {
                 let items = itemsByGroup[g] || []; if (!items.length) return;
@@ -616,49 +620,96 @@
                 } else { members.sort((a,b) => state.entries.findIndex(x=>x.id===a.id) - state.entries.findIndex(x=>x.id===b.id)); }
                 finalQueue.push(...pastors, ...members);
             });
-            let pages = []; let currentFlowItems = [];
-            finalQueue.forEach(entry => {
-                if (['PASTOR','PASTOR_NOTITLE'].includes(entry.layout)) {
-                    if (currentFlowItems.length) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
-                    pages.push({ type: 'PASTOR', items: [entry] });
-                } else {
-                    let testItems = [...currentFlowItems, entry];
-                    let testPage = document.createElement('div'); testPage.className = "book-page";
-                    let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
-                    whiteLayer.style.padding = "24mm 18mm 24mm 22mm";
-                    
-                    let grid = document.createElement('div'); grid.className = "grid-flow-engine";
-                    let rows = chunkItemsIntoRows(testItems);
-                    
-                    // ── 🟢 修正：高度計算測試時，同步導入真實小組標題高度模擬 ──
-                    let testLastG = "";
-                    grid.innerHTML = rows.map(r => {
-                        let banner = ''; 
-                        if (r[0] && r[0].groupName !== testLastG) { 
-                            banner = `<div class="flex items-center gap-4 mb-4 font-serif text-[#01177d] w-full"><span class="text-sm font-black tracking-widest">${r[0].groupName}</span><div class="h-[1px] bg-gradient-to-r from-[#f0a802]/60 to-transparent flex-1"></div></div>`; 
-                            testLastG = r[0].groupName; 
-                        }
-                        if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${banner}${buildFullWidthCardHTMLString(r[0])}</div>`;
-                        return `<div class="w-full avoid-break">${banner}<div class="flex gap-[14mm] mb-5">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
-                    }).join('');
-                    
-                    whiteLayer.appendChild(grid); 
-                    testPage.appendChild(whiteLayer); 
-                    scratchpad.appendChild(testPage);
-                    
-                    // ── 🟢 修正：將高度Poll節點從 whiteLayer 改為內含組件的真實 grid，臨界值設定在 780px ──
-                    const pageContentHeight = grid.scrollHeight;
-                    
-                    if (pageContentHeight > 780 && currentFlowItems.length) { 
-                        pages.push({ type: 'FLOW', items: currentFlowItems }); 
-                        currentFlowItems = [entry]; 
-                    } else { 
-                        currentFlowItems.push(entry); 
+
+            // ── 🟢 智慧型高度模擬器與矩陣配頁引擎 ──
+            function getFlowHeight(items) {
+                let testPage = document.createElement('div'); testPage.className = "book-page";
+                let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
+                whiteLayer.style.padding = "24mm 18mm 24mm 22mm";
+                let grid = document.createElement('div'); grid.className = "grid-flow-engine";
+                let rows = chunkItemsIntoRows(items);
+                let testLastG = "";
+                grid.innerHTML = rows.map(r => {
+                    let banner = ''; 
+                    if (r[0] && r[0].groupName !== testLastG) { 
+                        banner = `<div class="flex items-center gap-4 mb-4 font-serif text-[#01177d] w-full"><span class="text-sm font-black tracking-widest">${r[0].groupName}</span><div class="h-[1px] bg-gradient-to-r from-[#f0a802]/60 to-transparent flex-1"></div></div>`; 
+                        testLastG = r[0].groupName; 
                     }
-                    scratchpad.removeChild(testPage);
+                    if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${banner}${buildFullWidthCardHTMLString(r[0])}</div>`;
+                    return `<div class="w-full avoid-break">${banner}<div class="flex gap-[14mm] mb-5">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
+                }).join('');
+                whiteLayer.appendChild(grid); 
+                testPage.appendChild(whiteLayer); 
+                scratchpad.appendChild(testPage);
+                const pageContentHeight = grid.scrollHeight;
+                scratchpad.removeChild(testPage);
+                return pageContentHeight;
+            }
+
+            // ── 🟢 核心 lookahead 預分頁決策演算法：強制落實 max 4、min 2 與自動排版平衡 ──
+            function chunkMembersIntoPages(members) {
+                let chunks = [];
+                let i = 0;
+                while (i < members.length) {
+                    let rem = members.length - i;
+                    
+                    // 如果剩餘總數小於等於 3，就直接一網打盡（因為拆出去一定會有人變單人頁）
+                    if (rem === 1) { chunks.push([members[i]]); i += 1; continue; }
+                    if (rem === 2) { chunks.push([members[i], members[i+1]]); i += 2; continue; }
+                    if (rem === 3) { chunks.push([members[i], members[i+1], members[i+2]]); i += 3; continue; }
+                    
+                    // 特殊處理：當剩下 5 個人時，拆成 2+3 或 3+2（視高度而定），防止剩下 4+1 導致最後一人落單
+                    if (rem === 5) {
+                        let h2 = getFlowHeight([members[i], members[i+1]]);
+                        if (h2 <= 780) { chunks.push([members[i], members[i+1]]); i += 2; }
+                        else { chunks.push([members[i], members[i+1], members[i+2]]); i += 3; }
+                        continue;
+                    }
+                    
+                    // 剩餘 >= 4 人時，優先嘗試塞滿 4 個人
+                    let h4 = getFlowHeight([members[i], members[i+1], members[i+2], members[i+3]]);
+                    if (h4 <= 780) {
+                        chunks.push([members[i], members[i+1], members[i+2], members[i+3]]);
+                        i += 4;
+                    } else {
+                        // 4人會稍微超標，嘗試退回 3 人
+                        let h3 = getFlowHeight([members[i], members[i+1], members[i+2]]);
+                        // 注意：如果剩下 3 人會導致「後面那頁剛好只剩 1 個人」，就絕對不能只拿3人，必須強行拆成 2+2
+                        if (h3 <= 780 && (rem - 3 !== 1)) {
+                            chunks.push([members[i], members[i+1], members[i+2]]);
+                            i += 3;
+                        } else {
+                            // 強制拆成平整的 2 人，把負載平攤給下一頁，優雅解決單人頁問題
+                            chunks.push([members[i], members[i+1]]);
+                            i += 2;
+                        }
+                    }
                 }
-            });
-            if (currentFlowItems.length) pages.push({ type: 'FLOW', items: currentFlowItems });
+                return chunks;
+            }
+
+            let pages = [];
+            let pIdx = 0;
+            while (pIdx < finalQueue.length) {
+                let entry = finalQueue[pIdx];
+                if (['PASTOR','PASTOR_NOTITLE'].includes(entry.layout)) {
+                    pages.push({ type: 'PASTOR', items: [entry] });
+                    pIdx++;
+                } else {
+                    let currentGroupMembers = [];
+                    let gName = entry.groupName;
+                    while (pIdx < finalQueue.length && !['PASTOR','PASTOR_NOTITLE'].includes(finalQueue[pIdx].layout) && finalQueue[pIdx].groupName === gName) {
+                        currentGroupMembers.push(finalQueue[pIdx]);
+                        pIdx++;
+                    }
+                    let chunks = chunkMembersIntoPages(currentGroupMembers);
+                    chunks.forEach(chunk => {
+                        let h = getFlowHeight(chunk);
+                        pages.push({ type: 'FLOW', items: chunk, pageContentHeight: h });
+                    });
+                }
+            }
+
             document.body.removeChild(scratchpad);
             let pageNum = 7; let displayPages = [...pages]; if (state.viewMode === 'spread' && pageNum % 2 !== 0) displayPages.unshift({ type: 'BLANK' });
             container.innerHTML = '';
@@ -677,8 +728,26 @@
 
         function buildPageHTML(p, pageNum, groupStats) {
             const isLeft = pageNum % 2 === 0; const pd = isLeft ? 'padding: 24mm 22mm 24mm 18mm;' : 'padding: 24mm 18mm 24mm 22mm;';
+            const pageIdSuffix = pageNum || 'blank_' + Math.floor(Math.random() * 1000);
             const glowCorners = `<div class="corner-glow corner-top-right"></div><div class="corner-glow corner-bottom-left"></div>`;
-            if (p.type === 'BLANK') return `<div class="book-page">${glowCorners}<div class="white-layer bg-[#fcfbf9] flex items-center justify-center text-gray-300 italic">Royal Chosen Race Church</div></div>`;
+            
+            // ── 🟢 智慧型 Copyfitting 微縮水樣式注入 ──
+            let shrinkStyle = "";
+            if (p.type === 'FLOW' && p.pageContentHeight > 780) {
+                if (p.pageContentHeight > 980) {
+                    // 超級嚴重溢出（硬塞4人且大家話很多）：字級縮到 11.5px，行高拉緊到 1.5
+                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 11.5px !important; line-height: 1.52 !important; } #page_${pageIdSuffix} .entry-card { padding-bottom: 2px !important; }</style>`;
+                } else if (p.pageContentHeight > 860) {
+                    // 中度溢出：字級縮到 12.5px，行高 1.68
+                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 12.5px !important; line-height: 1.68 !important; } #page_${pageIdSuffix} .entry-card { padding-bottom: 6px !important; }</style>`;
+                } else {
+                    // 輕微溢出：字級微調到 13.4px，行高 1.8
+                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 13.4px !important; line-height: 1.8 !important; } #page_${pageIdSuffix} .entry-card { padding-bottom: 10px !important; }</style>`;
+                }
+            }
+
+            if (p.type === 'BLANK') return `<div class="book-page" id="page_${pageIdSuffix}">${glowCorners}<div class="white-layer bg-[#fcfbf9] flex items-center justify-center text-gray-300 italic">Royal Chosen Race Church</div></div>`;
+            
             let inner = '';
             if (p.type === 'PASTOR') {
                 const item = p.items[0]; const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
@@ -701,7 +770,7 @@
                 }).join('');
                 inner = `<div class="white-layer" style="${pd}"><div class="flex justify-between border-b border-gray-200 pb-3 mb-5 font-serif"><div class="text-[12.5px] font-black text-[#01177d]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會 10 週年紀念</span></div><div class="text-[#f0a802] text-lg opacity-60">✦ ✦</div></div><div class="flex-1 overflow-hidden pt-2 grid-flow-engine">${gridHTML}</div></div>`;
             }
-            return `<div class="book-page">${glowCorners}${inner}${pageNum?`<div class="absolute bottom-[16mm] ${isLeft?'left-[24mm]':'right-[24mm]'} text-[11px] font-sans font-bold text-gray-300 tracking-[3px] z-20">Royal Chosen Race Church ‧ P.${pageNum}</div>`:''}</div>`;
+            return `${shrinkStyle}<div class="book-page" id="page_${pageIdSuffix}">${glowCorners}${inner}${pageNum?`<div class="absolute bottom-[16mm] ${isLeft?'left-[24mm]':'right-[24mm]'} text-[11px] font-sans font-bold text-gray-300 tracking-[3px] z-20">Royal Chosen Race Church ‧ P.${pageNum}</div>`:''}</div>`;
         }
 
         function buildFullWidthCardHTMLString(item) {
