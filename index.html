@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 匯入出版級明體(標題)與黑體(內文) */
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght=600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
         
         :root {
             --primary-blue: #01177d;
@@ -35,7 +35,7 @@
             width: 210mm; height: 297mm; min-width: 210mm; min-height: 297mm;
             background-color: var(--primary-blue); 
             position: relative; 
-            overflow: hidden !important; /* 🟢 顧問修正二：固定高度硬性鎖定，防止分欄外溢造成分頁失控 */
+            overflow: hidden !important; /* 固定高度硬性鎖定，防止分欄外溢造成分頁失控 */
             display: flex; flex-direction: column; box-sizing: border-box;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin-bottom: 50px;
         }
@@ -47,7 +47,7 @@
             box-shadow: inset 0 0 20px rgba(0,16,104,0.03);
         }
 
-        /* ── 🟢 顧問修正四：純 CSS radial-gradient 出版級高級演色性光暈 ── */
+        /* ── 純 CSS radial-gradient 出版級高級演色性光暈 ── */
         .corner-glow {
             position: absolute;
             z-index: 1;
@@ -88,7 +88,7 @@
             );
         }
 
-        /* ── 🟢 顧問修正三：改裝高隱蔽離置式物理印刷快照通道，徹底摧毀 Tailwind 優先權死結 ── */
+        /* 改裝高隱蔽離置式物理印刷快照通道 */
         #printArea {
             position: fixed;
             left: -999999px;
@@ -104,35 +104,72 @@
 
         .entry-card { background: #ffffff; border-radius: 12px; padding: 12px 0px 16px 0px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
-        /* 標題微浮雕刻印質感 */
+        /* 網頁預覽環境樣式 */
         .royal-title {
+            font-family: 'Noto Serif TC', serif !important;
             color: var(--primary-blue);
-            text-shadow: 0 1px 0 rgba(255,255,255,0.7), 0 2px 4px rgba(0,16,104,0.05);
             letter-spacing: 0.05em;
         }
+        
         .royal-headline {
+            font-family: 'Noto Serif TC', serif !important;
             color: #0A2B66;
             font-weight: 800;
             letter-spacing: 0.04em;
-            text-shadow: 0 0.4px 0 rgba(255,255,255,0.75), 0 1.2px 2px rgba(10,43,102,0.08), 0 0 0.5px rgba(245,166,35,0.22);
             -webkit-font-smoothing: antialiased;
             text-rendering: geometricPrecision;
         }
 
+        /* 強制全區區塊指定明體與防選取快照 */
         .headline-quote-box {
+            font-family: 'Noto Serif TC', serif !important;
+            user-select: none;
+            -webkit-user-select: none;
             margin-bottom: 2.5rem; display: flex; align-items: center; justify-content: center; padding: 1.5rem;
             border: 1px solid rgba(217, 164, 65, 0.3); background-color: rgba(217, 164, 65, 0.06); border-radius: 1.25rem;
             position: relative; max-width: 92%; margin: 0 auto 2.5rem; min-height: 96px;
         }
+        
+        .headline-quote-box * {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* 額外防禦網頁環境文字焦點選取殘留的藍底 */
+        #canvas ::selection { background: transparent !important; color: inherit !important; }
+        #canvas ::-webkit-selection { background: transparent !important; color: inherit !important; }
 
         .star { position: absolute; border-radius: 50%; background: var(--primary-yellow); animation: twinkle 4s infinite ease-in-out; }
         @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.1); } }
 
-        /* ── 🟢 顧問修正一：重新對齊並覆蓋標準印刷隔離邊界 ── */
+        /* ── 重新對齊並覆蓋標準印刷隔離邊界 ── */
         @media print {
             @page {
                 size: A4;
                 margin: 0;
+            }
+
+            /* 徹底摧毀列印時的任何文字選取藍底殘留快照 */
+            ::selection {
+                background: transparent !important;
+                color: inherit !important;
+            }
+            ::-webkit-selection {
+                background: transparent !important;
+                color: inherit !important;
+            }
+
+            /* ── 🟢 終極修正：強制全面拔除所有列印文字的陰影與硬體加速，回歸純向量渲染，徹底消滅方塊底色 ── */
+            .royal-title, 
+            .royal-headline, 
+            .headline-quote-box, 
+            .headline-quote-box *, 
+            h1, h2, h3, p, span {
+                text-shadow: none !important;
+                box-shadow: none !important;
+                transform: none !important;
+                will-change: auto !important;
+                background-shadow: none !important;
             }
 
             /* 左側控制面板關閉 */
@@ -179,7 +216,7 @@
                 display: flex !important;
             }
 
-            /* ── 🟢 顧問修正五：全置換列印保險，強制對齊 root 級渲染核心 ── */
+            /* 全置換列印保險，強制對齊 root 級渲染核心 */
             html {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -314,7 +351,6 @@
             renderTimer = setTimeout(() => { renderCanvas(); }, 300);
         }
 
-        // ── 🟢 顧問修正三：重寫完備的 exportPDF 控制流 ──
         async function exportPDF() {
             if (document.activeElement) {
                 document.activeElement?.blur();
@@ -331,8 +367,19 @@
             // 強制 Reflow 喚醒
             void printArea.offsetHeight;
 
-            // 等待字體資源就緒
+            // 等待字體資源就緒並強制下載對應字重
             await document.fonts.ready;
+            try {
+                await Promise.all([
+                    document.fonts.load('600 14px "Noto Serif TC"'),
+                    document.fonts.load('700 22px "Noto Serif TC"'),
+                    document.fonts.load('900 22px "Noto Serif TC"'),
+                    document.fonts.load('400 14px "Noto Sans TC"'),
+                    document.fonts.load('700 14px "Noto Sans TC"')
+                ]);
+            } catch (e) {
+                console.warn("部分出版字體預載延遲，將以安全機制續行快照印刷", e);
+            }
 
             setTimeout(() => {
                 window.print();
@@ -595,7 +642,6 @@
                     if (currentFlowItems.length) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
                     pages.push({ type: 'PASTOR', items: [entry] });
                 } else {
-                    // ── 🟢 顧問修正一：高度測量 DOM 全面與實際印刷 DOM 同步對齊 ──
                     let testItems = [...currentFlowItems, entry];
                     let testPage = document.createElement('div'); testPage.className = "book-page";
                     let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
@@ -645,7 +691,7 @@
             const isLeft = pageNum % 2 === 0; const pd = isLeft ? 'padding: 24mm 22mm 24mm 18mm;' : 'padding: 24mm 18mm 24mm 22mm;';
             const pageIdSuffix = pageNum || 'blank_' + Math.floor(Math.random() * 1000);
             
-            // ── 🟢 顧問修正四：移去內嵌式 SVG 文字，改裝高演色純 CSS 印刷特刊光暈機制 ──
+            // 移去內嵌式 SVG 文字，改裝高演色純 CSS 印刷特刊光暈機制
             const glowCorners = `
                 <div class="corner-glow corner-top-right"></div>
                 <div class="corner-glow corner-bottom-left"></div>
@@ -662,7 +708,7 @@
                         <div class="text-[#f0a802] text-xs font-bold tracking-widest">${item.groupName.substring(0,2)}</div>
                     </div>
                     <div class="flex flex-col flex-1 h-full pt-4">
-                        ${item.layout!=='PASTOR_NOTITLE'?`<div class="headline-quote-box"><span class="text-[#f0a802] text-4xl font-black self-center -mt-1">“</span><span class="text-[22px] px-4 text-center leading-relaxed flex-1 font-black royal-title">${item.headline}</span><span class="text-[#f0a802] text-4xl font-black self-center mt-3">”</span></div>` : ''}
+                        ${item.layout!=='PASTOR_NOTITLE'?`<div class="headline-quote-box"><span class="text-[#f0a802] text-4xl font-black self-center -mt-1 font-serif">“</span><span class="text-[22px] px-4 text-center leading-relaxed flex-1 font-black royal-title font-serif">${item.headline}</span><span class="text-[#f0a802] text-4xl font-black self-center mt-3 font-serif">”</span></div>` : ''}
                         <div class="text-center mb-8"><div class="inline-flex items-center gap-3 border-b-2 border-[#f0a802] pb-2 px-6 font-serif"><span class="text-[20px] font-black text-[#01177d]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${iden} ${tit}</span></div></div>
                         <div class="pastor-content text-[14px] leading-[1.9] text-gray-700 font-sans font-normal text-justify flex-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 1em;">${p}</p>`).join('')}</div>
                     </div></div>`;
@@ -682,7 +728,7 @@
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
             return `<div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
                 <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] border-2 border-[#f0a802] flex items-center justify-center text-[#f0a802] text-base font-black shadow-sm font-sans">${item.groupName.substring(0,2)}</div><div class="text-xl font-black text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
-                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline text-sm font-bold leading-relaxed">${item.headline}</h3></div>`:''}
+                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline text-sm font-bold leading-relaxed font-serif">${item.headline}</h3></div>`:''}
                 <div class="pastor-content text-[15px] leading-relaxed text-gray-700 font-sans text-justify w-full px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-4 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
@@ -692,12 +738,11 @@
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
             return `<div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
                 <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] border-2 border-[#f0a802] flex items-center justify-center text-[#f0a802] text-base font-black font-sans">${item.groupName.substring(0,2)}</div><div class="text-xl font-black text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
-                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline text-sm font-bold leading-relaxed">${item.headline}</h3></div>`:''}
+                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline text-sm font-bold leading-relaxed font-serif">${item.headline}</h3></div>`:''}
                 <div class="text-[15px] leading-relaxed text-gray-700 font-sans text-justify flex-1 px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-4 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
 
-        // ── 🟢 顧問修正三：beforeprint 與 afterprint 攔截器更新，改採 style.visibility 指引 ──
         window.addEventListener('beforeprint', () => {
             state.isEditing = false;
             renderCanvas();
