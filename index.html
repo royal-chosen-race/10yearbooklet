@@ -756,7 +756,7 @@
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
             // ── 🟢 修正：Full-Width 卡片姓名改套用 book-name、內文改套用 book-body-text ──
             return `<div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] border-2 border-[#f0a802] flex items-center justify-center text-[#f0a802] text-base font-black shadow-sm font-sans">${item.groupName.substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
+                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black shadow-sm font-sans">${item.groupName.substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
                 ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
                 <div class="book-body-text pastor-content w-full px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-4 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
@@ -767,7 +767,7 @@
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
             // ── 🟢 修正：一般卡片姓名改套用 book-name、內文改套用 book-body-text ──
             return `<div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] border-2 border-[#f0a802] flex items-center justify-center text-[#f0a802] text-base font-black font-sans">${item.groupName.substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
+                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black font-sans">${item.groupName.substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
                 ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
                 <div class="book-body-text flex-1 px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-4 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
