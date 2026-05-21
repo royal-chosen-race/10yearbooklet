@@ -657,7 +657,7 @@
             });
             if (currentFlowItems.length) pages.push({ type: 'FLOW', items: currentFlowItems });
             document.body.removeChild(scratchpad);
-            let pageNum = 3; let displayPages = [...pages]; if (state.viewMode === 'spread' && pageNum % 2 !== 0) displayPages.unshift({ type: 'BLANK' });
+            let pageNum = 1; let displayPages = [...pages]; if (state.viewMode === 'spread' && pageNum % 2 !== 0) displayPages.unshift({ type: 'BLANK' });
             container.innerHTML = '';
             displayPages.forEach((p,i) => {
                 const spread = document.createElement('div'); spread.className = state.viewMode==='spread'?"flex shadow-2xl mb-12 relative":"mb-12 shadow-2xl relative";
