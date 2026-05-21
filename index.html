@@ -9,139 +9,216 @@
         /* 匯入出版級明體(標題)與黑體(內文) */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
         
+        :root {
+            --primary-blue: #001068;
+            --primary-yellow: #e8a002;
+        }
+
         body { background-color: #0F172A; }
         .font-sans { font-family: 'Noto Sans TC', sans-serif !important; }
         .font-serif { font-family: 'Noto Serif TC', serif !important; }
 
-        /* ── 標準現代大廠 Flexbox 三欄平行解構 ── */
-        .app-container { 
-            display: flex; 
-            width: 100vw; 
-            height: 100vh; 
-            overflow: hidden; 
+        /* 從根部鎖定列印色彩 */
+        html, body, .book-page, .white-layer, svg, rect {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
-        .sidebar-panel { 
-            width: 280px; 
-            min-width: 280px; 
-            max-width: 280px; 
-            height: 100%; 
-            z-index: 40; 
-            border-right: 1px solid rgba(245,166,35,0.2); 
-            display: flex;
-            flex-direction: column;
-        }
-        .editor-panel { 
-            width: 380px; 
-            min-width: 380px; 
-            max-width: 380px; 
-            height: 100%; 
-            z-index: 30; 
-            border-right: 1px solid rgba(255,255,255,0.1); 
-            display: flex;
-            flex-direction: column;
-        }
-        .preview-area { 
-            flex: 1; 
-            height: 100%; 
-            background-color: #020617; 
-            display: flex; 
-            flex-direction: column; 
-            min-width: 0; 
-            z-index: 20;
-        }
+
+        /* ── 標準三欄結構 ── */
+        .app-container { display: flex; width: 100vw; height: 100vh; overflow: hidden; }
+        .sidebar-panel { width: 280px; min-width: 280px; height: 100%; z-index: 40; border-right: 1px solid rgba(232,160,2,0.2); display: flex; flex-direction: column; }
+        .editor-panel { width: 380px; min-width: 380px; height: 100%; z-index: 30; border-right: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; }
+        .preview-area { flex: 1; height: 100%; background-color: #020617; display: flex; flex-direction: column; min-width: 0; z-index: 20; }
 
         /* ── A4 實體畫布 ── */
         .book-page {
             width: 210mm; height: 297mm; min-width: 210mm; min-height: 297mm;
-            background-color: #0A2B66; 
-            position: relative; overflow: hidden;
+            background-color: var(--primary-blue); 
+            position: relative; 
+            overflow: hidden !important; /* 🟢 顧問修正二：固定高度硬性鎖定，防止分欄外溢造成分頁失控 */
             display: flex; flex-direction: column; box-sizing: border-box;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin-bottom: 50px;
         }
 
         .white-layer {
+            position: absolute; inset: 12mm; background-color: #FFFFFF;
+            border-radius: 45px; z-index: 10; padding: 24mm 20mm; 
+            display: flex; flex-direction: column;
+            box-shadow: inset 0 0 20px rgba(0,16,104,0.03);
+        }
+
+        /* ── 🟢 顧問修正四：純 CSS radial-gradient 出版級高級演色性光暈 ── */
+        .corner-glow {
             position: absolute;
-            inset: 12mm; 
-            background-color: #FFFFFF;
-            border-radius: 45px; 
-            z-index: 10;
-            padding: 24mm 20mm; 
-            display: flex;
-            flex-direction: column;
-            box-shadow: inset 0 0 20px rgba(10,43,102,0.03);
+            z-index: 1;
+            pointer-events: none;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
-        .grid-flow-engine {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
+        /* 右上黃金光暈 */
+        .corner-top-right {
+            top: -20mm;
+            right: -20mm;
+            width: 160mm;
+            height: 160mm;
+            background: radial-gradient(
+                circle at top right,
+                rgba(232,160,2,0.92) 0%,
+                rgba(232,160,2,0.45) 28%,
+                rgba(232,160,2,0.18) 48%,
+                rgba(232,160,2,0.06) 62%,
+                rgba(232,160,2,0) 78%
+            );
         }
 
-        .pastor-content {
-            column-count: 2;
-            column-gap: 16mm;
-            column-rule: 1px dotted rgba(245,166,35,0.25);
+        /* 左下黃金光暈 */
+        .corner-bottom-left {
+            left: -22mm;
+            bottom: -22mm;
+            width: 170mm;
+            height: 170mm;
+            background: radial-gradient(
+                circle at bottom left,
+                rgba(232,160,2,0.92) 0%,
+                rgba(232,160,2,0.45) 28%,
+                rgba(232,160,2,0.18) 48%,
+                rgba(232,160,2,0.06) 62%,
+                rgba(232,160,2,0) 78%
+            );
         }
+
+        /* ── 🟢 顧問修正三：改裝高隱蔽離置式物理印刷快照通道，徹底摧毀 Tailwind 優先權死結 ── */
+        #printArea {
+            position: fixed;
+            left: -999999px;
+            top: 0;
+            visibility: hidden;
+        }
+
+        .grid-flow-engine { width: 100%; display: flex; flex-direction: column; }
+        .pastor-content { column-count: 2; column-gap: 16mm; column-rule: 1px dotted rgba(217,164,65,0.25); }
 
         p { orphans: 2 !important; widows: 2 !important; margin-bottom: 8px; }
         h2, h3, .avoid-break { break-inside: avoid; page-break-inside: avoid; break-after: avoid !important; }
 
-        .entry-card {
-            background: #ffffff;
-            border-radius: 12px; 
-            padding: 12px 0px 16px 0px; 
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            overflow: hidden; 
+        .entry-card { background: #ffffff; border-radius: 12px; padding: 12px 0px 16px 0px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+
+        /* 標題微浮雕刻印質感 */
+        .royal-title {
+            color: var(--primary-blue);
+            text-shadow: 0 1px 0 rgba(255,255,255,0.7), 0 2px 4px rgba(0,16,104,0.05);
+            letter-spacing: 0.05em;
+        }
+        .royal-headline {
+            color: #0A2B66;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-shadow: 0 0.4px 0 rgba(255,255,255,0.75), 0 1.2px 2px rgba(10,43,102,0.08), 0 0 0.5px rgba(245,166,35,0.22);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: geometricPrecision;
         }
 
-        .card-overflow-error {
-            border: 2px dashed #EF4444 !important;
-            background-color: #FEF2F2 !important;
-            position: relative;
+        .headline-quote-box {
+            margin-bottom: 2.5rem; display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+            border: 1px solid rgba(217, 164, 65, 0.3); background-color: rgba(217, 164, 65, 0.06); border-radius: 1.25rem;
+            position: relative; max-width: 92%; margin: 0 auto 2.5rem; min-height: 96px;
         }
 
-        .corner-top-right {
-            position: absolute; top: 0; right: 0; width: 85mm; height: 85mm;
-            background: radial-gradient(circle at top right, #F5A623 0%, #0A2B66 45%, transparent 70%);
-            opacity: 0.8; z-index: 1;
-        }
-        .corner-bottom-left {
-            position: absolute; bottom: 0; left: 0; width: 105mm; height: 105mm;
-            background: radial-gradient(circle at bottom left, #F5A623 0%, #0A2B66 40%, transparent 70%);
-            opacity: 0.8; z-index: 1;
-        }
-
-        .star { position: absolute; border-radius: 50%; background: #F5A623; animation: twinkle 4s infinite ease-in-out; }
+        .star { position: absolute; border-radius: 50%; background: var(--primary-yellow); animation: twinkle 4s infinite ease-in-out; }
         @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.1); } }
 
-        /* 精準生產列印模式 */
+        /* ── 🟢 顧問修正一：重新對齊並覆蓋標準印刷隔離邊界 ── */
         @media print {
-            @page { size: A4; margin: 0; }
-            header, aside, main, .h-12, button { display: none !important; }
-            .app-container { display: block !important; height: auto !important; width: auto !important; overflow: visible !important; }
-            .preview-area { display: block !important; position: static !important; padding: 0 !important; background: transparent !important; width: 100% !important; height: auto !important; overflow: visible !important; }
-            #canvas { display: none !important; }
-            .print-area { display: block !important; position: static !important; width: 100% !important; height: auto !important; overflow: visible !important; }
-            .book-page { margin: 0 !important; box-shadow: none !important; page-break-after: always !important; page-break-inside: avoid !important; display: flex !important; }
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            /* 左側控制面板關閉 */
+            .sidebar-panel,
+            .editor-panel,
+            header,
+            .preview-nav,
+            .no-print {
+                display: none !important;
+            }
+
+            /* 保留預覽大區存在，防止 Layout Tree 物理座標瓦解 */
+            .preview-area {
+                display: block !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                background: white !important;
+            }
+
+            /* 預覽 canvas 容器不進入印表機編制 */
+            #canvas {
+                display: none !important;
+            }
+
+            /* 真正用於高精列印的數據管道容器強制放行 */
+            #printArea,
+            #printArea.hidden {
+                display: block !important;
+                visibility: visible !important;
+                position: static !important;
+                width: 100% !important;
+            }
+
+            /* 防止 overflow 裁切，解除分頁塌陷 */
+            .book-page {
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                box-shadow: none !important;
+                overflow: hidden !important; 
+                display: flex !important;
+            }
+
+            /* ── 🟢 顧問修正五：全置換列印保險，強制對齊 root 級渲染核心 ── */
+            html {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            body {
+                background: #001068 !important;
+                width: auto !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            .book-page {
+                background: #001068 !important;
+                position: relative !important;
+            }
+
+            .corner-glow {
+                opacity: 1 !important;
+                visibility: visible !important;
+                display: block !important;
+            }
         }
     </style>
 </head>
-<body class="text-white selection:bg-[#F5A623] selection:text-[#0A2B66] h-screen overflow-hidden flex flex-col">
+<body class="text-white selection:bg-[#D9A441] selection:text-[#001068] h-screen overflow-hidden flex flex-col">
 
     <div id="starField" class="fixed inset-0 pointer-events-none opacity-40"></div>
 
-    <header class="h-16 bg-gradient-to-r from-[#0A2B66] to-[#030712] border-b border-[#F5A623]/30 z-50 flex items-center px-6 no-print shrink-0">
+    <header class="h-16 bg-gradient-to-r from-[#001068] to-[#030712] border-b border-[#D9A441]/30 z-50 flex items-center px-6 no-print shrink-0">
         <div class="flex items-center gap-3 font-serif whitespace-nowrap">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F5A623] to-[#FBBF24] flex items-center justify-center text-[#0A2B66] font-black text-xl shadow-lg">風</div>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D9A441] to-[#FBBF24] flex items-center justify-center text-[#001068] font-black text-xl shadow-lg">風</div>
             <div>
                 <h1 class="text-sm font-bold text-[#FBBF24] leading-tight tracking-wider">十週年感言手冊產生系統</h1>
                 <p class="text-[10px] text-white/50 font-sans uppercase tracking-[2px]">Royal Chosen Race Editorial Book System</p>
             </div>
         </div>
         
-        <div id="safetyBadge" class="ml-8 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500 text-emerald-400 text-xs font-bold flex items-center gap-2 no-print">
+        <div id="safetyBadge" class="ml-8 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500 text-emerald-400 text-xs font-bold flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 系統狀態：出版編排安全 (✓ 已自動儲存)
         </div>
 
@@ -150,22 +227,22 @@
             <button class="px-4 py-2 rounded-lg border border-white/20 text-white/80 text-sm font-medium hover:bg-white/10 transition-colors" onclick="toggleViewMode()">
                 切換至 <span id="lblViewMode">單頁</span> 視角
             </button>
-            <button id="btnExportPdf" onclick="window.print()" class="px-6 py-2 rounded-full bg-gradient-to-r from-[#F5A623] to-[#D97706] text-white font-bold text-sm hover:scale-105 transition-all shadow-lg">📥 匯出印刷 PDF</button>
+            <button id="btnExportPdf" onclick="exportPDF()" class="px-6 py-2 rounded-full bg-gradient-to-r from-[#D9A441] to-[#D97706] text-white font-bold text-sm hover:scale-105 transition-all shadow-lg">📥 匯出印刷 PDF</button>
         </div>
     </header>
 
     <div class="app-container flex-1">
         <aside class="sidebar-panel bg-slate-950 flex flex-col no-print">
             <div class="p-4 border-b border-white/10 shrink-0 space-y-3">
-                <div class="text-[10px] font-bold text-[#F5A623] uppercase tracking-widest">肢體名單 (手動優先排序)</div>
-                <input type="text" id="searchFilter" oninput="renderSidebar()" placeholder="🔍 搜尋姓名小組..." class="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-xs text-white outline-none focus:border-[#F5A623]">
+                <div class="text-[10px] font-bold text-[#D9A441] uppercase tracking-widest">肢體名單 (手動排序)</div>
+                <input type="text" id="searchFilter" oninput="renderSidebar()" placeholder="🔍 搜尋姓名小組..." class="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-xs text-white outline-none focus:border-[#D9A441]">
                 
                 <div class="bg-slate-900/60 p-2.5 rounded-xl border border-white/5 space-y-2">
                     <label class="flex items-center gap-2 text-[11px] text-gray-300 cursor-pointer select-none">
-                        <input type="checkbox" id="chkSmartSort" onchange="state.smartSort = this.checked; saveState(); renderCanvas();" class="accent-[#F5A623]"> 智慧對稱平衡排版
+                        <input type="checkbox" id="chkSmartSort" onchange="state.smartSort = this.checked; saveState(); renderCanvas();" class="accent-[#D9A441]"> 智慧對稱平衡排版
                     </label>
                     <label class="flex items-center gap-2 text-[11px] text-gray-300 cursor-pointer select-none">
-                        <input type="checkbox" id="chkLockLayout" onchange="state.isLocked = this.checked; saveState(); renderSidebar(); renderEditor();" class="accent-[#F5A623]"> 🔒 鎖定全書目前頁面流動
+                        <input type="checkbox" id="chkLockLayout" onchange="state.isLocked = this.checked; saveState(); renderSidebar(); renderEditor();" class="accent-[#D9A441]"> 🔒 鎖定全書目前頁面流動
                     </label>
                 </div>
             </div>
@@ -173,10 +250,10 @@
             <div id="sidebarList" class="flex-1 space-y-1.5 overflow-y-auto px-4 py-2"></div>
             
             <div class="p-4 border-t border-white/10 shrink-0">
-                <button id="btnAddEntryBtn" onclick="addEntry()" class="w-full py-2.5 border border-dashed border-[#F5A623]/50 text-[#F5A623] text-xs font-bold rounded-xl hover:bg-[#F5A623]/10 transition-all">＋ 新增肢體感言</button>
+                <button id="btnAddEntryBtn" onclick="addEntry()" class="w-full py-2.5 border border-dashed border-[#D9A441]/50 text-[#D9A441] text-xs font-bold rounded-xl hover:bg-[#D9A441]/10 transition-all">＋ 新增肢體感言</button>
             </div>
             <div class="p-4 bg-black/40 text-center shrink-0 border-t border-white/5">
-                <div class="text-3xl font-serif text-[#F5A623] font-black" id="statCount">0</div>
+                <div class="text-3xl font-serif text-[#D9A441] font-black" id="statCount">0</div>
                 <div class="text-[10px] text-white/40 font-sans tracking-widest">TOTAL TESTIMONIES</div>
             </div>
         </aside>
@@ -184,24 +261,24 @@
         <main class="editor-panel bg-slate-900 flex flex-col no-print"></main>
 
         <section class="preview-area font-sans">
-            <div class="h-12 bg-white/5 border-b border-white/10 flex items-center px-6 justify-between shrink-0 no-print">
+            <div class="preview-nav h-12 bg-white/5 border-b border-white/10 flex items-center px-6 justify-between shrink-0 no-print">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span class="text-[10px] text-white/40 uppercase tracking-widest font-bold">A4 實體出版物預覽 (DOM 實體高度排版)</span>
                 </div>
                 <div class="flex items-center gap-4">
                     <button onclick="adjustZoom(-10)" class="text-white/40 hover:text-white font-bold text-xl">－</button>
-                    <span id="zoomVal" class="text-xs font-mono font-bold text-[#F5A623]">80%</span>
+                    <span id="zoomVal" class="text-xs font-mono font-bold text-[#D9A441]">80%</span>
                     <button onclick="adjustZoom(10)" class="text-white/40 hover:text-white font-bold text-xl">＋</button>
                 </div>
             </div>
-            <div id="scrollViewport" class="flex-1 overflow-auto p-12 flex flex-col items-center scroll-smooth bg-slate-950 w-full">
+            <div id="scrollViewport" class="flex-1 overflow-auto p-12 flex flex-col items-center scroll-smooth bg-slate-950 w-full no-print">
                 <div id="canvas" class="origin-top transition-transform duration-200"></div>
             </div>
         </section>
     </div>
 
-    <div id="printArea" class="hidden print-area"></div>
+    <div id="printArea" class="print-area"></div>
 
     <script>
         const LAYOUTS = {
@@ -228,17 +305,38 @@
         };
         
         state.entries = [
-            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大能大力，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' },
-            { id: '2', layout: 'MEMBER_TITLE', groupName: '風潔小組', name: '何姊妹', role: '(一般組員)', title: '姊妹', headline: '一路走來，神的恩典滿滿', content: '轉眼間來到風一族八年了，感謝神，給予我機會。學鼓服事，在一次又一次的服事中進步、成長。委身在風一族教會的這幾年，很感謝牧師不辭辛勞地講道、以及弟兄姊妹彼此之間的代禱與扶持，使我在信仰上更加堅定，風一族教會十週年，一路走來神的恩典滿滿！' },
-            { id: '3', layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '彭依嵐', role: '小組長', title: '姊妹', headline: '五載恩典，一生家人', content: '邁向十週年神聖時刻，是主任牧師與師母用生命無私付出澆灌風一族，我心中除對神的敬畏與感恩，最想表達的是最誠摯的謝意。謝謝主任牧師是位領路牧者—您講道總成為我腳前的燈、路裝備。聽著您分享真理那分堅定的眼神，是知識傳遞，更是生命榜樣！' }
+            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大大力量，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' }
         ];
 
         let renderTimer = null;
         function scheduleCanvasRender() {
             clearTimeout(renderTimer);
-            renderTimer = setTimeout(() => {
-                renderCanvas();
-            }, 300);
+            renderTimer = setTimeout(() => { renderCanvas(); }, 300);
+        }
+
+        // ── 🟢 顧問修正三：重寫完備的 exportPDF 控制流 ──
+        async function exportPDF() {
+            if (document.activeElement) {
+                document.activeElement?.blur();
+            }
+            state.isEditing = false;
+            renderCanvas();
+
+            // 等待雙重 requestAnimationFrame 幀佈局重組完畢
+            await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+            const printArea = document.getElementById('printArea');
+            printArea.style.visibility = 'visible';
+
+            // 強制 Reflow 喚醒
+            void printArea.offsetHeight;
+
+            // 等待字體資源就緒
+            await document.fonts.ready;
+
+            setTimeout(() => {
+                window.print();
+            }, 150);
         }
 
         function ensureGroupOrder() {
@@ -246,9 +344,7 @@
                 state.groupOrder = [...GROUP_OPTIONS];
             }
             state.entries.forEach(e => {
-                if (e.groupName && !state.groupOrder.includes(e.groupName)) {
-                    state.groupOrder.push(e.groupName);
-                }
+                if (e.groupName && !state.groupOrder.includes(e.groupName)) { state.groupOrder.push(e.groupName); }
             });
         }
 
@@ -282,127 +378,64 @@
                         if(document.getElementById('chkSmartSort')) document.getElementById('chkSmartSort').checked = state.smartSort;
                         if(document.getElementById('chkLockLayout')) document.getElementById('chkLockLayout').checked = state.isLocked;
                     }, 50);
-                } catch(e) { console.error("持久化資料加載出錯", e); }
-            } else {
-                ensureGroupOrder();
-            }
-        }
-
-        function runPreflightCheck() {
-            let issues = []; let total = state.entries.length; let emptyContent = 0;
-            let nameRegistry = new Set(); let hasDuplicateName = false; let missingHeadline = 0;
-            let overflowCount = document.querySelectorAll('.card-overflow-error').length;
-
-            state.entries.forEach(e => {
-                let checkName = e.name || '';
-                if(nameRegistry.has(checkName)) hasDuplicateName = true;
-                nameRegistry.add(checkName);
-                if(!e.name || e.name === '新肢體成員') issues.push(`• 肢體姓名未完成修改`);
-                if(!e.content || e.content.length < 5) emptyContent++;
-                if(e.layout === 'MEMBER_TITLE' && (!e.headline || e.headline.trim() === '')) missingHeadline++;
-            });
-
-            let score = Math.max(0, 100 - (issues.length * 10) - (emptyContent * 15) - (overflowCount * 25) - (hasDuplicateName ? 15 : 0) - (missingHeadline * 10));
-            let msg = `＝ Royal Chosen Race 全書落版印刷健檢報告 ＝\n\n總計見證特刊篇數：${total} 篇\n排版物理溢出錯誤：${overflowCount} 處\n空白或無見證內文：${emptyContent} 篇\n有金句型版面但金句空白：${missingHeadline} 篇\n重複人名安全紅線：${hasDuplicateName ? '⚠️ 有重複名單(請檢查是否忘記改名)' : '✓ 安全'}\n\n`;
-            if(score < 100) {
-                msg += `[待修正指引]\n`;
-                if(hasDuplicateName) msg += `• 偵測到重複的人名，請核對是否行政複製後漏改名字。\n`;
-                if(missingHeadline > 0) msg += `• 有 ${missingHeadline} 篇套用有金句版型，但大標題為空。\n`;
-                if(overflowCount > 0) msg += `• 有 ${overflowCount} 頁內文過長產生生產線溢出紅框。\n`;
-                msg += `\n目前落版出版安全度：${score}%\n`;
-            } else { msg += `✓ 完美！全書落版結構、孤寡防護與印刷高度檢測完全通過！\n目前落版出版安全度：100%`; }
-            alert(msg);
+                } catch(e) { console.error("還原緩衝失敗", e); }
+            } else { ensureGroupOrder(); }
         }
 
         function render() {
-            renderSidebar();
-            renderEditor();
-            renderCanvas();
-
+            renderSidebar(); renderEditor(); renderCanvas();
             const canvas = document.getElementById('canvas');
             if (canvas) canvas.style.transform = `scale(${state.zoom / 100})`;
-            const zoomLabel = document.getElementById('zoomVal');
-            if (zoomLabel) zoomLabel.innerText = `${state.zoom}%`;
-            const viewLabel = document.getElementById('lblViewMode');
-            if (viewLabel) viewLabel.innerText = state.viewMode === 'spread' ? '單頁' : '跨頁';
         }
 
-        function adjustZoom(delta) {
-            state.zoom += delta;
-            if (state.zoom < 30) state.zoom = 30;
-            if (state.zoom > 200) state.zoom = 200;
-            const canvas = document.getElementById('canvas');
-            if (canvas) canvas.style.transform = `scale(${state.zoom / 100})`;
-            const zoomLabel = document.getElementById('zoomVal');
-            if (zoomLabel) zoomLabel.innerText = `${state.zoom}%`;
+        function adjustZoom(v) {
+            state.zoom = Math.max(30, Math.min(200, state.zoom + v));
+            document.getElementById('zoomVal').innerText = `${state.zoom}%`;
+            document.getElementById('canvas').style.transform = `scale(${state.zoom / 100})`;
             saveState();
         }
 
         function toggleViewMode() {
             state.viewMode = state.viewMode === 'spread' ? 'single' : 'spread';
-            const viewLabel = document.getElementById('lblViewMode');
-            if (viewLabel) viewLabel.innerText = state.viewMode === 'spread' ? '單頁' : '跨頁';
-            saveState();
-            state.lastScrolledId = null; 
-            renderCanvas();
+            saveState(); state.lastScrolledId = null; renderCanvas();
         }
 
-        function moveGroup(groupName, direction) {
+        function moveGroup(g, dir) {
             if (state.isLocked) return;
             ensureGroupOrder();
-            const idx = state.groupOrder.indexOf(groupName);
-            if (idx === -1) return;
-
-            const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-            if (targetIdx < 0 || targetIdx >= state.groupOrder.length) return;
-
-            [state.groupOrder[idx], state.groupOrder[targetIdx]] = [state.groupOrder[targetIdx], state.groupOrder[idx]];
-            state.shouldAutoScroll = true; 
-            saveState();
-            render();
+            const idx = state.groupOrder.indexOf(g);
+            const tIdx = dir === 'up' ? idx - 1 : idx + 1;
+            if (tIdx >= 0 && tIdx < state.groupOrder.length) {
+                [state.groupOrder[idx], state.groupOrder[tIdx]] = [state.groupOrder[tIdx], state.groupOrder[idx]];
+                state.shouldAutoScroll = true; saveState(); render();
+            }
         }
 
-        function moveEntry(id, direction) {
+        function moveEntry(id, dir) {
             if (state.isLocked) return;
-            const index = state.entries.findIndex(e => e.id === id);
-            if (index === -1) return;
-
-            const targetGroup = state.entries[index].groupName;
-            let sameGroupIndices = [];
-            state.entries.forEach((e, idx) => {
-                if (e.groupName === targetGroup) sameGroupIndices.push(idx);
-            });
-
-            const currentPosInGroup = sameGroupIndices.indexOf(index);
-            const targetPosInGroup = direction === 'up' ? currentPosInGroup - 1 : currentPosInGroup + 1;
-            if (targetPosInGroup < 0 || targetPosInGroup >= sameGroupIndices.length) return;
-
-            const targetGlobalIndex = sameGroupIndices[targetPosInGroup];
-            [state.entries[index], state.entries[targetGlobalIndex]] = [state.entries[targetGlobalIndex], state.entries[index]];
-            state.shouldAutoScroll = true; 
-            saveState();
-            render();
+            const idx = state.entries.findIndex(e => e.id === id);
+            const g = state.entries[idx].groupName;
+            let gIdxs = state.entries.map((e,i) => e.groupName === g ? i : -1).filter(i => i !== -1);
+            let pos = gIdxs.indexOf(idx);
+            let tPos = dir === 'up' ? pos - 1 : pos + 1;
+            if (tPos >= 0 && tPos < gIdxs.length) {
+                [state.entries[idx], state.entries[gIdxs[tPos]]] = [state.entries[gIdxs[tPos]], state.entries[idx]];
+                state.shouldAutoScroll = true; saveState(); render();
+            }
         }
 
         function handleDelete(id) {
             if (state.isLocked) return;
-            const confirmed = confirm('確定刪除此肢體感言？');
-            if (!confirmed) return;
-            state.entries = state.entries.filter(e => e.id !== id);
-            if (state.activeId === id && state.entries.length) {
-                state.activeId = state.entries[0].id;
-            } else if (state.entries.length === 0) {
-                state.activeId = null;
+            if (confirm('確定刪除？')) {
+                state.entries = state.entries.filter(e => e.id !== id);
+                state.activeId = state.entries.length ? state.entries[0].id : null;
+                state.shouldAutoScroll = true; saveState(); render();
             }
-            state.shouldAutoScroll = true; 
-            saveState();
-            render();
         }
 
         function duplicateEntry(id, mode) {
-            if(state.isLocked) { alert('目前系統處於 [🔒 全書排版鎖定] 狀態，無法進行複製。'); return; }
+            if(state.isLocked) { alert('目前排版已鎖定'); return; }
             const idx = state.entries.findIndex(e => e.id === id);
-            if (idx === -1) return;
             const source = state.entries[idx]; const newId = Date.now().toString(); let newEntry = {};
             if (mode === 'clone') { newEntry = { ...source, id: newId, name: source.name + ' (副本)' }; } 
             else if (mode === 'same_group') {
@@ -414,12 +447,10 @@
         }
 
         function addEntry() {
-            if(state.isLocked) { alert('目前系統處於 [🔒 全書排版鎖定] 狀態，無法新增。'); return; }
-            const id = Date.now().toString();
-            state.entries.push({ id, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...' });
-            state.activeId = id; 
-            state.shouldAutoScroll = true; 
-            saveState(); render();
+            if(state.isLocked) { alert('目前排版已鎖定'); return; }
+            const newId = Date.now().toString();
+            state.entries.push({ id: newId, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...' });
+            state.activeId = newId; state.shouldAutoScroll = true; saveState(); render();
         }
 
         function updateEntry(id, field, val) {
@@ -427,19 +458,15 @@
             const entry = state.entries.find(e => e.id === id);
             if (entry) entry[field] = val;
             saveState();
-
-            if (field === 'groupName' || field === 'layout' || field === 'role' || field === 'title') {
-                renderSidebar();
-                scheduleCanvasRender();
-                return;
+            if (['groupName', 'layout', 'role', 'title'].includes(field)) {
+                renderSidebar(); scheduleCanvasRender(); return;
             }
             scheduleCanvasRender();
         }
 
         function getCanvasRelativeTop(el) {
             const canvas = document.getElementById('canvas');
-            let top = 0;
-            while (el && el !== canvas) { top += el.offsetTop; el = el.offsetParent; }
+            let top = 0; while (el && el !== canvas) { top += el.offsetTop; el = el.offsetParent; }
             return top;
         }
 
@@ -447,522 +474,243 @@
             requestAnimationFrame(() => {
                 const editor = document.getElementById('editorUI');
                 if (editor && editor.contains(document.activeElement)) return;
-                state.isEditing = false;
-                renderCanvas();
+                state.isEditing = false; renderCanvas();
             });
         }
 
-        // ── 🟢 修正二：抽取統一的 Row Chunking 引擎，完美解決第二層 FLOW 落頁錯位 Bug ──
-        function chunkItemsIntoRows(testItems) {
-            let rows = []; let currentRow = []; let currentGroup = "";
-            testItems.forEach(item => {
-                if (item.groupName !== currentGroup || item.isFullWidth) {
-                    if (currentRow.length > 0) {
-                        while (currentRow.length < 2) currentRow.push(null);
-                        rows.push(currentRow); currentRow = [];
-                    }
-                    currentGroup = item.groupName;
+        function chunkItemsIntoRows(items) {
+            let rows = []; let curR = []; let curG = "";
+            items.forEach(it => {
+                if (it.groupName !== curG || it.isFullWidth) {
+                    if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); curR = []; }
+                    curG = it.groupName;
                 }
-                if (item.isFullWidth) {
-                    rows.push([item, "FULL_WIDTH"]);
-                } else {
-                    currentRow.push(item);
-                    if (currentRow.length === 2) { rows.push(currentRow); currentRow = []; }
-                }
+                if (it.isFullWidth) { rows.push([it, "FULL_WIDTH"]); }
+                else { curR.push(it); if (curR.length === 2) { rows.push(curR); curR = []; } }
             });
-            if (currentRow.length > 0) {
-                while (currentRow.length < 2) currentRow.push(null);
-                rows.push(currentRow);
-            }
+            if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); }
             return rows;
         }
 
         function renderSidebar() {
-            const list = document.getElementById('sidebarList');
-            if (!list) return;
+            const list = document.getElementById('sidebarList'); if (!list) return;
             ensureGroupOrder();
-            const keyword = document.getElementById('searchFilter') ? document.getElementById('searchFilter').value.toLowerCase().trim() : '';
-            
-            let grouped = {};
-            state.entries.forEach(e => {
-                let gName = e.groupName || '未分配小組';
-                if(!grouped[gName]) grouped[gName] = [];
-                grouped[gName].push(e);
-            });
-
+            const keyword = document.getElementById('searchFilter').value.toLowerCase().trim();
+            let grouped = {}; state.entries.forEach(e => { (grouped[e.groupName] = grouped[e.groupName] || []).push(e); });
             list.innerHTML = state.groupOrder.map(groupName => {
-                let items = grouped[groupName];
-                if (!items || items.length === 0) return ''; 
-
-                let isFiltered = items.some(e => (((e.name || '').toLowerCase().includes(keyword) || (groupName || '').toLowerCase().includes(keyword))));
-                if (keyword && !isFiltered) return '';
-
-                let isCollapsed = state.collapsedGroups[groupName] || false;
-                let arrow = isCollapsed ? '▶' : '▼';
-                
-                let groupHeaderHtml = `
-                    <div class="text-xs font-bold text-[#F5A623] bg-slate-900/80 p-2 rounded-lg flex items-center justify-between select-none hover:bg-slate-800 transition-colors">
-                        <span class="cursor-pointer flex-1 py-0.5" onclick="state.collapsedGroups['${groupName}'] = !${isCollapsed}; saveState(); renderSidebar();">
-                            ${arrow} ${groupName} (${items.length})
-                        </span>
-                        <div class="flex gap-2 text-[10px] text-gray-400 ${state.isLocked ? 'hidden' : ''}" onclick="event.stopPropagation();">
-                            <button onclick="moveGroup('${groupName}','up')" class="hover:text-white p-0.5" title="組別上移">▲</button>
-                            <button onclick="moveGroup('${groupName}','down')" class="hover:text-white p-0.5" title="組別下移">▼</button>
+                let items = grouped[groupName]; if (!items || items.length === 0) return '';
+                if (keyword && !items.some(e => e.name.toLowerCase().includes(keyword) || groupName.toLowerCase().includes(keyword))) return '';
+                let isCollapsed = state.collapsedGroups[groupName];
+                return `<div class="mb-2">
+                    <div class="text-xs font-bold text-[#e8a002] bg-slate-900/80 p-2 rounded-lg flex items-center justify-between select-none hover:bg-slate-800 cursor-pointer transition-colors" onclick="state.collapsedGroups['${groupName}']=!${isCollapsed}; renderSidebar();">
+                        <span>${isCollapsed?'▶':'▼'} ${groupName} (${items.length})</span>
+                        <div class="flex gap-2" onclick="event.stopPropagation();">
+                            <button onclick="moveGroup('${groupName}','up')" class="hover:text-white p-0.5">▲</button><button onclick="moveGroup('${groupName}','down')" class="hover:text-white p-0.5">▼</button>
                         </div>
                     </div>
-                `;
-
-                let membersHtml = `<div class="space-y-1 pl-2 mt-1 ${isCollapsed ? 'hidden' : ''}">` + items.map(e => {
-                    if (keyword && !(e.name || '').toLowerCase().includes(keyword) && !(groupName || '').toLowerCase().includes(keyword)) return '';
-                    return `
+                    <div class="${isCollapsed?'hidden':''} pl-2 mt-1 space-y-1">${items.map(e => `
                         <div class="flex items-center gap-1 group">
-                            <div onclick="state.activeId='${e.id}'; state.shouldAutoScroll=true; render();" class="flex-1 p-2.5 rounded-xl cursor-pointer border transition-all ${state.activeId === e.id ? 'bg-[#F5A623]/20 border-[#F5A623]' : 'border-transparent hover:bg-white/5'}">
+                            <div onclick="state.activeId='${e.id}'; state.shouldAutoScroll=true; render();" class="flex-1 p-2.5 rounded-xl cursor-pointer border ${state.activeId===e.id?'bg-[#e8a002]/20 border-[#e8a002]':'border-transparent hover:bg-white/5'}">
                                 <div class="text-xs font-bold font-serif text-white">${e.name || '未命名'}</div>
                             </div>
-                            <div class="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity pr-1 ${state.isLocked ? 'hidden' : ''}">
-                                <button onclick="moveEntry('${e.id}','up')" class="text-[9px] hover:text-[#F5A623]">▲</button>
-                                <button onclick="moveEntry('${e.id}','down')" class="text-[9px] hover:text-[#F5A623]">▼</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('') + `</div>`;
-
-                return `<div class="space-y-1 mb-2">${groupHeaderHtml}${membersHtml}</div>`;
+                            <div class="opacity-0 group-hover:opacity-100 flex flex-col gap-0.5 pr-1"><button onclick="moveEntry('${e.id}','up')" class="text-[9px] hover:text-[#e8a002]">▲</button><button onclick="moveEntry('${e.id}','down')" class="text-[9px] hover:text-[#e8a002]">▼</button></div>
+                        </div>`).join('')}</div>
+                </div>`;
             }).join('');
-
-            const totalLabel = document.getElementById('statCount');
-            if (totalLabel) totalLabel.innerText = state.entries.length;
+            document.getElementById('statCount').innerText = state.entries.length;
         }
 
-        // ── 🟢 修正一：完美修復被截斷的 template literal 錯誤，補上反引號與正確 join ──
         function renderEditor() {
             const ui = document.querySelector('.editor-panel');
-            if (!ui) return;
             const e = state.entries.find(x => x.id === state.activeId);
-            if (!e) { ui.innerHTML = '<div class="m-auto text-white/30 font-serif text-center p-4">✦ 請選擇或新增左側肢體 ✦</div>'; return; }
-            
-            let len = (e.content || '').length; let badgeColor = 'text-emerald-400'; let badgeText = `最佳落版長度 (${len} 字)`;
-            if(len > 220 && len <= 350) { badgeColor = 'text-amber-400'; badgeText = `內容字數偏長 (${len} 字)`; }
-            else if(len > 350) { badgeColor = 'text-red-400'; badgeText = `字數過長建議拆頁 (${len} 字)`; }
-
-            ui.innerHTML = `
-                <div class="p-5 border-b border-white/10 bg-[#0f1535] sticky top-0 shrink-0 flex items-center justify-between">
-                    <h2 class="font-bold text-[#F5A623]">✍ 手冊落版控制台</h2>
-                    ${state.isLocked ? '<span class="text-xs bg-red-950 border border-red-500 text-red-400 px-2 py-0.5 rounded font-bold">🔒 全書已鎖定</span>' : ''}
-                </div>
-                <div id="editorUI" class="flex-1 flex flex-col overflow-y-auto p-6 space-y-5 ${state.isLocked ? 'pointer-events-none opacity-50' : ''}">
-                    <div><label class="text-[11px] text-white/60 font-bold">套用手冊出版結構</label>
-                        <select onchange="updateEntry('${e.id}','layout',this.value); render();" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none focus:border-[#F5A623]">
-                            ${Object.keys(LAYOUTS).map(k => `<option value="${k}" ${e.layout===k?'selected':''}>${LAYOUTS[k]}</option>`).join('')}
-                        </select>
+            if (!e) { ui.innerHTML = '<div class="m-auto opacity-30 font-serif text-center p-4">✦ 請選擇肢體 ✦</div>'; return; }
+            ui.innerHTML = `<div id="editorUI" class="p-6 space-y-5 flex-1 overflow-y-auto">
+                <h2 class="font-bold text-[#e8a002] mb-4">✍ 手冊落版控制台</h2>
+                <div class="space-y-4">
+                    <div><label class="text-[11px] opacity-60 font-bold">套用版型</label><select onchange="updateEntry('${e.id}','layout',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none focus:border-[#e8a002]">${Object.keys(LAYOUTS).map(k=>`<option value="${k}" ${e.layout===k?'selected':''}>${LAYOUTS[k]}</option>`).join('')}</select></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[11px] opacity-60 font-bold">小組 / 團契別</label>
+                            <select onchange="updateEntry('${e.id}','groupName',this.value); render();" 
+                                class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none">
+                                ${GROUP_OPTIONS.map(g => `<option value="${g}" ${e.groupName === g ? 'selected' : ''}>${g}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div><label class="text-[11px] opacity-60 font-bold">姓名</label><input onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','name',this.value)" value="${e.name}" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none"/></div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div><label class="text-[11px] text-white/60 font-bold">小組 / 團契別</label>
-                            <select onchange="updateEntry('${e.id}','groupName',this.value); render();" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none">
-                                ${GROUP_OPTIONS.map(g => `<option value="${g}" ${e.groupName===g?'selected':''}>${g}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div><label class="text-[11px] text-white/60 font-bold">姓名</label><input onfocus="state.isEditing=true;" onblur="handleEditorBlur();" oninput="updateEntry('${e.id}','name',this.value)" value="${e.name || ''}" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none"/></div>
+                        <div><label class="text-[11px] opacity-60 font-bold">身份 (職分)</label><select onchange="updateEntry('${e.id}','role',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none">${ROLE_OPTIONS.map(r=>`<option value="${r}" ${e.role===r?'selected':''}>${r}</option>`).join('')}</select></div>
+                        <div><label class="text-[11px] opacity-60 font-bold">稱謂</label><select onchange="updateEntry('${e.id}','title',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none">${TITLE_OPTIONS.map(t=>`<option value="${t}" ${e.title===t?'selected':''}>${t}</option>`).join('')}</select></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div><label class="text-[11px] text-white/60 font-bold">身份 (職分)</label>
-                            <select onchange="updateEntry('${e.id}','role',this.value)" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none">
-                                ${ROLE_OPTIONS.map(r => `<option value="${r}" ${e.role===r?'selected':''}>${r}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div><label class="text-[11px] text-white/60 font-bold">稱謂 (弟兄/姊妹)</label>
-                            <select onchange="updateEntry('${e.id}','title',this.value)" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none">
-                                ${TITLE_OPTIONS.map(t => `<option value="${t}" ${e.title===t?'selected':''}>${t}</option>`).join('')}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="${(e.layout === 'MEMBER_NOTITLE' || e.layout === 'PASTOR_NOTITLE') ? 'hidden' : 'block'}"><label class="text-[11px] text-[#F5A623] font-bold uppercase tracking-widest">金句破題大標題</label><input onfocus="state.isEditing=true;" onblur="handleEditorBlur();" oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#F5A623]/10 border border-[#F5A623]/30 rounded-lg p-3 text-sm text-[#F5A623] font-serif font-black outline-none"/></div>
-                    <div class="space-y-1"><div class="flex justify-between text-[10px] uppercase font-bold tracking-widest"><span class="text-white/40">感恩見證內文</span><span class="font-bold ${badgeColor}">${badgeText}</span></div><textarea onfocus="state.isEditing=true;" onblur="handleEditorBlur();" oninput="updateEntry('${e.id}','content',this.value);" class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm leading-relaxed text-white outline-none font-sans" style="height: 180px;">${e.content || ''}</textarea></div>
-                    <div class="pt-4 border-t border-white/10 space-y-2">
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="duplicateEntry('${e.id}', 'same_group')" class="py-2.5 rounded-lg bg-blue-950 border border-blue-700/60 text-blue-300 text-xs font-bold hover:bg-blue-900/40 flex items-center justify-center gap-1">👥 ＋ 同小組新增</button>
-                            <button onclick="duplicateEntry('${e.id}', 'clone')" class="py-2.5 rounded-lg bg-slate-800 border border-white/10 text-white/80 text-xs font-bold hover:bg-slate-700/50 transition-all flex items-center justify-center gap-1">⧉ 複製目前肢體</button>
-                        </div>
-                        <button onclick="handleDelete('${e.id}')" class="w-full py-2.5 rounded-lg border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-500/10 block text-center">❌ 刪除此肢體感言</button>
-                    </div>
+                    <div class="${(e.layout==='MEMBER_NOTITLE'||e.layout==='PASTOR_NOTITLE')?'hidden':''}"><label class="text-[11px] opacity-60 text-[#e8a002] font-bold">金句大標</label><input onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#e8a002]/10 border border-[#e8a002]/30 p-3 rounded-lg text-sm text-[#e8a002] font-serif font-black outline-none"/></div>
+                    <div><label class="text-[11px] opacity-60 font-bold">見證內文</label><textarea onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','content',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm h-48 text-white outline-none font-sans leading-relaxed">${e.content || ''}</textarea></div>
                 </div>
-            `;
+                <div class="pt-4 border-t border-white/10 space-y-2">
+                    <div class="grid grid-cols-2 gap-2"><button onclick="duplicateEntry('${e.id}','same_group')" class="py-2.5 rounded-lg bg-blue-950 border border-blue-700/60 text-blue-300 text-xs font-bold hover:bg-blue-900/40 flex items-center justify-center gap-1">👥 ＋同小組新增</button><button onclick="duplicateEntry('${e.id}','clone')" class="py-2.5 rounded-lg bg-slate-800 border border-white/10 text-white/80 text-xs font-bold hover:bg-slate-700/50 flex items-center justify-center gap-1">⧉複製目前成員</button></div>
+                    <button onclick="handleDelete('${e.id}')" class="w-full border border-red-500/30 py-2.5 rounded-lg text-red-400 text-xs font-bold hover:bg-red-500/10 block text-center">❌刪除此肢體</button>
+                </div>
+            </div>`;
         }
 
         function renderCanvas() {
-            const container = document.getElementById('canvas'); if (!container) return;
+            const container = document.getElementById('canvas'); if (!container || state.isEditing) return;
             ensureGroupOrder();
+            const viewport = document.getElementById('scrollViewport'); const zoomRatio = state.zoom / 100;
             
-            const viewport = document.getElementById('scrollViewport');
-            const canvas = document.getElementById('canvas');
-            const zoomRatio = state.zoom / 100;
-
             const editorHasFocus = document.querySelector('.editor-panel :focus');
             if (editorHasFocus) return;
 
             let activeRect = null;
             if (viewport) {
                 const activeCard = document.querySelector(`#canvas [data-id="${state.activeId}"]`);
-                if (activeCard) {
-                    activeRect = (getCanvasRelativeTop(activeCard) * zoomRatio) - viewport.scrollTop;
-                }
+                if (activeCard) { activeRect = (getCanvasRelativeTop(activeCard) * zoomRatio) - viewport.scrollTop; }
             }
-
             container.innerHTML = ''; 
-            let scratchpad = document.createElement('div');
-            scratchpad.style.cssText = "position: absolute; visibility: hidden; width: 210mm; top: -9999px; left: -9999px; z-index:-100;";
-            document.body.appendChild(scratchpad);
-
+            let scratchpad = document.createElement('div'); scratchpad.style.cssText = "position: absolute; visibility: hidden; width: 210mm; top: -9999px;"; document.body.appendChild(scratchpad);
             let groupStats = {}; state.entries.forEach(e => { groupStats[e.groupName] = (groupStats[e.groupName] || 0) + 1; });
-            let initialFlattenedEntries = [];
-            
+            let flattened = [];
             state.entries.forEach(entry => {
-                let paragraphs = (entry.content || '').split('\n').filter(p => p.trim() !== '');
                 let testCard = document.createElement('div'); testCard.style.width = "85mm"; testCard.innerHTML = buildCardHTMLString(entry);
-                scratchpad.appendChild(testCard); let fullHeight = testCard.getBoundingClientRect().height; scratchpad.removeChild(testCard);
-
-                if (fullHeight > 390 && entry.layout !== 'PASTOR' && entry.layout !== 'PASTOR_NOTITLE') {
-                    initialFlattenedEntries.push({ ...entry, isFullWidth: true });
-                } else { 
-                    initialFlattenedEntries.push(entry); 
-                }
+                scratchpad.appendChild(testCard); let h = testCard.getBoundingClientRect().height; scratchpad.removeChild(testCard);
+                if (h > 390 && !['PASTOR','PASTOR_NOTITLE'].includes(entry.layout)) { flattened.push({ ...entry, isFullWidth: true }); }
+                else { flattened.push(entry); }
             });
-
-            let itemsByGroup = {};
-            state.groupOrder.forEach(g => itemsByGroup[g] = []);
-            initialFlattenedEntries.forEach(entry => {
-                let g = entry.groupName || '未分配小組';
-                if (!itemsByGroup[g]) itemsByGroup[g] = [];
-                itemsByGroup[g].push(entry);
-            });
-
+            let itemsByGroup = {}; state.groupOrder.forEach(g => itemsByGroup[g] = []);
+            flattened.forEach(e => { (itemsByGroup[e.groupName || '未分配'] = itemsByGroup[e.groupName || '未分配'] || []).push(e); });
             let finalQueue = [];
-            state.groupOrder.forEach(groupName => {
-                let groupItems = itemsByGroup[groupName] || [];
-                if (groupItems.length === 0) return;
-
-                let groupPastors = groupItems.filter(e => e.layout === 'PASTOR' || e.layout === 'PASTOR_NOTITLE');
-                let groupMembers = groupItems.filter(e => e.layout !== 'PASTOR' && e.layout !== 'PASTOR_NOTITLE');
-
+            state.groupOrder.forEach(g => {
+                let items = itemsByGroup[g] || []; if (!items.length) return;
+                let pastors = items.filter(e => ['PASTOR','PASTOR_NOTITLE'].includes(e.layout));
+                let members = items.filter(e => !['PASTOR','PASTOR_NOTITLE'].includes(e.layout));
                 if (state.smartSort) {
-                    groupMembers.sort((a, b) => (b.content || '').length - (a.content || '').length);
-                    let balanced = [];
-                    while(groupMembers.length > 0) {
-                        balanced.push(groupMembers.shift());
-                        if(groupMembers.length > 0) balanced.push(groupMembers.pop());
-                    }
-                    groupMembers = balanced;
-                } else {
-                    groupMembers.sort((a, b) => {
-                        return state.entries.findIndex(x => x.id === a.id) - state.entries.findIndex(x => x.id === b.id);
-                    });
-                }
-                finalQueue.push(...groupPastors, ...groupMembers);
+                    members.sort((a,b) => b.content.length - a.content.length);
+                    let bal = []; while(members.length){ bal.push(members.shift()); if(members.length) bal.push(members.pop()); }
+                    members = bal;
+                } else { members.sort((a,b) => state.entries.findIndex(x=>x.id===a.id) - state.entries.findIndex(x=>x.id===b.id)); }
+                finalQueue.push(...pastors, ...members);
             });
-
-            let pages = []; let currentFlowItems = []; let lastGroup = "";
-            const MAX_PRINTABLE_HEIGHT = 810; 
-
-            finalQueue.forEach((entry) => {
-                if (entry.groupName !== lastGroup) {
-                    if (currentFlowItems.length > 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
-                    lastGroup = entry.groupName;
-                }
-
-                if (entry.layout === 'PASTOR' || entry.layout === 'PASTOR_NOTITLE') {
-                    if (currentFlowItems.length > 0) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
+            let pages = []; let currentFlowItems = [];
+            finalQueue.forEach(entry => {
+                if (['PASTOR','PASTOR_NOTITLE'].includes(entry.layout)) {
+                    if (currentFlowItems.length) { pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = []; }
                     pages.push({ type: 'PASTOR', items: [entry] });
-                    lastGroup = entry.groupName;
                 } else {
+                    // ── 🟢 顧問修正一：高度測量 DOM 全面與實際印刷 DOM 同步對齊 ──
                     let testItems = [...currentFlowItems, entry];
                     let testPage = document.createElement('div'); testPage.className = "book-page";
                     let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
-                    let gridEngine = document.createElement('div'); gridEngine.className = "grid-flow-engine pt-2";
                     
-                    // ── 🟢 修正二：統一調用專用 Chunking 演算法，將 Full-Width 特性帶入高度測量沙盒 ──
+                    /* 模擬真實印刷 padding */
+                    whiteLayer.style.padding = "24mm 18mm 24mm 22mm";
+                    
+                    let grid = document.createElement('div'); grid.className = "grid-flow-engine";
                     let rows = chunkItemsIntoRows(testItems);
-                    let lastGroupHeading = "";
-                    gridEngine.innerHTML = rows.map(row => {
-                        let inlineHeaderHtml = '';
-                        if (row[0] && row[0].groupName !== lastGroupHeading) {
-                            inlineHeaderHtml = `
-                                <div class="flex items-center gap-4 mb-4 avoid-break font-serif text-[#0A2B66] w-full">
-                                    <span class="text-sm font-black tracking-widest">${row[0].groupName}</span>
-                                    <div class="h-[1px] bg-gradient-to-r from-[#F5A623]/60 to-transparent flex-1"></div>
-                                </div>
-                            `;
-                            lastGroupHeading = row[0].groupName;
-                        }
-                        if (row[1] === "FULL_WIDTH") {
-                            return `<div class="w-full avoid-break">${inlineHeaderHtml}<div class="mb-[20px] w-full">${buildFullWidthCardHTMLString(row[0])}</div></div>`;
-                        }
-                        return `
-                            <div class="w-full avoid-break">
-                                ${inlineHeaderHtml}
-                                <div class="flex gap-[14mm] mb-[20px] items-stretch w-full">
-                                    ${buildCardHTMLString(row[0])}
-                                    ${row[1] ? buildCardHTMLString(row[1]) : '<div class="flex-1"></div>'}
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
+                    grid.innerHTML = rows.map(r => r[1]==="FULL_WIDTH"?buildFullWidthCardHTMLString(r[0]):`<div class="flex gap-[14mm] mb-5">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div>`).join('');
                     
-                    whiteLayer.appendChild(gridEngine); 
+                    /* 真實 DOM 結構 */
+                    whiteLayer.appendChild(grid); 
                     testPage.appendChild(whiteLayer); 
                     scratchpad.appendChild(testPage);
                     
-                    let measuredHeight = gridEngine.getBoundingClientRect().height; scratchpad.removeChild(testPage);
+                    /* 改成量測整頁實體高度 */
+                    const pageHeight = whiteLayer.scrollHeight;
                     
-                    if (measuredHeight > MAX_PRINTABLE_HEIGHT && currentFlowItems.length > 0) {
-                        pages.push({ type: 'FLOW', items: currentFlowItems }); currentFlowItems = [entry];
-                    } else { currentFlowItems.push(entry); }
-                    lastGroup = entry.groupName;
+                    if (pageHeight > 980 && currentFlowItems.length) { 
+                        pages.push({ type: 'FLOW', items: currentFlowItems }); 
+                        currentFlowItems = [entry]; 
+                    } else { 
+                        currentFlowItems.push(entry); 
+                    }
+                    scratchpad.removeChild(testPage);
                 }
             });
-            if (currentFlowItems.length > 0) pages.push({ type: 'FLOW', items: currentFlowItems });
+            if (currentFlowItems.length) pages.push({ type: 'FLOW', items: currentFlowItems });
             document.body.removeChild(scratchpad);
-
-            let pageNum = 7; 
-            let displayPages = [...pages];
-            let hasAddedBlank = false;
-            if (state.viewMode === 'spread' && pageNum % 2 !== 0) {
-                displayPages.unshift({ type: 'BLANK' });
-                hasAddedBlank = true;
-            }
-
-            if (state.viewMode === 'spread') {
-                let renderPageNum = hasAddedBlank ? 6 : 7;
-                for (let i = 0; i < displayPages.length; i += 2) {
-                    const spread = document.createElement('div'); spread.className = "flex shadow-2xl mb-12 relative";
-                    let leftPageNum = (displayPages[i].type === 'BLANK') ? null : renderPageNum;
-                    let leftHtml = buildPageHTML(displayPages[i], leftPageNum, groupStats); renderPageNum++;
-                    
-                    let rightHtml = '';
-                    if (displayPages[i+1]) {
-                        let rightPageNum = (displayPages[i+1].type === 'BLANK') ? null : renderPageNum;
-                        rightHtml = buildPageHTML(displayPages[i+1], rightPageNum, groupStats);
-                    } else {
-                        rightHtml = `<div class="book-page"></div>`;
-                    }
-                    renderPageNum++;
-                    
-                    spread.innerHTML = leftHtml + `<div class="w-[20px] -mx-[10px] bg-gradient-to-r from-black/15 via-transparent to-black/15 z-30 pointer-events-none no-print"></div>` + rightHtml;
-                    spread.querySelectorAll('.book-page').forEach(el => { el.style.boxShadow = 'none'; el.style.marginBottom = '0'; });
-                    container.appendChild(spread);
-                }
-            } else {
-                pages.forEach(p => {
-                    const div = document.createElement('div'); div.className = "mb-12 shadow-2xl"; 
-                    let currentPageNum = (p.type === 'BLANK') ? null : pageNum;
-                    div.innerHTML = buildPageHTML(p, currentPageNum, groupStats);
-                    if (div.querySelector('.book-page')) div.querySelector('.book-page').style.boxShadow = 'none'; 
-                    container.appendChild(div); pageNum++;
-                });
-            }
-
-            const pc = document.getElementById('printArea'); if (pc) {
-                let pNumCache = 7;
-                pc.innerHTML = pages.map(p => { 
-                    let currentPageNum = (p.type === 'BLANK') ? null : pNumCache;
-                    let html = buildPageHTML(p, currentPageNum, groupStats); pNumCache++; return html; 
-                }).join('');
-                pc.querySelectorAll('.book-page').forEach(el => el.style.boxShadow = 'none');
-            }
-
-            if (viewport) { const forceLayout = viewport.scrollHeight; }
-
-            // 結構性絕對坐標恢復鏈，同步鎖定 A4 畫布高度
-            if (activeRect !== null && viewport) {
+            let pageNum = 7; let displayPages = [...pages]; if (state.viewMode === 'spread' && pageNum % 2 !== 0) displayPages.unshift({ type: 'BLANK' });
+            container.innerHTML = '';
+            displayPages.forEach((p,i) => {
+                const spread = document.createElement('div'); spread.className = state.viewMode==='spread'?"flex shadow-2xl mb-12 relative":"mb-12 shadow-2xl relative";
+                let pN = (p.type==='BLANK')?null:pageNum;
+                spread.innerHTML = buildPageHTML(p, pN, groupStats);
+                if (pN) pageNum++; container.appendChild(spread);
+            });
+            document.getElementById('printArea').innerHTML = pages.map((p,i) => buildPageHTML(p, 7+i, groupStats)).join('');
+            if (viewport) { viewport.scrollHeight; if (activeRect !== null && state.shouldAutoScroll) {
                 const newCard = document.querySelector(`#canvas [data-id="${state.activeId}"]`);
-                if (newCard) {
-                    viewport.scrollTop = (getCanvasRelativeTop(newCard) * zoomRatio) - activeRect;
-                }
-            }
-
-            if (state.shouldAutoScroll && !editorHasFocus) {
-                setTimeout(() => {
-                    const targetCard = document.querySelector(`#canvas [data-id="${state.activeId}"]`);
-                    if (targetCard && viewport && canvas) {
-                        const absTop = getCanvasRelativeTop(targetCard);
-                        const targetScrollTop = (absTop * zoomRatio) - (viewport.clientHeight / 2) + ((targetCard.clientHeight * zoomRatio) / 2);
-                        viewport.scrollTo({ top: targetScrollTop, behavior: 'auto' });
-                    }
-                    state.shouldAutoScroll = false; 
-                }, 50);
-            }
+                if (newCard) viewport.scrollTop = (getCanvasRelativeTop(newCard) * zoomRatio) - activeRect;
+            } }
         }
 
-        function buildPageHTML(pageData, pageNum, groupStats) {
-            const isLeft = pageNum ? (pageNum % 2 === 0) : false;
-            const pd = isLeft ? 'padding: 24mm 22mm 24mm 18mm;' : 'padding: 24mm 18mm 24mm 22mm;';
-            let contentHTML = ''; 
+        function buildPageHTML(p, pageNum, groupStats) {
+            const isLeft = pageNum % 2 === 0; const pd = isLeft ? 'padding: 24mm 22mm 24mm 18mm;' : 'padding: 24mm 18mm 24mm 22mm;';
+            const pageIdSuffix = pageNum || 'blank_' + Math.floor(Math.random() * 1000);
+            
+            // ── 🟢 顧問修正四：移去內嵌式 SVG 文字，改裝高演色純 CSS 印刷特刊光暈機制 ──
+            const glowCorners = `
+                <div class="corner-glow corner-top-right"></div>
+                <div class="corner-glow corner-bottom-left"></div>
+            `;
 
-            if (pageData.type === 'BLANK') {
-                return `
-                    <div class="book-page">
-                        <div class="white-layer justify-center items-center bg-[#fcfbf9]" style="${pd}">
-                            <div class="text-gray-300 font-serif text-sm tracking-widest italic select-none">Royal Chosen Race Church</div>
-                        </div>
+            if (p.type === 'BLANK') return `<div class="book-page">${glowCorners}<div class="white-layer bg-[#fcfbf9] flex items-center justify-center text-gray-300 italic">Royal Chosen Race Church</div></div>`;
+            
+            let inner = '';
+            if (p.type === 'PASTOR') {
+                const item = p.items[0]; const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
+                inner = `<div class="white-layer" style="${pd}" data-id="${item.id}">
+                    <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-6 font-serif">
+                        <div class="text-[12.5px] font-black text-[#001068]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言</span></div>
+                        <div class="text-[#e8a002] text-xs font-bold tracking-widest">${item.groupName.substring(0,2)}</div>
                     </div>
-                `;
-            }
-
-            if (pageData.type === 'PASTOR') {
-                const item = pageData.items[0];
-                const identityText = (item.role && item.role !== '(一般組員)') ? item.role : '';
-                const titleText = (item.title && item.title !== '(無稱謂)') ? item.title : '';
-                
-                let headlineBlockHtml = '';
-                if (item.layout !== 'PASTOR_NOTITLE') {
-                    headlineBlockHtml = `
-                        <div class="mb-10 font-serif flex items-center justify-center p-6 border border-[#F5A623]/25 bg-[#F5A623]/5 rounded-2xl relative max-w-[90%] mx-auto shadow-sm min-h-[96px]">
-                            <span class="text-[#F5A623] text-4xl font-black leading-none self-center -mt-1">“</span>
-                            <span class="text-[#0A2B66] font-black text-[22px] px-4 tracking-wide text-center leading-relaxed flex-1">${item.headline || ''}</span>
-                            <span class="text-[#F5A623] text-4xl font-black leading-none self-center mt-3">”</span>
-                        </div>
-                    `;
-                } else { headlineBlockHtml = `<div class="mb-6"></div>`; }
-
-                contentHTML = `
-                    <div class="white-layer" style="${pd}" data-id="${item.id}">
-                        <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-6 font-serif">
-                            <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言總勉</span></div>
-                            <div class="text-[#F5A623] text-xs font-bold tracking-widest uppercase font-sans">${(item.groupName || '').substring(0,2)}</div>
-                        </div>
-                        <div class="flex flex-col flex-1 h-full pt-4">
-                            ${headlineBlockHtml}
-                            <div class="text-center mb-8">
-                                <div class="inline-flex items-center justify-center gap-3 border-b-2 border-[#F5A623] pb-2 px-6 font-serif">
-                                    <span class="text-[20px] font-black text-[#0A2B66] tracking-widest">${item.name || ''}</span>
-                                    <span class="text-[14px] font-bold text-gray-500 font-sans tracking-widest">${identityText} ${titleText}</span>
-                                </div>
-                            </div>
-                            <div class="pastor-content text-[14px] leading-[1.9] text-gray-700 font-sans font-normal text-justify flex-1 tracking-[0.02em]">
-                                ${(item.content || '').split('\n').filter(p=>p.trim()!=='').map(p => `<p style="text-indent: 2em; margin-bottom: 1em;">${p}</p>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
+                    <div class="flex flex-col flex-1 h-full pt-4">
+                        ${item.layout!=='PASTOR_NOTITLE'?`<div class="headline-quote-box"><span class="text-[#e8a002] text-4xl font-black self-center -mt-1">“</span><span class="text-[22px] px-4 text-center leading-relaxed flex-1 font-black royal-title">${item.headline}</span><span class="text-[#e8a002] text-4xl font-black self-center mt-3">”</span></div>` : ''}
+                        <div class="text-center mb-8"><div class="inline-flex items-center gap-3 border-b-2 border-[#e8a002] pb-2 px-6 font-serif"><span class="text-[20px] font-black text-[#001068]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${iden} ${tit}</span></div></div>
+                        <div class="pastor-content text-[14px] leading-[1.9] text-gray-700 font-sans font-normal text-justify flex-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 1em;">${p}</p>`).join('')}</div>
+                    </div></div>`;
             } else {
-                // ── 🟢 修正二：完備 buildPageHTML 下的分流器。全面對齊 chunkItemsIntoRows，拒絕粗暴的 i+=2 ──
-                let rows = chunkItemsIntoRows(pageData.items);
-                let lastGroupHeading = "";
-                contentHTML = rows.map((row) => {
-                    let inlineHeaderHtml = '';
-                    if (row[0] && row[0].groupName !== lastGroupHeading) {
-                        inlineHeaderHtml = `
-                            <div class="flex items-center gap-4 mb-4 avoid-break font-serif text-[#0A2B66] w-full">
-                                <span class="text-sm font-black tracking-widest">${row[0].groupName}</span>
-                                <div class="h-[1px] bg-gradient-to-r from-[#F5A623]/60 to-transparent flex-1"></div>
-                            </div>
-                        `;
-                        lastGroupHeading = row[0].groupName;
-                    }
-
-                    if (row[1] === "FULL_WIDTH") {
-                        return `
-                            <div class="w-full avoid-break">
-                                ${inlineHeaderHtml}
-                                <div class="mb-[20px] w-full">
-                                    ${buildFullWidthCardHTMLString(row[0])}
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    return `
-                        <div class="w-full avoid-break">
-                            ${inlineHeaderHtml}
-                            <div class="flex gap-[14mm] mb-[20px] items-stretch w-full">
-                                ${buildCardHTMLString(row[0])}
-                                ${row[1] ? buildCardHTMLString(row[1]) : '<div class="flex-1"></div>'}
-                            </div>
-                        </div>
-                    `;
+                let rows = chunkItemsIntoRows(p.items); let lastG = "";
+                let gridHTML = rows.map(r => {
+                    let banner = ''; if (r[0] && r[0].groupName !== lastG) { banner = `<div class="flex items-center gap-4 mb-4 font-serif text-[#001068] w-full"><span class="text-sm font-black tracking-widest">${r[0].groupName}</span><div class="h-[1px] bg-gradient-to-r from-[#e8a002]/60 to-transparent flex-1"></div></div>`; lastG = r[0].groupName; }
+                    if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${banner}${buildFullWidthCardHTMLString(r[0])}</div>`;
+                    return `<div class="w-full avoid-break">${banner}<div class="flex gap-[14mm] mb-5">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
                 }).join('');
-
-                contentHTML = `
-                    <div class="white-layer" style="${pd}">
-                        <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-5 font-serif">
-                            <div class="text-[12.5px] font-black text-[#0A2B66] tracking-[0.1em]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會 10 週年紀念</span></div>
-                            <div class="text-[#F5A623] text-lg opacity-60">✦ ✦</div>
-                        </div>
-                        <div class="flex-1 overflow-hidden pt-2 grid-flow-engine">${contentHTML}</div>
-                    </div>
-                `;
+                inner = `<div class="white-layer" style="${pd}"><div class="flex justify-between border-b border-gray-200 pb-3 mb-5 font-serif"><div class="text-[12.5px] font-black text-[#001068]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會 10 週年紀念</span></div><div class="text-[#e8a002] text-lg opacity-60">✦ ✦</div></div><div class="flex-1 overflow-hidden pt-2 grid-flow-engine">${gridHTML}</div></div>`;
             }
-
-            return `
-            <div class="book-page">
-                <div class="corner-top-right no-print"></div><div class="corner-bottom-left no-print"></div>
-                ${contentHTML}
-                ${pageNum ? `
-                <div class="absolute bottom-[16mm] ${isLeft ? 'left-[24mm]' : 'right-[24mm]'} text-[11px] font-sans font-bold text-gray-300 tracking-[3px] z-20">
-                    Royal Chosen Race Church ‧ P.${pageNum}
-                </div>
-                ` : ''}
-            </div>`;
+            return `<div class="book-page">${glowCorners}${inner}${pageNum?`<div class="absolute bottom-[16mm] ${isLeft?'left-[24mm]':'right-[24mm]'} text-[11px] font-sans font-bold text-gray-300 tracking-[3px] z-20">Royal Chosen Race Church ‧ P.${pageNum}</div>`:''}</div>`;
         }
 
         function buildFullWidthCardHTMLString(item) {
-            if(!item) return '';
-            const identityText = (item.role && item.role !== '(一般組員)') ? item.role : '';
-            const titleText = (item.title && item.title !== '(無稱謂)') ? item.title : '';
-
-            return `
-            <div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-4 font-serif shrink-0">
-                    <div class="w-[48px] h-[48px] rounded-full bg-[#0A2B66] border-[2px] border-[#F5A623] flex items-center justify-center text-[#F5A623] text-[16px] font-black shadow-sm shrink-0 font-sans tracking-wide">
-                        ${(item.groupName||'').substring(0,2)}
-                    </div>
-                    <div class="text-[19px] font-black text-[#0A2B66] tracking-widest flex items-baseline">
-                        <span class="text-[#F5A623] text-[13px] mr-1.5 relative -top-0.5">✦</span>${item.name || ''} 
-                        <span class="text-[13px] font-bold text-gray-400 ml-2 font-sans tracking-normal">${identityText} ${titleText}</span>
-                    </div>
-                </div>
-                ${item.layout === 'MEMBER_TITLE' && item.headline ? `
-                    <div class="text-left mb-4 font-serif border-l-[3px] border-[#F5A623] pl-3 shrink-0 avoid-break">
-                        <h3 class="text-[14.5px] font-bold text-[#0A2B66] leading-relaxed tracking-wide">${item.headline}</h3>
-                    </div>
-                ` : ''}
-                <div class="pastor-content text-[15px] leading-[1.75] text-gray-700 font-sans font-normal text-justify tracking-[0.02em] w-full px-1">
-                    ${(item.content || '').split('\n').filter(p=>p.trim()!=='').map(p => `<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}
-                </div>
-                <div class="w-full mt-4 border-t-[1.5px] border-dotted border-[#F5A623]/40 opacity-60 shrink-0"></div>
-            </div>`;
+            const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
+            return `<div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
+                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#001068] border-2 border-[#e8a002] flex items-center justify-center text-[#e8a002] text-base font-black shadow-sm font-sans">${item.groupName.substring(0,2)}</div><div class="text-xl font-black text-[#001068] flex items-baseline"><span class="text-[#e8a002] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
+                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#e8a002] pl-3"><h3 class="royal-headline text-sm font-bold leading-relaxed">${item.headline}</h3></div>`:''}
+                <div class="pastor-content text-[15px] leading-relaxed text-gray-700 font-sans text-justify w-full px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
+                <div class="w-full mt-4 border-t border-dotted border-[#e8a002]/40 opacity-60"></div></div>`;
         }
 
         function buildCardHTMLString(item) {
             if(!item) return '';
-            const identityText = (item.role && item.role !== '(一般組員)') ? item.role : '';
-            const titleText = (item.title && item.title !== '(無稱謂)') ? item.title : '';
-
-            return `
-            <div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-4 font-serif shrink-0">
-                    <div class="w-[48px] h-[48px] rounded-full bg-[#0A2B66] border-[2px] border-[#F5A623] flex items-center justify-center text-[#F5A623] text-[16px] font-black shadow-sm shrink-0 font-sans tracking-wide">
-                        ${(item.groupName||'').substring(0,2)}
-                    </div>
-                    <div class="text-[19px] font-black text-[#0A2B66] tracking-widest flex items-baseline">
-                        <span class="text-[#F5A623] text-[13px] mr-1.5 relative -top-0.5">✦</span>${item.name || ''} 
-                        <span class="text-[13px] font-bold text-gray-400 ml-2 font-sans tracking-normal">${identityText} ${titleText}</span>
-                    </div>
-                </div>
-                ${item.layout === 'MEMBER_TITLE' && item.headline ? `
-                    <div class="text-left mb-4 font-serif border-l-[3px] border-[#F5A623] pl-3 shrink-0 avoid-break">
-                        <h3 class="text-[14.5px] font-bold text-[#0A2B66] leading-relaxed tracking-wide">${item.headline}</h3>
-                    </div>
-                ` : ''}
-                <div class="text-[15px] leading-[1.75] text-gray-700 font-sans font-normal text-justify tracking-[0.02em] flex-1 px-1">
-                    ${(item.content || '').split('\n').filter(p=>p.trim()!=='').map(p => `<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}
-                </div>
-                <div class="w-full mt-4 border-t-[1.5px] border-dotted border-[#F5A623]/40 opacity-60 shrink-0"></div>
-            </div>`;
+            const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
+            return `<div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
+                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#001068] border-2 border-[#e8a002] flex items-center justify-center text-[#e8a002] text-base font-black font-sans">${item.groupName.substring(0,2)}</div><div class="text-xl font-black text-[#001068] flex items-baseline"><span class="text-[#e8a002] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
+                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#e8a002] pl-3"><h3 class="royal-headline text-sm font-bold leading-relaxed">${item.headline}</h3></div>`:''}
+                <div class="text-[15px] leading-relaxed text-gray-700 font-sans text-justify flex-1 px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
+                <div class="w-full mt-4 border-t border-dotted border-[#e8a002]/40 opacity-60"></div></div>`;
         }
 
-        // 開機初始化
-        loadState();
-        render();
+        // ── 🟢 顧問修正三：beforeprint 與 afterprint 攔截器更新，改採 style.visibility 指引 ──
+        window.addEventListener('beforeprint', () => {
+            state.isEditing = false;
+            renderCanvas();
+            const printArea = document.getElementById('printArea');
+            printArea.style.visibility = 'visible';
+        });
+
+        window.addEventListener('afterprint', () => {
+            const printArea = document.getElementById('printArea');
+            printArea.style.visibility = 'hidden';
+        });
+
+        loadState(); render();
     </script>
 </body>
 </html>
