@@ -120,7 +120,7 @@
 
         .book-serif-title {
             font-family: 'Noto Serif TC', serif !important;
-            font-weight: 700 !important;
+            font-weight: 900 !important;
             letter-spacing: 0.035em !important;
             text-rendering: geometricPrecision !important;
             -webkit-font-smoothing: antialiased !important;
@@ -135,7 +135,7 @@
         /* 標題與金句排版優化 */
         .royal-title {
             font-family: 'Noto Serif TC', serif !important;
-            font-weight: 700 !important;
+            font-weight: 900 !important;
             color: var(--primary-blue);
             letter-spacing: 0.05em;
         }
@@ -143,7 +143,7 @@
         .royal-headline {
             font-family: 'Noto Serif TC', serif !important;
             color: #0A2B66;
-            font-weight: 700 !important;
+            font-weight: 900 !important;
             font-size: 18px !important;
             line-height: 1.55 !important;
             letter-spacing: 0.035em !important;
@@ -303,9 +303,9 @@
         <aside class="sidebar-panel bg-slate-950 flex flex-col no-print">
             <div class="p-4 border-b border-white/10 shrink-0 space-y-3">
                 <div class="text-[10px] font-bold text-[#D9A441] uppercase tracking-widest">肢體名單 (手動排序)</div>
-                <input type="text" id="searchFilter" oninput="renderSidebar()" placeholder="🔍 搜尋姓名小組..." class="w-full bg-slate-700 border border-white/10 rounded-lg p-2.5 text-xs text-white outline-none focus:border-[#D9A441]">
+                <input type="text" id="searchFilter" oninput="renderSidebar()" placeholder="🔍 搜尋姓名小組..." class="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-xs text-white outline-none focus:border-[#D9A441]">
                 
-                <div class="bg-slate-700/60 p-2.5 rounded-xl border border-white/5 space-y-2">
+                <div class="bg-slate-900/60 p-2.5 rounded-xl border border-white/5 space-y-2">
                     <label class="flex items-center gap-2 text-[11px] text-gray-300 cursor-pointer select-none">
                         <input type="checkbox" id="chkSmartSort" onchange="state.smartSort = this.checked; saveState(); renderCanvas();" class="accent-[#D9A441]"> 智慧對稱平衡排版
                     </label>
@@ -326,7 +326,7 @@
             </div>
         </aside>
 
-        <main class="editor-panel bg-slate-700 flex flex-col no-print"></main>
+        <main class="editor-panel bg-slate-900 flex flex-col no-print"></main>
 
         <section class="preview-area font-sans">
             <div class="preview-nav h-12 bg-white/5 border-b border-white/10 flex items-center px-6 justify-between shrink-0 no-print">
@@ -401,7 +401,7 @@
                 await Promise.all([
                     document.fonts.load('600 14px "Noto Serif TC"'),
                     document.fonts.load('700 14px "Noto Serif TC"'),
-                    document.fonts.load('700 22px "Noto Serif TC"'),
+                    document.fonts.load('900 22px "Noto Serif TC"'),
                     document.fonts.load('400 14px "Noto Sans TC"'),
                     document.fonts.load('700 14px "Noto Sans TC"')
                 ]);
@@ -577,7 +577,7 @@
                 if (keyword && !items.some(e => e.name.toLowerCase().includes(keyword) || groupName.toLowerCase().includes(keyword))) return '';
                 let isCollapsed = state.collapsedGroups[groupName];
                 return `<div class="mb-2">
-                    <div class="text-xs font-bold text-[#f0a802] bg-slate-700/80 p-2 rounded-lg flex items-center justify-between select-none hover:bg-slate-800 cursor-pointer transition-colors" onclick="state.collapsedGroups['${groupName}']=!${isCollapsed}; renderSidebar();">
+                    <div class="text-xs font-bold text-[#f0a802] bg-slate-900/80 p-2 rounded-lg flex items-center justify-between select-none hover:bg-slate-800 cursor-pointer transition-colors" onclick="state.collapsedGroups['${groupName}']=!${isCollapsed}; renderSidebar();">
                         <span>${isCollapsed?'▶':'▼'} ${groupName} (${items.length})</span>
                         <div class="flex gap-2" onclick="event.stopPropagation();">
                             <button onclick="moveGroup('${groupName}','up')" class="hover:text-white p-0.5">▲</button><button onclick="moveGroup('${groupName}','down')" class="hover:text-white p-0.5">▼</button>
@@ -621,7 +621,7 @@
                     <div><label class="text-[11px] opacity-60 font-bold">見證內文</label><textarea onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','content',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm h-48 text-white outline-none font-sans leading-relaxed">${e.content || ''}</textarea></div>
                 </div>
                 <div class="pt-4 border-t border-white/10 space-y-2">
-                    <div class="grid grid-cols-2 gap-2"><button onclick="duplicateEntry('${e.id}','same_group')" class="py-2.5 rounded-lg bg-blue-950 border border-blue-700/60 text-blue-300 text-xs font-bold hover:bg-blue-700/40 flex items-center justify-center gap-1">👥 ＋同小組新增</button><button onclick="duplicateEntry('${e.id}','clone')" class="py-2.5 rounded-lg bg-slate-800 border border-white/10 text-white/80 text-xs font-bold hover:bg-slate-700/50 flex items-center justify-center gap-1">⧉複製目前成員</button></div>
+                    <div class="grid grid-cols-2 gap-2"><button onclick="duplicateEntry('${e.id}','same_group')" class="py-2.5 rounded-lg bg-blue-950 border border-blue-700/60 text-blue-300 text-xs font-bold hover:bg-blue-900/40 flex items-center justify-center gap-1">👥 ＋同小組新增</button><button onclick="duplicateEntry('${e.id}','clone')" class="py-2.5 rounded-lg bg-slate-800 border border-white/10 text-white/80 text-xs font-bold hover:bg-slate-700/50 flex items-center justify-center gap-1">⧉複製目前成員</button></div>
                     <button onclick="handleDelete('${e.id}')" class="w-full border border-red-500/30 py-2.5 rounded-lg text-red-400 text-xs font-bold hover:bg-red-500/10 block text-center">❌刪除此肢體</button>
                 </div>
             </div>`;
