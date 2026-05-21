@@ -128,7 +128,7 @@
 
         .book-name {
             font-family: 'Noto Serif TC', serif !important;
-            font-weight: 900 !important;
+            font-weight: 700 !important;
             letter-spacing: 0.02em !important;
         }
 
@@ -419,13 +419,11 @@
             }, 150);
         }
 
-        // ── 🟢 修正：串接跨電腦備份控制流 ──
         function exportDataJson() {
             ensureGroupOrder();
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            // 檔名自動帶上當前時間戳記，方便團隊辨識最新版
             const timeStamp = new Date().toISOString().slice(0,10);
             downloadAnchor.setAttribute("download", `風一族手冊專案備份_${timeStamp}.json`);
             document.body.appendChild(downloadAnchor);
@@ -457,7 +455,7 @@
                 }
             };
             reader.readAsText(file);
-            event.target.value = ''; // 清空 input 以便重複觸發
+            event.target.value = '';
         }
 
         function ensureGroupOrder() {
@@ -509,19 +507,8 @@
             if (canvas) canvas.style.transform = `scale(${state.zoom / 100})`;
         }
 
-        function adjustZoom(v) {
-            state.zoom = Math.max(30, Math.min(200, state.zoom + v));
-            document.getElementById('zoomVal').innerText = `${state.zoom}%`;
-            document.getElementById('canvas').style.transform = `scale(${state.zoom / 100})`;
-            saveState();
-        }
-
-        function toggleViewMode() {
-            state.viewMode = state.viewMode === 'spread' ? 'single' : 'spread';
-            saveState(); state.lastScrolledId = null; renderCanvas();
-        }
-
-        // 剩餘的 JS 計算功能保持完全不變
+        function adjustZoom(v) { state.zoom = Math.max(30, Math.min(200, state.zoom + v)); document.getElementById('zoomVal').innerText = `${state.zoom}%`; document.getElementById('canvas').style.transform = `scale(${state.zoom / 100})`; saveState(); }
+        function toggleViewMode() { state.viewMode = state.viewMode === 'spread' ? 'single' : 'spread'; saveState(); state.lastScrolledId = null; renderCanvas(); }
         function moveGroup(g, dir) { if (state.isLocked) return; ensureGroupOrder(); const idx = state.groupOrder.indexOf(g); const tIdx = dir === 'up' ? idx - 1 : idx + 1; if (tIdx >= 0 && tIdx < state.groupOrder.length) { [state.groupOrder[idx], state.groupOrder[tIdx]] = [state.groupOrder[tIdx], state.groupOrder[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
         function moveEntry(id, dir) { if (state.isLocked) return; const idx = state.entries.findIndex(e => e.id === id); const g = state.entries[idx].groupName; let gIdxs = state.entries.map((e,i) => e.groupName === g ? i : -1).filter(i => i !== -1); let pos = gIdxs.indexOf(idx); let tPos = dir === 'up' ? pos - 1 : pos + 1; if (tPos >= 0 && tPos < gIdxs.length) { [state.entries[idx], state.entries[gIdxs[tPos]]] = [state.entries[gIdxs[tPos]], state.entries[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
         function handleDelete(id) { if (state.isLocked) return; if (confirm('確定刪除？')) { state.entries = state.entries.filter(e => e.id !== id); state.activeId = state.entries.length ? state.entries[0].id : null; state.shouldAutoScroll = true; saveState(); render(); } }
@@ -639,14 +626,30 @@
                     let testPage = document.createElement('div'); testPage.className = "book-page";
                     let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
                     whiteLayer.style.padding = "24mm 18mm 24mm 22mm";
+                    
                     let grid = document.createElement('div'); grid.className = "grid-flow-engine";
                     let rows = chunkItemsIntoRows(testItems);
-                    grid.innerHTML = rows.map(r => r[1]==="FULL_WIDTH"?buildFullWidthCardHTMLString(r[0]):`<div class="flex gap-[14mm] mb-5">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div>`).join('');
+                    
+                    // ── 🟢 修正：高度計算測試時，同步導入真實小組標題高度模擬 ──
+                    let testLastG = "";
+                    grid.innerHTML = rows.map(r => {
+                        let banner = ''; 
+                        if (r[0] && r[0].groupName !== testLastG) { 
+                            banner = `<div class="flex items-center gap-4 mb-4 font-serif text-[#01177d] w-full"><span class="text-sm font-black tracking-widest">${r[0].groupName}</span><div class="h-[1px] bg-gradient-to-r from-[#f0a802]/60 to-transparent flex-1"></div></div>`; 
+                            testLastG = r[0].groupName; 
+                        }
+                        if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${banner}${buildFullWidthCardHTMLString(r[0])}</div>`;
+                        return `<div class="w-full avoid-break">${banner}<div class="flex gap-[14mm] mb-5">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
+                    }).join('');
+                    
                     whiteLayer.appendChild(grid); 
                     testPage.appendChild(whiteLayer); 
                     scratchpad.appendChild(testPage);
-                    const pageHeight = whiteLayer.scrollHeight;
-                    if (pageHeight > 980 && currentFlowItems.length) { 
+                    
+                    // ── 🟢 修正：將高度Poll節點從 whiteLayer 改為內含組件的真實 grid，臨界值設定在 780px ──
+                    const pageContentHeight = grid.scrollHeight;
+                    
+                    if (pageContentHeight > 780 && currentFlowItems.length) { 
                         pages.push({ type: 'FLOW', items: currentFlowItems }); 
                         currentFlowItems = [entry]; 
                     } else { 
@@ -657,7 +660,7 @@
             });
             if (currentFlowItems.length) pages.push({ type: 'FLOW', items: currentFlowItems });
             document.body.removeChild(scratchpad);
-            let pageNum = 1; let displayPages = [...pages]; if (state.viewMode === 'spread' && pageNum % 2 !== 0) displayPages.unshift({ type: 'BLANK' });
+            let pageNum = 7; let displayPages = [...pages]; if (state.viewMode === 'spread' && pageNum % 2 !== 0) displayPages.unshift({ type: 'BLANK' });
             container.innerHTML = '';
             displayPages.forEach((p,i) => {
                 const spread = document.createElement('div'); spread.className = state.viewMode==='spread'?"flex shadow-2xl mb-12 relative":"mb-12 shadow-2xl relative";
