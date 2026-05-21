@@ -6,8 +6,8 @@
     <title>風一族職場教會 - 十週年感言手冊智慧排版系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 匯入出版級明體(標題)與黑體(內文) */
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght=600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        /* ── 🟢 修正：修正 Google Fonts 語法死結，正確載入 600/700/900 實體字重 ── */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
         
         :root {
             --primary-blue: #01177d;
@@ -104,9 +104,38 @@
 
         .entry-card { background: #ffffff; border-radius: 12px; padding: 12px 0px 16px 0px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
-        /* 網頁預覽環境樣式 */
+        /* ── 🟢 修正：導入統一出版級字體核心系統 ── */
+        .book-body-text {
+            font-family: 'Noto Sans TC', sans-serif !important;
+            font-size: 14.2px !important;
+            line-height: 1.92 !important;
+            letter-spacing: 0.02em !important;
+            font-weight: 400 !important;
+            color: #374151 !important; /* 精緻出版深灰 */
+            text-align: justify !important;
+            word-break: break-word !important;
+            text-rendering: geometricPrecision !important;
+            -webkit-font-smoothing: antialiased !important;
+        }
+
+        .book-serif-title {
+            font-family: 'Noto Serif TC', serif !important;
+            font-weight: 900 !important;
+            letter-spacing: 0.035em !important;
+            text-rendering: geometricPrecision !important;
+            -webkit-font-smoothing: antialiased !important;
+        }
+
+        .book-name {
+            font-family: 'Noto Serif TC', serif !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.02em !important;
+        }
+
+        /* 標題與金句排版優化 */
         .royal-title {
             font-family: 'Noto Serif TC', serif !important;
+            font-weight: 900 !important;
             color: var(--primary-blue);
             letter-spacing: 0.05em;
         }
@@ -114,10 +143,12 @@
         .royal-headline {
             font-family: 'Noto Serif TC', serif !important;
             color: #0A2B66;
-            font-weight: 800;
-            letter-spacing: 0.04em;
-            -webkit-font-smoothing: antialiased;
+            font-weight: 900 !important;
+            font-size: 18px !important;
+            line-height: 1.55 !important;
+            letter-spacing: 0.035em !important;
             text-rendering: geometricPrecision;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* 強制全區區塊指定明體與防選取快照 */
@@ -159,7 +190,7 @@
                 color: inherit !important;
             }
 
-            /* ── 🟢 終極修正：強制全面拔除所有列印文字的陰影與硬體加速，回歸純向量渲染，徹底消滅方塊底色 ── */
+            /* 終極修正：強制全面拔除所有列印文字的陰影與硬體加速，回歸純向量渲染，徹底消滅方塊底色 */
             .royal-title, 
             .royal-headline, 
             .headline-quote-box, 
@@ -358,21 +389,18 @@
             state.isEditing = false;
             renderCanvas();
 
-            // 等待雙重 requestAnimationFrame 幀佈局重組完畢
             await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
             const printArea = document.getElementById('printArea');
             printArea.style.visibility = 'visible';
 
-            // 強制 Reflow 喚醒
             void printArea.offsetHeight;
 
-            // 等待字體資源就緒並強制下載對應字重
             await document.fonts.ready;
             try {
                 await Promise.all([
                     document.fonts.load('600 14px "Noto Serif TC"'),
-                    document.fonts.load('700 22px "Noto Serif TC"'),
+                    document.fonts.load('700 14px "Noto Serif TC"'),
                     document.fonts.load('900 22px "Noto Serif TC"'),
                     document.fonts.load('400 14px "Noto Sans TC"'),
                     document.fonts.load('700 14px "Noto Sans TC"')
@@ -691,7 +719,6 @@
             const isLeft = pageNum % 2 === 0; const pd = isLeft ? 'padding: 24mm 22mm 24mm 18mm;' : 'padding: 24mm 18mm 24mm 22mm;';
             const pageIdSuffix = pageNum || 'blank_' + Math.floor(Math.random() * 1000);
             
-            // 移去內嵌式 SVG 文字，改裝高演色純 CSS 印刷特刊光暈機制
             const glowCorners = `
                 <div class="corner-glow corner-top-right"></div>
                 <div class="corner-glow corner-bottom-left"></div>
@@ -702,15 +729,16 @@
             let inner = '';
             if (p.type === 'PASTOR') {
                 const item = p.items[0]; const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
+                // ── 🟢 修正：牧者姓名改套用 book-name 規格、內文統一改套 book-body-text ──
                 inner = `<div class="white-layer" style="${pd}" data-id="${item.id}">
                     <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-6 font-serif">
                         <div class="text-[12.5px] font-black text-[#01177d]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言</span></div>
                         <div class="text-[#f0a802] text-xs font-bold tracking-widest">${item.groupName.substring(0,2)}</div>
                     </div>
                     <div class="flex flex-col flex-1 h-full pt-4">
-                        ${item.layout!=='PASTOR_NOTITLE'?`<div class="headline-quote-box"><span class="text-[#f0a802] text-4xl font-black self-center -mt-1 font-serif">“</span><span class="text-[22px] px-4 text-center leading-relaxed flex-1 font-black royal-title font-serif">${item.headline}</span><span class="text-[#f0a802] text-4xl font-black self-center mt-3 font-serif">”</span></div>` : ''}
-                        <div class="text-center mb-8"><div class="inline-flex items-center gap-3 border-b-2 border-[#f0a802] pb-2 px-6 font-serif"><span class="text-[20px] font-black text-[#01177d]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${iden} ${tit}</span></div></div>
-                        <div class="pastor-content text-[14px] leading-[1.9] text-gray-700 font-sans font-normal text-justify flex-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 1em;">${p}</p>`).join('')}</div>
+                        ${item.layout!=='PASTOR_NOTITLE'?`<div class="headline-quote-box"><span class="text-[#f0a802] text-4xl font-black self-center -mt-1 book-serif-title">“</span><span class="text-[22px] px-4 text-center leading-relaxed flex-1 royal-title">${item.headline}</span><span class="text-[#f0a802] text-4xl font-black self-center mt-3 book-serif-title">”</span></div>` : ''}
+                        <div class="text-center mb-8"><div class="inline-flex items-center gap-3 border-b-2 border-[#f0a802] pb-2 px-6 font-serif"><span class="text-[22px] book-name text-[#01177d]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${iden} ${tit}</span></div></div>
+                        <div class="pastor-content book-body-text flex-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 1em;">${p}</p>`).join('')}</div>
                     </div></div>`;
             } else {
                 let rows = chunkItemsIntoRows(p.items); let lastG = "";
@@ -726,20 +754,22 @@
 
         function buildFullWidthCardHTMLString(item) {
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
+            // ── 🟢 修正：Full-Width 卡片姓名改套用 book-name、內文改套用 book-body-text ──
             return `<div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] border-2 border-[#f0a802] flex items-center justify-center text-[#f0a802] text-base font-black shadow-sm font-sans">${item.groupName.substring(0,2)}</div><div class="text-xl font-black text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
-                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline text-sm font-bold leading-relaxed font-serif">${item.headline}</h3></div>`:''}
-                <div class="pastor-content text-[15px] leading-relaxed text-gray-700 font-sans text-justify w-full px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
+                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] border-2 border-[#f0a802] flex items-center justify-center text-[#f0a802] text-base font-black shadow-sm font-sans">${item.groupName.substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
+                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
+                <div class="book-body-text pastor-content w-full px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-4 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
 
         function buildCardHTMLString(item) {
             if(!item) return '';
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
+            // ── 🟢 修正：一般卡片姓名改套用 book-name、內文改套用 book-body-text ──
             return `<div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] border-2 border-[#f0a802] flex items-center justify-center text-[#f0a802] text-base font-black font-sans">${item.groupName.substring(0,2)}</div><div class="text-xl font-black text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
-                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline text-sm font-bold leading-relaxed font-serif">${item.headline}</h3></div>`:''}
-                <div class="text-[15px] leading-relaxed text-gray-700 font-sans text-justify flex-1 px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
+                <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] border-2 border-[#f0a802] flex items-center justify-center text-[#f0a802] text-base font-black font-sans">${item.groupName.substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
+                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
+                <div class="book-body-text flex-1 px-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.6em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-4 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
 
