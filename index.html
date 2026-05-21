@@ -6,7 +6,7 @@
     <title>風一族職場教會 - 十週年感言手冊智慧排版系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ── 🟢 修正：修正 Google Fonts 語法死結，正確載入 600/700/900 實體字重 ── */
+        /* 匯入出版級明體(標題)與黑體(內文) */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
         
         :root {
@@ -104,14 +104,14 @@
 
         .entry-card { background: #ffffff; border-radius: 12px; padding: 12px 0px 16px 0px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
-        /* ── 🟢 修正：導入統一出版級字體核心系統 ── */
+        /* 統一出版級字體核心系統 */
         .book-body-text {
             font-family: 'Noto Sans TC', sans-serif !important;
             font-size: 14.2px !important;
             line-height: 1.92 !important;
             letter-spacing: 0.02em !important;
             font-weight: 400 !important;
-            color: #374151 !important; /* 精緻出版深灰 */
+            color: #374151 !important;
             text-align: justify !important;
             word-break: break-word !important;
             text-rendering: geometricPrecision !important;
@@ -290,9 +290,14 @@
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 系統狀態：出版編排安全 (✓ 已自動儲存)
         </div>
 
-        <div class="ml-auto flex gap-4 whitespace-nowrap">
-            <button onclick="runPreflightCheck()" class="px-4 py-2 rounded-lg border border-amber-500/40 text-amber-400 text-sm font-medium hover:bg-amber-500/10 transition-colors">📋 全書健檢</button>
-            <button class="px-4 py-2 rounded-lg border border-white/20 text-white/80 text-sm font-medium hover:bg-white/10 transition-colors" onclick="toggleViewMode()">
+        <div class="ml-auto flex gap-3 whitespace-nowrap items-center">
+            <button onclick="exportDataJson()" class="px-3 py-1.5 rounded-lg border border-teal-500/40 text-teal-400 text-xs font-medium hover:bg-teal-500/10 transition-colors">📦 導出專案備份</button>
+            <button onclick="triggerImportJson()" class="px-3 py-1.5 rounded-lg border border-purple-500/40 text-purple-400 text-xs font-medium hover:bg-purple-500/10 transition-colors">📂 導入專案數據</button>
+            <input type="file" id="hideJsonImporter" accept=".json" onchange="importDataJson(event)" class="hidden">
+            
+            <div class="h-6 w-[1px] bg-white/10 mx-1"></div>
+            
+            <button onclick="toggleViewMode()" class="px-4 py-2 rounded-lg border border-white/20 text-white/80 text-sm font-medium hover:bg-white/10 transition-colors">
                 切換至 <span id="lblViewMode">單頁</span> 視角
             </button>
             <button id="btnExportPdf" onclick="exportPDF()" class="px-6 py-2 rounded-full bg-gradient-to-r from-[#D9A441] to-[#D97706] text-white font-bold text-sm hover:scale-105 transition-all shadow-lg">📥 匯出印刷 PDF</button>
@@ -414,6 +419,47 @@
             }, 150);
         }
 
+        // ── 🟢 修正：串接跨電腦備份控制流 ──
+        function exportDataJson() {
+            ensureGroupOrder();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            // 檔名自動帶上當前時間戳記，方便團隊辨識最新版
+            const timeStamp = new Date().toISOString().slice(0,10);
+            downloadAnchor.setAttribute("download", `風一族手冊專案備份_${timeStamp}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function triggerImportJson() {
+            document.getElementById('hideJsonImporter').click();
+        }
+
+        function importDataJson(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedState = JSON.parse(e.target.result);
+                    if (importedState && Array.isArray(importedState.entries)) {
+                        state = { ...state, ...importedState };
+                        saveState();
+                        render();
+                        alert(`🎉 專案導入成功！已成功載入 ${state.entries.length} 筆肢體感言數據。`);
+                    } else {
+                        alert("❌ 錯誤的檔案格式：無法識別手冊專案架構。");
+                    }
+                } catch (err) {
+                    alert("❌ 導入失敗：檔案可能已損壞或非正確的 JSON 格式。");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // 清空 input 以便重複觸發
+        }
+
         function ensureGroupOrder() {
             if (!state.groupOrder || !Array.isArray(state.groupOrder) || state.groupOrder.length === 0) {
                 state.groupOrder = [...GROUP_OPTIONS];
@@ -475,97 +521,16 @@
             saveState(); state.lastScrolledId = null; renderCanvas();
         }
 
-        function moveGroup(g, dir) {
-            if (state.isLocked) return;
-            ensureGroupOrder();
-            const idx = state.groupOrder.indexOf(g);
-            const tIdx = dir === 'up' ? idx - 1 : idx + 1;
-            if (tIdx >= 0 && tIdx < state.groupOrder.length) {
-                [state.groupOrder[idx], state.groupOrder[tIdx]] = [state.groupOrder[tIdx], state.groupOrder[idx]];
-                state.shouldAutoScroll = true; saveState(); render();
-            }
-        }
-
-        function moveEntry(id, dir) {
-            if (state.isLocked) return;
-            const idx = state.entries.findIndex(e => e.id === id);
-            const g = state.entries[idx].groupName;
-            let gIdxs = state.entries.map((e,i) => e.groupName === g ? i : -1).filter(i => i !== -1);
-            let pos = gIdxs.indexOf(idx);
-            let tPos = dir === 'up' ? pos - 1 : pos + 1;
-            if (tPos >= 0 && tPos < gIdxs.length) {
-                [state.entries[idx], state.entries[gIdxs[tPos]]] = [state.entries[gIdxs[tPos]], state.entries[idx]];
-                state.shouldAutoScroll = true; saveState(); render();
-            }
-        }
-
-        function handleDelete(id) {
-            if (state.isLocked) return;
-            if (confirm('確定刪除？')) {
-                state.entries = state.entries.filter(e => e.id !== id);
-                state.activeId = state.entries.length ? state.entries[0].id : null;
-                state.shouldAutoScroll = true; saveState(); render();
-            }
-        }
-
-        function duplicateEntry(id, mode) {
-            if(state.isLocked) { alert('目前排版已鎖定'); return; }
-            const idx = state.entries.findIndex(e => e.id === id);
-            const source = state.entries[idx]; const newId = Date.now().toString(); let newEntry = {};
-            if (mode === 'clone') { newEntry = { ...source, id: newId, name: source.name + ' (副本)' }; } 
-            else if (mode === 'same_group') {
-                newEntry = { id: newId, layout: source.layout, groupName: source.groupName, name: '新肢體成員', role: source.role, title: source.title, headline: source.headline, content: '' };
-            }
-            state.entries.splice(idx + 1, 0, newEntry); state.activeId = newId; 
-            state.shouldAutoScroll = true; 
-            saveState(); render();
-        }
-
-        function addEntry() {
-            if(state.isLocked) { alert('目前排版已鎖定'); return; }
-            const newId = Date.now().toString();
-            state.entries.push({ id: newId, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...' });
-            state.activeId = newId; state.shouldAutoScroll = true; saveState(); render();
-        }
-
-        function updateEntry(id, field, val) {
-            if(state.isLocked) return;
-            const entry = state.entries.find(e => e.id === id);
-            if (entry) entry[field] = val;
-            saveState();
-            if (['groupName', 'layout', 'role', 'title'].includes(field)) {
-                renderSidebar(); scheduleCanvasRender(); return;
-            }
-            scheduleCanvasRender();
-        }
-
-        function getCanvasRelativeTop(el) {
-            const canvas = document.getElementById('canvas');
-            let top = 0; while (el && el !== canvas) { top += el.offsetTop; el = el.offsetParent; }
-            return top;
-        }
-
-        function handleEditorBlur() {
-            requestAnimationFrame(() => {
-                const editor = document.getElementById('editorUI');
-                if (editor && editor.contains(document.activeElement)) return;
-                state.isEditing = false; renderCanvas();
-            });
-        }
-
-        function chunkItemsIntoRows(items) {
-            let rows = []; let curR = []; let curG = "";
-            items.forEach(it => {
-                if (it.groupName !== curG || it.isFullWidth) {
-                    if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); curR = []; }
-                    curG = it.groupName;
-                }
-                if (it.isFullWidth) { rows.push([it, "FULL_WIDTH"]); }
-                else { curR.push(it); if (curR.length === 2) { rows.push(curR); curR = []; } }
-            });
-            if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); }
-            return rows;
-        }
+        // 剩餘的 JS 計算功能保持完全不變
+        function moveGroup(g, dir) { if (state.isLocked) return; ensureGroupOrder(); const idx = state.groupOrder.indexOf(g); const tIdx = dir === 'up' ? idx - 1 : idx + 1; if (tIdx >= 0 && tIdx < state.groupOrder.length) { [state.groupOrder[idx], state.groupOrder[tIdx]] = [state.groupOrder[tIdx], state.groupOrder[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
+        function moveEntry(id, dir) { if (state.isLocked) return; const idx = state.entries.findIndex(e => e.id === id); const g = state.entries[idx].groupName; let gIdxs = state.entries.map((e,i) => e.groupName === g ? i : -1).filter(i => i !== -1); let pos = gIdxs.indexOf(idx); let tPos = dir === 'up' ? pos - 1 : pos + 1; if (tPos >= 0 && tPos < gIdxs.length) { [state.entries[idx], state.entries[gIdxs[tPos]]] = [state.entries[gIdxs[tPos]], state.entries[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
+        function handleDelete(id) { if (state.isLocked) return; if (confirm('確定刪除？')) { state.entries = state.entries.filter(e => e.id !== id); state.activeId = state.entries.length ? state.entries[0].id : null; state.shouldAutoScroll = true; saveState(); render(); } }
+        function duplicateEntry(id, mode) { if(state.isLocked) { alert('目前排版已鎖定'); return; } const idx = state.entries.findIndex(e => e.id === id); const source = state.entries[idx]; const newId = Date.now().toString(); let newEntry = {}; if (mode === 'clone') { newEntry = { ...source, id: newId, name: source.name + ' (副本)' }; } else if (mode === 'same_group') { newEntry = { id: newId, layout: source.layout, groupName: source.groupName, name: '新肢體成員', role: source.role, title: source.title, headline: source.headline, content: '' }; } state.entries.splice(idx + 1, 0, newEntry); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
+        function addEntry() { if(state.isLocked) { alert('目前排版已鎖定'); return; } const newId = Date.now().toString(); state.entries.push({ id: newId, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...' }); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
+        function updateEntry(id, field, val) { if(state.isLocked) return; const entry = state.entries.find(e => e.id === id); if (entry) entry[field] = val; saveState(); if (['groupName', 'layout', 'role', 'title'].includes(field)) { renderSidebar(); scheduleCanvasRender(); return; } scheduleCanvasRender(); }
+        function getCanvasRelativeTop(el) { const canvas = document.getElementById('canvas'); let top = 0; while (el && el !== canvas) { top += el.offsetTop; el = el.offsetParent; } return top; }
+        function handleEditorBlur() { requestAnimationFrame(() => { const editor = document.getElementById('editorUI'); if (editor && editor.contains(document.activeElement)) return; state.isEditing = false; renderCanvas(); }); }
+        function chunkItemsIntoRows(items) { let rows = []; let curR = []; let curG = ""; items.forEach(it => { if (it.groupName !== curG || it.isFullWidth) { if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); curR = []; } curG = it.groupName; } if (it.isFullWidth) { rows.push([it, "FULL_WIDTH"]); } else { curR.push(it); if (curR.length === 2) { rows.push(curR); curR = []; } } }); if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); } return rows; }
 
         function renderSidebar() {
             const list = document.getElementById('sidebarList'); if (!list) return;
@@ -673,22 +638,14 @@
                     let testItems = [...currentFlowItems, entry];
                     let testPage = document.createElement('div'); testPage.className = "book-page";
                     let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
-                    
-                    /* 模擬真實印刷 padding */
                     whiteLayer.style.padding = "24mm 18mm 24mm 22mm";
-                    
                     let grid = document.createElement('div'); grid.className = "grid-flow-engine";
                     let rows = chunkItemsIntoRows(testItems);
                     grid.innerHTML = rows.map(r => r[1]==="FULL_WIDTH"?buildFullWidthCardHTMLString(r[0]):`<div class="flex gap-[14mm] mb-5">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div>`).join('');
-                    
-                    /* 真實 DOM 結構 */
                     whiteLayer.appendChild(grid); 
                     testPage.appendChild(whiteLayer); 
                     scratchpad.appendChild(testPage);
-                    
-                    /* 改成量測整頁實體高度 */
                     const pageHeight = whiteLayer.scrollHeight;
-                    
                     if (pageHeight > 980 && currentFlowItems.length) { 
                         pages.push({ type: 'FLOW', items: currentFlowItems }); 
                         currentFlowItems = [entry]; 
@@ -717,26 +674,18 @@
 
         function buildPageHTML(p, pageNum, groupStats) {
             const isLeft = pageNum % 2 === 0; const pd = isLeft ? 'padding: 24mm 22mm 24mm 18mm;' : 'padding: 24mm 18mm 24mm 22mm;';
-            const pageIdSuffix = pageNum || 'blank_' + Math.floor(Math.random() * 1000);
-            
-            const glowCorners = `
-                <div class="corner-glow corner-top-right"></div>
-                <div class="corner-glow corner-bottom-left"></div>
-            `;
-
+            const glowCorners = `<div class="corner-glow corner-top-right"></div><div class="corner-glow corner-bottom-left"></div>`;
             if (p.type === 'BLANK') return `<div class="book-page">${glowCorners}<div class="white-layer bg-[#fcfbf9] flex items-center justify-center text-gray-300 italic">Royal Chosen Race Church</div></div>`;
-            
             let inner = '';
             if (p.type === 'PASTOR') {
                 const item = p.items[0]; const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
-                // ── 🟢 修正：牧者姓名改套用 book-name 規格、內文統一改套 book-body-text ──
                 inner = `<div class="white-layer" style="${pd}" data-id="${item.id}">
                     <div class="flex justify-between items-end border-b border-gray-200 pb-3 mb-6 font-serif">
                         <div class="text-[12.5px] font-black text-[#01177d]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言</span></div>
                         <div class="text-[#f0a802] text-xs font-bold tracking-widest">${item.groupName.substring(0,2)}</div>
                     </div>
                     <div class="flex flex-col flex-1 h-full pt-4">
-                        ${item.layout!=='PASTOR_NOTITLE'?`<div class="headline-quote-box"><span class="text-[#f0a802] text-4xl font-black self-center -mt-1 book-serif-title">“</span><span class="text-[22px] px-4 text-center leading-relaxed flex-1 royal-title">${item.headline}</span><span class="text-[#f0a802] text-4xl font-black self-center mt-3 book-serif-title">”</span></div>` : ''}
+                        ${item.layout!=='PASTOR_NOTITLE'?`<div class="headline-quote-box"><span class="text-[#f0a802] text-4xl font-black self-center -mt-1 font-serif">“</span><span class="text-[22px] px-4 text-center leading-relaxed flex-1 royal-title">${item.headline}</span><span class="text-[#f0a802] text-4xl font-black self-center mt-3 font-serif">”</span></div>` : ''}
                         <div class="text-center mb-8"><div class="inline-flex items-center gap-3 border-b-2 border-[#f0a802] pb-2 px-6 font-serif"><span class="text-[22px] book-name text-[#01177d]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${iden} ${tit}</span></div></div>
                         <div class="pastor-content book-body-text flex-1">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 1em;">${p}</p>`).join('')}</div>
                     </div></div>`;
@@ -754,7 +703,6 @@
 
         function buildFullWidthCardHTMLString(item) {
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
-            // ── 🟢 修正：Full-Width 卡片姓名改套用 book-name、內文改套用 book-body-text ──
             return `<div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
                 <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black shadow-sm font-sans">${item.groupName.substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
                 ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
@@ -765,7 +713,6 @@
         function buildCardHTMLString(item) {
             if(!item) return '';
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
-            // ── 🟢 修正：一般卡片姓名改套用 book-name、內文改套用 book-body-text ──
             return `<div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
                 <div class="flex items-center gap-3 mb-4 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black font-sans">${item.groupName.substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
                 ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-4 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
@@ -773,17 +720,8 @@
                 <div class="w-full mt-4 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
 
-        window.addEventListener('beforeprint', () => {
-            state.isEditing = false;
-            renderCanvas();
-            const printArea = document.getElementById('printArea');
-            printArea.style.visibility = 'visible';
-        });
-
-        window.addEventListener('afterprint', () => {
-            const printArea = document.getElementById('printArea');
-            printArea.style.visibility = 'hidden';
-        });
+        window.addEventListener('beforeprint', () => { state.isEditing = false; renderCanvas(); document.getElementById('printArea').style.visibility = 'visible'; });
+        window.addEventListener('afterprint', () => { document.getElementById('printArea').style.visibility = 'hidden'; });
 
         loadState(); render();
     </script>
