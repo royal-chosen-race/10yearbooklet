@@ -40,7 +40,7 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin-bottom: 50px;
         }
 
-        /* ── 🟢 修正：CSS 基礎天地海邊距全面與高度測量同步，頂部改 14mm，底部改 16mm，釋放大量大字體垂直空間 ── */
+        /* 天地海邊距全面與高度測量同步 */
         .white-layer {
             position: absolute; inset: 12mm; background-color: #FFFFFF;
             border-radius: 45px; z-index: 10; padding: 14mm 16mm 16mm 16mm; 
@@ -74,7 +74,6 @@
         p { orphans: 2 !important; widows: 2 !important; margin-bottom: 6px; }
         h2, h3, .avoid-break { break-inside: avoid; page-break-inside: avoid; break-after: avoid !important; }
         
-        /* ── 🟢 修正：縮減內襯 Padding，把物理空間最大化讓渡給大字級 ── */
         .entry-card { background: #ffffff; border-radius: 12px; padding: 8px 0px 10px 0px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
         /* 統一出版級字體核心系統 */
@@ -108,7 +107,6 @@
         .royal-title { font-family: 'Noto Serif TC', serif !important; font-weight: 900 !important; color: var(--primary-blue); letter-spacing: 0.05em; }
         .royal-headline { font-family: 'Noto Serif TC', serif !important; color: #0A2B66; font-weight: 900 !important; font-size: 18px !important; line-height: 1.55 !important; letter-spacing: 0.035em !important; text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; }
 
-        /* 🟢 修正：精簡金句框內外間距，為長者守住字級 */
         .headline-quote-box {
             font-family: 'Noto Serif TC', serif !important; user-select: none; -webkit-user-select: none;
             margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: center; padding: 1.25rem;
@@ -244,7 +242,7 @@
         };
         
         state.entries = [
-            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大大力量，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的開境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。' }
+            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大大力量，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的開境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。', forceNewPage: false }
         ];
 
         let renderTimer = null;
@@ -287,9 +285,9 @@
         function moveGroup(g, dir) { if (state.isLocked) return; ensureGroupOrder(); const idx = state.groupOrder.indexOf(g); const tIdx = dir === 'up' ? idx - 1 : idx + 1; if (tIdx >= 0 && tIdx < state.groupOrder.length) { [state.groupOrder[idx], state.groupOrder[tIdx]] = [state.groupOrder[tIdx], state.groupOrder[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
         function moveEntry(id, dir) { if (state.isLocked) return; const idx = state.entries.findIndex(e => e.id === id); const g = state.entries[idx].groupName; let gIdxs = state.entries.map((e,i) => e.groupName === g ? i : -1).filter(i => i !== -1); let pos = gIdxs.indexOf(idx); let tPos = dir === 'up' ? pos - 1 : pos + 1; if (tPos >= 0 && tPos < gIdxs.length) { [state.entries[idx], state.entries[gIdxs[tPos]]] = [state.entries[gIdxs[tPos]], state.entries[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
         function handleDelete(id) { if (state.isLocked) return; if (confirm('確定刪除？')) { state.entries = state.entries.filter(e => e.id !== id); state.activeId = state.entries.length ? state.entries[0].id : null; state.shouldAutoScroll = true; saveState(); render(); } }
-        function duplicateEntry(id, mode) { if(state.isLocked) { alert('目前排版已鎖定'); return; } const idx = state.entries.findIndex(e => e.id === id); const source = state.entries[idx]; const newId = Date.now().toString(); let newEntry = {}; if (mode === 'clone') { newEntry = { ...source, id: newId, name: source.name + ' (副本)' }; } else if (mode === 'same_group') { newEntry = { id: newId, layout: source.layout, groupName: source.groupName, name: '新肢體成員', role: source.role, title: source.title, headline: source.headline, content: '' }; } state.entries.splice(idx + 1, 0, newEntry); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
-        function addEntry() { if(state.isLocked) { alert('目前排版已鎖定'); return; } const newId = Date.now().toString(); state.entries.push({ id: newId, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...' }); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
-        function updateEntry(id, field, val) { if(state.isLocked) return; const entry = state.entries.find(e => e.id === id); if (entry) entry[field] = val; saveState(); if (['groupName', 'layout', 'role', 'title'].includes(field)) { renderSidebar(); scheduleCanvasRender(); return; } scheduleCanvasRender(); }
+        function duplicateEntry(id, mode) { if(state.isLocked) { alert('目前排版已鎖定'); return; } const idx = state.entries.findIndex(e => e.id === id); const source = state.entries[idx]; const newId = Date.now().toString(); let newEntry = {}; if (mode === 'clone') { newEntry = { ...source, id: newId, name: source.name + ' (副本)', forceNewPage: false }; } else if (mode === 'same_group') { newEntry = { id: newId, layout: source.layout, groupName: source.groupName, name: '新肢體成員', role: source.role, title: source.title, headline: source.headline, content: '', forceNewPage: false }; } state.entries.splice(idx + 1, 0, newEntry); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
+        function addEntry() { if(state.isLocked) { alert('目前排版已鎖定'); return; } const newId = Date.now().toString(); state.entries.push({ id: newId, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...', forceNewPage: false }); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
+        function updateEntry(id, field, val) { if(state.isLocked) return; const entry = state.entries.find(e => e.id === id); if (entry) entry[field] = val; saveState(); if (['groupName', 'layout', 'role', 'title', 'forceNewPage'].includes(field)) { renderSidebar(); scheduleCanvasRender(); return; } scheduleCanvasRender(); }
         function getCanvasRelativeTop(el) { const canvas = document.getElementById('canvas'); let top = 0; while (el && el !== canvas) { top += el.offsetTop; el = el.offsetParent; } return top; }
         function handleEditorBlur() { requestAnimationFrame(() => { const editor = document.getElementById('editorUI'); if (editor && editor.contains(document.activeElement)) return; state.isEditing = false; renderCanvas(); }); }
         function chunkItemsIntoRows(items) { let rows = []; let curR = []; let curG = ""; items.forEach(it => { if (!it) return; if ((it.groupName || '未分配') !== curG || it.isFullWidth) { if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); curR = []; } curG = (it.groupName || '未分配'); } if (it.isFullWidth) { rows.push([it, "FULL_WIDTH"]); } else { curR.push(it); if (curR.length === 2) { rows.push(curR); curR = []; } } }); if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); } return rows; }
@@ -313,7 +311,10 @@
                     <div class="${isCollapsed?'hidden':''} pl-2 mt-1 space-y-1">${items.map(e => `
                         <div class="flex items-center gap-1 group">
                             <div onclick="state.activeId='${e.id}'; state.shouldAutoScroll=true; render();" class="flex-1 p-2.5 rounded-xl cursor-pointer border ${state.activeId===e.id?'bg-[#f0a802]/20 border-[#f0a802]':'border-transparent hover:bg-white/5'}">
-                                <div class="text-xs font-bold font-serif text-white">${e.name || '未命名'}</div>
+                                <div class="text-xs font-bold font-serif text-white flex items-center justify-between">
+                                    <span>${e.name || '未命名'} ${e.forceNewPage?'<span class="text-[9px] text-[#f0a802] border border-[#f0a802]/40 px-1 rounded">✂️新頁</span>':''}</span>
+                                    <span class="text-[10px] opacity-40 font-sans font-normal">${e.role==='(一般組員)'?'':e.role}</span>
+                                </div>
                             </div>
                             <div class="opacity-0 group-hover:opacity-100 flex flex-col gap-0.5 pr-1"><button onclick="moveEntry('${e.id}','up')" class="text-[9px] hover:text-[#f0a802]">▲</button><button onclick="moveEntry('${e.id}','down')" class="text-[9px] hover:text-[#f0a802]">▼</button></div>
                         </div>`).join('')}</div>
@@ -344,6 +345,14 @@
                         <div><label class="text-[11px] opacity-60 font-bold">身份 (職分)</label><select onchange="updateEntry('${e.id}','role',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none">${ROLE_OPTIONS.map(r=>`<option value="${r}" ${e.role===r?'selected':''}>${r}</option>`).join('')}</select></div>
                         <div><label class="text-[11px] opacity-60 font-bold">稱謂</label><select onchange="updateEntry('${e.id}','title',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none">${TITLE_OPTIONS.map(t=>`<option value="${t}" ${e.title===t?'selected':''}>${t}</option>`).join('')}</select></div>
                     </div>
+                    
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-white/10 mt-1">
+                        <label class="flex items-center gap-2 text-xs text-gray-200 cursor-pointer select-none">
+                            <input type="checkbox" onchange="updateEntry('${e.id}','forceNewPage',this.checked)" ${e.forceNewPage?'checked':''} class="accent-[#f0a802]"> 
+                            <span class="text-[#f0a802] font-bold">✂️ 強制此篇起新頁 (手動分頁控制)</span>
+                        </label>
+                    </div>
+
                     <div class="${(e.layout==='MEMBER_NOTITLE'||e.layout==='PASTOR_NOTITLE')?'hidden':''}"><label class="text-[11px] opacity-60 text-[#f0a802] font-bold">金句大標</label><input onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#f0a802]/10 border border-[#f0a802]/30 p-3 rounded-lg text-sm text-[#f0a802] font-serif font-black outline-none"/></div>
                     <div><label class="text-[11px] opacity-60 font-bold">見證內文</label><textarea onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','content',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm h-48 text-white outline-none font-sans leading-relaxed">${e.content || ''}</textarea></div>
                 </div>
@@ -413,23 +422,12 @@
                     let bal = []; while(regular.length){ bal.push(regular.shift()); if(regular.length) bal.push(regular.pop()); }
                     members = [...leaders, ...bal];
                 } else {
-                    members.sort((a, b) => {
-                        const getRoleScore = (role) => {
-                            if (role === '區長') return 3;
-                            if (role === '小組長') return 2;
-                            if (role === '副小組長') return 1;
-                            return 0;
-                        };
-                        const scoreA = getRoleScore(a.role);
-                        const scoreB = getRoleScore(b.role);
-                        if (scoreA !== scoreB) return scoreB - scoreA;
-                        return state.entries.findIndex(x => x.id === a.id) - state.entries.findIndex(x => x.id === b.id);
-                    });
+                    // 🟢 修正點 2：若關閉智慧排版，嚴格尊重手冊自然名單排序，不強制干預職分先後
+                    members.sort((a, b) => state.entries.findIndex(x => x.id === a.id) - state.entries.findIndex(x => x.id === b.id));
                 }
                 finalQueue.push(...pastors, ...members);
             });
 
-            // ── 🟢 修正：測試高度的虛擬畫布內襯改為 14mm/16mm，徹底與真實渲染 pd 鏡像同步 ──
             function getFlowHeight(items) {
                 let testPage = document.createElement('div'); testPage.className = "book-page";
                 let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
@@ -468,50 +466,40 @@
                 return pageContentHeight;
             }
 
-            // ── 🟢 修正：因邊距優化多出大量空間，安全分頁高度臨界值放寬至 800px（保留長輩大字級） ──
+            // ── 🟢 修正點 1：升級為動態流式累積演算法，完美融合「實體高度測量」與「手動強制分頁」 ──
             function chunkPastorsIntoPages(pastors) {
-                let chunks = []; let i = 0;
-                while (i < pastors.length) {
-                    let rem = pastors.length - i;
-                    if (rem === 1) { chunks.push([pastors[i]]); i += 1; continue; }
-                    let h2 = getPastorFlowHeight([pastors[i], pastors[i+1]]);
-                    if (h2 <= 800) { chunks.push([pastors[i], pastors[i+1]]); i += 2; } 
-                    else { chunks.push([pastors[i]]); i += 1; }
+                let chunks = []; let currentChunk = [];
+                for (let i = 0; i < pastors.length; i++) {
+                    let p = pastors[i];
+                    if (currentChunk.length > 0) {
+                        // 如果手動勾選強制新頁，或者加進來後高度會炸掉，就切分出來
+                        if (p.forceNewPage || getPastorFlowHeight([...currentChunk, p]) > 820) {
+                            chunks.push(currentChunk);
+                            currentChunk = [p];
+                            continue;
+                        }
+                    }
+                    currentChunk.push(p);
                 }
+                if (currentChunk.length > 0) chunks.push(currentChunk);
                 return chunks;
             }
 
             function chunkMembersIntoPages(members) {
-                let chunks = [];
-                if (members.length <= 3) {
-                    if (members.length > 0) chunks.push(members);
-                    return chunks;
-                }
-                if (members.length === 4) {
-                    if (getFlowHeight(members) <= 800) { chunks.push(members); } 
-                    else { chunks.push([members[0], members[1]]); chunks.push([members[2], members[3]]); }
-                    return chunks;
-                }
-                
-                let i = 0;
-                while (i < members.length) {
-                    let rem = members.length - i;
-                    if (rem <= 3) { chunks.push(members.slice(i)); break; }
-                    if (rem === 4) {
-                        if (getFlowHeight(members.slice(i)) <= 800) { chunks.push(members.slice(i)); } 
-                        else { chunks.push(members.slice(i, i + 2)); chunks.push(members.slice(i + 2)); }
-                        break;
+                let chunks = []; let currentChunk = [];
+                for (let i = 0; i < members.length; i++) {
+                    let m = members[i];
+                    if (currentChunk.length > 0) {
+                        // 核心：若該篇被勾選了手動分頁，或者合併後高度 > 820px 安全值，則立即開拓新頁
+                        if (m.forceNewPage || getFlowHeight([...currentChunk, m]) > 820) {
+                            chunks.push(currentChunk);
+                            currentChunk = [m];
+                            continue;
+                        }
                     }
-                    if (rem === 5) { chunks.push(members.slice(i, i + 2)); chunks.push(members.slice(i + 2)); break; }
-                    
-                    let currentTry = members.slice(i, i + 4);
-                    if (getFlowHeight(currentTry) <= 800) { chunks.push(currentTry); i += 4; } 
-                    else {
-                        let testTry3 = members.slice(i, i + 3);
-                        if (getFlowHeight(testTry3) <= 800) { chunks.push(testTry3); i += 3; } 
-                        else { chunks.push(members.slice(i, i + 2)); i += 2; }
-                    }
+                    currentChunk.push(m);
                 }
+                if (currentChunk.length > 0) chunks.push(currentChunk);
                 return chunks;
             }
 
@@ -562,22 +550,17 @@
         }
 
         function buildPageHTML(p, pageNum, groupStats) {
-            // ── 🟢 修正：同步收緊真實 A4 紙張的渲染內襯 Padding，釋放天地海空間 ──
             const isLeft = pageNum % 2 === 0; const pd = isLeft ? 'padding: 14mm 18mm 16mm 14mm;' : 'padding: 14mm 14mm 16mm 18mm;';
             const pageIdSuffix = pageNum || 'blank_' + Math.floor(Math.random() * 1000);
             const glowCorners = `<div class="corner-glow corner-top-right"></div><div class="corner-glow corner-bottom-left"></div>`;
             
-            // ── 🟢 修正：為了體貼長輩視力，防溢水調整「優先壓緊行高，死守 13.5px 粗體明亮大字」──
             let shrinkStyle = "";
             if (p.pageContentHeight > 800) {
                 if (p.pageContentHeight > 940) {
-                    // 極端爆量狀況：字級絕不縮小、死守長輩 13.5px；改將行高強行壓縮至 1.48，並精簡金句框尺寸
                     shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 13.5px !important; line-height: 1.48 !important; } #page_${pageIdSuffix} .headline-quote-box { padding: 0.75rem !important; margin-bottom: 0.75rem !important; min-height: 72px !important; } #page_${pageIdSuffix} .headline-quote-box .royal-title { font-size: 16px !important; } #page_${pageIdSuffix} .entry-card { padding-top: 4px !important; padding-bottom: 4px !important; }</style>`;
                 } else if (p.pageContentHeight > 860) {
-                    // 中度溢出：字級維持大器的 13.8px，行高拉緊到 1.58
                     shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 13.8px !important; line-height: 1.58 !important; } #page_${pageIdSuffix} .headline-quote-box { padding: 1rem !important; margin-bottom: 1.25rem !important; }</style>`;
                 } else {
-                    // 輕微溢出：字級維持原始 14.2px 滿配大字，僅行高微調 1.7
                     shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 14.2px !important; line-height: 1.70 !important; }</style>`;
                 }
             }
