@@ -218,14 +218,17 @@
     <div id="printArea" class="print-area"></div>
 
     <script>
+        // ── 🟢 修正點 1：新增大類三：事工負責人專屬版型 ──
         const LAYOUTS = {
             'PASTOR': '大類一：牧者/長老專屬版 (獨立滿版頁)',
             'PASTOR_NOTITLE': '大類一：牧者/長老專屬版 - 無標題金句 (獨立滿版頁)',
             'MEMBER_TITLE': '大類二：肢體同工版 - 有標題金句 (自動流動)',
-            'MEMBER_NOTITLE': '大類二：肢體同工版 - 無標題標籤 (自動流動)'
+            'MEMBER_NOTITLE': '大類二：肢體同工版 - 無標題標籤 (自動流動)',
+            'MINISTRY_TITLE': '大類三：事工負責人 - 有標題標籤 (自動流動)',
+            'MINISTRY_NOTITLE': '大類三：事工負責人 - 無標題標籤 (自動流動)'
         };
         
-        // ── 🟢 修正點 3：新增「事工負責人」、「招待」、「影音」平行小組區段 ──
+        // ── 🟢 修正點 2：確保留下招待、影音平行小組 ──
         const GROUP_OPTIONS = [
             '牧者團隊', '長老團隊', '風吉小組', '風潔小組', '風豪小組', '風光小組', '風發小組', 
             '風欣小組', '風楚小組', '風玲小組', '風梁小組', '風炎小組', 
@@ -243,7 +246,7 @@
         };
         
         state.entries = [
-            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大大力量，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的開境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。', forceNewPage: false }
+            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大大力量，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的開境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們，', forceNewPage: false }
         ];
 
         let renderTimer = null;
@@ -354,7 +357,7 @@
                         </label>
                     </div>
 
-                    <div class="${(e.layout==='MEMBER_NOTITLE'||e.layout==='PASTOR_NOTITLE')?'hidden':''}"><label class="text-[11px] opacity-60 text-[#f0a802] font-bold">金句大標</label><input onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#f0a802]/10 border border-[#f0a802]/30 p-3 rounded-lg text-sm text-[#f0a802] font-serif font-black outline-none"/></div>
+                    <div class="${(e.layout==='MEMBER_NOTITLE'||e.layout==='PASTOR_NOTITLE'||e.layout==='MINISTRY_NOTITLE')?'hidden':''}"><label class="text-[11px] opacity-60 text-[#f0a802] font-bold">金句大標</label><input onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#f0a802]/10 border border-[#f0a802]/30 p-3 rounded-lg text-sm text-[#f0a802] font-serif font-black outline-none"/></div>
                     <div><label class="text-[11px] opacity-60 font-bold">見證內文</label><textarea onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','content',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm h-48 text-white outline-none font-sans leading-relaxed">${e.content || ''}</textarea></div>
                 </div>
                 <div class="pt-4 border-t border-white/10 space-y-2">
@@ -366,7 +369,6 @@
 
         function buildPastorItemHTML(item, showDivider = false) {
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
-            // ── 🟢 修正點 2：將排版順序一律改為 [姓名] [稱謂] [職分] ──
             const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
             let divider = showDivider ? `<div class="w-full my-6 border-t border-dotted border-[#f0a802]/40 opacity-60"></div>` : '';
             return `<div class="pastor-item-block flex flex-col avoid-break" data-id="${item.id}">
@@ -436,7 +438,6 @@
                 whiteLayer.style.padding = "14mm 16mm 16mm 16mm";
                 let grid = document.createElement('div'); grid.className = "grid-flow-engine";
                 let rows = chunkItemsIntoRows(items);
-                // ── 🟢 修正點 1：拿掉 getFlowHeight 內的橫槓標題區段 ──
                 grid.innerHTML = rows.map(r => {
                     if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${buildFullWidthCardHTMLString(r[0])}</div>`;
                     return `<div class="w-full avoid-break"><div class="flex gap-[14mm] mb-3">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
@@ -575,12 +576,19 @@
                     </div></div>`;
             } else {
                 let rows = chunkItemsIntoRows(p.items);
-                // ── 🟢 修正點 1：拿掉 buildPageHTML 內的橫槓標題區段 ──
                 let gridHTML = rows.map(r => {
                     if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${buildFullWidthCardHTMLString(r[0])}</div>`;
                     return `<div class="w-full avoid-break"><div class="flex gap-[14mm] mb-3">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
                 }).join('');
-                inner = `<div class="white-layer" style="${pd}"><div class="flex justify-between border-b border-gray-200 pb-2 mb-4 font-serif"><div class="text-[12.5px] font-black text-[#01177d]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會 10 週年紀念</span></div><div class="text-[#f0a802] text-lg opacity-60">✦ ✦</div></div><div class="flex-1 overflow-hidden pt-1 grid-flow-engine">${gridHTML}</div></div>`;
+                
+                // ── 🟢 修正點 3：頁首依據版型自動判斷，若是事工負責人則將 ✦ ✦ 改為文字 ──
+                const firstItem = p.items[0];
+                const isMinistryLayout = firstItem && ['MINISTRY_TITLE', 'MINISTRY_NOTITLE'].includes(firstItem.layout);
+                const topRightContent = isMinistryLayout 
+                    ? `<div class="text-[#f0a802] text-xs font-bold tracking-wider">事工負責人</div>` 
+                    : `<div class="text-[#f0a802] text-lg opacity-60">✦ ✦</div>`;
+
+                inner = `<div class="white-layer" style="${pd}"><div class="flex justify-between border-b border-gray-200 pb-2 mb-4 font-serif"><div class="text-[12.5px] font-black text-[#01177d]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會 10 週年紀念</span></div>${topRightContent}</div><div class="flex-1 overflow-hidden pt-1 grid-flow-engine">${gridHTML}</div></div>`;
             }
             return `${shrinkStyle}<div class="book-page" id="page_${pageIdSuffix}">${glowCorners}${inner}${pageNum?`<div class="absolute bottom-[16mm] ${isLeft?'left-[24mm]':'right-[24mm]'} text-[11px] font-sans font-bold text-gray-300 tracking-[3px] z-20">Royal Chosen Race Church ‧ P.${pageNum}</div>`:''}</div>`;
         }
@@ -588,11 +596,12 @@
         function buildFullWidthCardHTMLString(item) {
             if (!item) return '';
             const iden = item.role==='(一般組員)'?'':(item.role || ''); const tit = item.title==='(無稱謂)'?'':(item.title || '');
-            // ── 🟢 修正點 2：將排版順序一律改為 [姓名] [稱謂] [職分] ──
             const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
+            // ── 🟢 修正點 4：支援大類三有標題大標顯示 ──
+            const hasTitle = ['MEMBER_TITLE', 'MINISTRY_TITLE'].includes(item.layout);
             return `<div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
                 <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black shadow-sm font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${labelStr}</span></div></div>
-                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
+                ${hasTitle&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
                 <div class="book-body-text pastor-content w-full px-1">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-3 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
@@ -600,11 +609,12 @@
         function buildCardHTMLString(item) {
             if(!item) return '';
             const iden = item.role==='(一般組員)'?'':(item.role || ''); const tit = item.title==='(無稱謂)'?'':(item.title || '');
-            // ── 🟢 修正點 2：將排版順序一律改為 [姓名] [稱謂] [職分] ──
             const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
+            // ── 🟢 修正點 5：支援大類三有標題大標顯示 ──
+            const hasTitle = ['MEMBER_TITLE', 'MINISTRY_TITLE'].includes(item.layout);
             return `<div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
                 <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${labelStr}</span></div></div>
-                ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
+                ${hasTitle&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
                 <div class="book-body-text flex-1 px-1">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-3 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
