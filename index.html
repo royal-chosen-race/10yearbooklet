@@ -46,6 +46,7 @@
             border-radius: 45px; z-index: 10; padding: 14mm 16mm 16mm 16mm; 
             display: flex; flex-direction: column;
             box-shadow: inset 0 0 20px rgba(0,16,104,0.03);
+            isolation: isolate; /* 徹底隔離底層光暈，阻斷方形圖層混合 Bug */
         }
 
         /* Pure CSS 演色性光暈 */
@@ -134,6 +135,7 @@
             body { background: #01177d !important; width: auto !important; height: auto !important; overflow: visible !important; }
             .book-page { background: #01177d !important; position: relative !important; }
             .corner-glow { opacity: 1 !important; visibility: visible !important; display: block !important; }
+            .entry-card, .rounded-full, div { box-shadow: none !important; text-shadow: none !important; }
         }
     </style>
 </head>
@@ -218,7 +220,6 @@
     <div id="printArea" class="print-area"></div>
 
     <script>
-        // ── 🟢 修正點 1：新增大類三：事工負責人專屬版型 ──
         const LAYOUTS = {
             'PASTOR': '大類一：牧者/長老專屬版 (獨立滿版頁)',
             'PASTOR_NOTITLE': '大類一：牧者/長老專屬版 - 無標題金句 (獨立滿版頁)',
@@ -228,7 +229,6 @@
             'MINISTRY_NOTITLE': '大類三：事工負責人 - 無標題標籤 (自動流動)'
         };
         
-        // ── 🟢 修正點 2：確保留下招待、影音平行小組 ──
         const GROUP_OPTIONS = [
             '牧者團隊', '長老團隊', '風吉小組', '風潔小組', '風豪小組', '風光小組', '風發小組', 
             '風欣小組', '風楚小組', '風玲小組', '風梁小組', '風炎小組', 
@@ -246,7 +246,7 @@
         };
         
         state.entries = [
-            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大大力量，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的開境：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們，', forceNewPage: false }
+            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大大力量，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的開境：「作耶言華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。', forceNewPage: false, fontSizeMode: 'normal' }
         ];
 
         let renderTimer = null;
@@ -289,9 +289,9 @@
         function moveGroup(g, dir) { if (state.isLocked) return; ensureGroupOrder(); const idx = state.groupOrder.indexOf(g); const tIdx = dir === 'up' ? idx - 1 : idx + 1; if (tIdx >= 0 && tIdx < state.groupOrder.length) { [state.groupOrder[idx], state.groupOrder[tIdx]] = [state.groupOrder[tIdx], state.groupOrder[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
         function moveEntry(id, dir) { if (state.isLocked) return; const idx = state.entries.findIndex(e => e.id === id); const g = state.entries[idx].groupName; let gIdxs = state.entries.map((e,i) => e.groupName === g ? i : -1).filter(i => i !== -1); let pos = gIdxs.indexOf(idx); let tPos = dir === 'up' ? pos - 1 : pos + 1; if (tPos >= 0 && tPos < gIdxs.length) { [state.entries[idx], state.entries[gIdxs[tPos]]] = [state.entries[gIdxs[tPos]], state.entries[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
         function handleDelete(id) { if (state.isLocked) return; if (confirm('確定刪除？')) { state.entries = state.entries.filter(e => e.id !== id); state.activeId = state.entries.length ? state.entries[0].id : null; state.shouldAutoScroll = true; saveState(); render(); } }
-        function duplicateEntry(id, mode) { if(state.isLocked) { alert('目前排版已鎖定'); return; } const idx = state.entries.findIndex(e => e.id === id); const source = state.entries[idx]; const newId = Date.now().toString(); let newEntry = {}; if (mode === 'clone') { newEntry = { ...source, id: newId, name: source.name + ' (副本)', forceNewPage: false }; } else if (mode === 'same_group') { newEntry = { id: newId, layout: source.layout, groupName: source.groupName, name: '新肢體成員', role: source.role, title: source.title, headline: source.headline, content: '', forceNewPage: false }; } state.entries.splice(idx + 1, 0, newEntry); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
-        function addEntry() { if(state.isLocked) { alert('目前排版已鎖定'); return; } const newId = Date.now().toString(); state.entries.push({ id: newId, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...', forceNewPage: false }); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
-        function updateEntry(id, field, val) { if(state.isLocked) return; const entry = state.entries.find(e => e.id === id); if (entry) entry[field] = val; saveState(); if (['groupName', 'layout', 'role', 'title', 'forceNewPage'].includes(field)) { renderSidebar(); scheduleCanvasRender(); return; } scheduleCanvasRender(); }
+        function duplicateEntry(id, mode) { if(state.isLocked) { alert('目前排版已鎖定'); return; } const idx = state.entries.findIndex(e => e.id === id); const source = state.entries[idx]; const newId = Date.now().toString(); let newEntry = {}; if (mode === 'clone') { newEntry = { ...source, id: newId, name: source.name + ' (副本)', forceNewPage: false, fontSizeMode: source.fontSizeMode || 'normal' }; } else if (mode === 'same_group') { newEntry = { id: newId, layout: source.layout, groupName: source.groupName, name: '新肢體成員', role: source.role, title: source.title, headline: source.headline, content: '', forceNewPage: false, fontSizeMode: 'normal' }; } state.entries.splice(idx + 1, 0, newEntry); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
+        function addEntry() { if(state.isLocked) { alert('目前排版已鎖定'); return; } const newId = Date.now().toString(); state.entries.push({ id: newId, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...', forceNewPage: false, fontSizeMode: 'normal' }); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
+        function updateEntry(id, field, val) { if(state.isLocked) return; const entry = state.entries.find(e => e.id === id); if (entry) entry[field] = val; saveState(); if (['groupName', 'layout', 'role', 'title', 'forceNewPage', 'fontSizeMode'].includes(field)) { renderSidebar(); scheduleCanvasRender(); return; } scheduleCanvasRender(); }
         function getCanvasRelativeTop(el) { const canvas = document.getElementById('canvas'); let top = 0; while (el && el !== canvas) { top += el.offsetTop; el = el.offsetParent; } return top; }
         function handleEditorBlur() { requestAnimationFrame(() => { const editor = document.getElementById('editorUI'); if (editor && editor.contains(document.activeElement)) return; state.isEditing = false; renderCanvas(); }); }
         function chunkItemsIntoRows(items) { let rows = []; let curR = []; let curG = ""; items.forEach(it => { if (!it) return; if ((it.groupName || '未分配') !== curG || it.isFullWidth) { if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); curR = []; } curG = (it.groupName || '未分配'); } if (it.isFullWidth) { rows.push([it, "FULL_WIDTH"]); } else { curR.push(it); if (curR.length === 2) { rows.push(curR); curR = []; } } }); if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); } return rows; }
@@ -350,11 +350,19 @@
                         <div><label class="text-[11px] opacity-60 font-bold">稱謂</label><select onchange="updateEntry('${e.id}','title',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none">${TITLE_OPTIONS.map(t=>`<option value="${t}" ${e.title===t?'selected':''}>${t}</option>`).join('')}</select></div>
                     </div>
                     
-                    <div class="bg-slate-950/60 p-3 rounded-xl border border-white/10 mt-1">
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-white/10 mt-1 space-y-3">
                         <label class="flex items-center gap-2 text-xs text-gray-200 cursor-pointer select-none">
                             <input type="checkbox" onchange="updateEntry('${e.id}','forceNewPage',this.checked)" ${e.forceNewPage?'checked':''} class="accent-[#f0a802]"> 
                             <span class="text-[#f0a802] font-bold">✂️ 強制此篇起新頁 (手動分頁控制)</span>
                         </label>
+                        <div class="pt-1">
+                            <label class="text-[11px] opacity-60 font-bold block mb-1 text-gray-300">🔍 本篇文字大小微調 (長文防溢出)</label>
+                            <select onchange="updateEntry('${e.id}','fontSizeMode',this.value)" class="w-full bg-slate-800 p-2 rounded-lg text-xs text-white outline-none focus:border-[#f0a802]">
+                                <option value="normal" ${e.fontSizeMode==='normal'||!e.fontSizeMode?'selected':''}>標準級 (適合一般字數)</option>
+                                <option value="medium" ${e.fontSizeMode==='medium'?'selected':''}>精簡級 (適合字數偏多)</option>
+                                <option value="small" ${e.fontSizeMode==='small'?'selected':''}>緊湊級 (適合極多字長文)</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="${(e.layout==='MEMBER_NOTITLE'||e.layout==='PASTOR_NOTITLE'||e.layout==='MINISTRY_NOTITLE')?'hidden':''}"><label class="text-[11px] opacity-60 text-[#f0a802] font-bold">金句大標</label><input onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#f0a802]/10 border border-[#f0a802]/30 p-3 rounded-lg text-sm text-[#f0a802] font-serif font-black outline-none"/></div>
@@ -370,14 +378,16 @@
         function buildPastorItemHTML(item, showDivider = false) {
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
             const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
+            const sizeStyle = item.fontSizeMode === 'medium' ? 'font-size: 13.5px !important; line-height: 1.62 !important;' : (item.fontSizeMode === 'small' ? 'font-size: 12.5px !important; line-height: 1.45 !important;' : '');
             let divider = showDivider ? `<div class="w-full my-6 border-t border-dotted border-[#f0a802]/40 opacity-60"></div>` : '';
             return `<div class="pastor-item-block flex flex-col avoid-break" data-id="${item.id}">
                 ${item.layout!=='PASTOR_NOTITLE' && item.headline ? `<div class="headline-quote-box mb-4"><span class="text-[#f0a802] text-4xl font-black self-center -mt-1 font-serif">“</span><span class="text-[20px] px-4 text-center leading-relaxed flex-1 royal-title font-serif">${item.headline}</span><span class="text-[#f0a802] text-4xl font-black self-center mt-3 font-serif">”</span></div>` : ''}
                 <div class="text-center mb-4"><div class="inline-flex items-center gap-3 border-b-2 border-[#f0a802] pb-2 px-6 font-serif"><span class="text-[22px] book-name text-[#01177d]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${labelStr}</span></div></div>
-                <div class="pastor-content book-body-text mb-2">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.8em;">${p}</p>`).join('')}</div>
+                <div class="pastor-content book-body-text mb-2" style="${sizeStyle}">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.8em;">${p}</p>`).join('')}</div>
             </div>${divider}`;
         }
 
+        // ── 🟢 修正點 1：將自動排版分頁的實體高度臨界值全面從 820px 調降至 760px，給底部留出絕對安全的緩衝 ──
         function renderCanvas() {
             const container = document.getElementById('canvas'); if (!container || state.isEditing) return;
             ensureGroupOrder();
@@ -464,12 +474,13 @@
                 return pageContentHeight;
             }
 
+            // ── 🟢 修正點 1：死守 760px 排版臨界高，絕不硬塞長文到同一頁 ──
             function chunkPastorsIntoPages(pastors) {
                 let chunks = []; let currentChunk = [];
                 for (let i = 0; i < pastors.length; i++) {
                     let p = pastors[i];
                     if (currentChunk.length > 0) {
-                        if (p.forceNewPage || getPastorFlowHeight([...currentChunk, p]) > 820) {
+                        if (p.forceNewPage || getPastorFlowHeight([...currentChunk, p]) > 760) {
                             chunks.push(currentChunk);
                             currentChunk = [p];
                             continue;
@@ -486,7 +497,7 @@
                 for (let i = 0; i < members.length; i++) {
                     let m = members[i];
                     if (currentChunk.length > 0) {
-                        if (m.forceNewPage || getFlowHeight([...currentChunk, m]) > 820) {
+                        if (m.forceNewPage || getFlowHeight([...currentChunk, m]) > 760) {
                             chunks.push(currentChunk);
                             currentChunk = [m];
                             continue;
@@ -550,13 +561,13 @@
             const glowCorners = `<div class="corner-glow corner-top-right"></div><div class="corner-glow corner-bottom-left"></div>`;
             
             let shrinkStyle = "";
-            if (p.pageContentHeight > 800) {
-                if (p.pageContentHeight > 940) {
+            if (p.pageContentHeight > 740) {
+                if (p.pageContentHeight > 880) {
                     shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 13.5px !important; line-height: 1.48 !important; } #page_${pageIdSuffix} .headline-quote-box { padding: 0.75rem !important; margin-bottom: 0.75rem !important; min-height: 72px !important; } #page_${pageIdSuffix} .headline-quote-box .royal-title { font-size: 16px !important; } #page_${pageIdSuffix} .entry-card { padding-top: 4px !important; padding-bottom: 4px !important; }</style>`;
-                } else if (p.pageContentHeight > 860) {
+                } else if (p.pageContentHeight > 800) {
                     shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 13.8px !important; line-height: 1.58 !important; } #page_${pageIdSuffix} .headline-quote-box { padding: 1rem !important; margin-bottom: 1.25rem !important; }</style>`;
                 } else {
-                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 14.2px !important; line-height: 1.70 !important; }</style>`;
+                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 14.1px !important; line-height: 1.68 !important; }</style>`;
                 }
             }
 
@@ -581,7 +592,6 @@
                     return `<div class="w-full avoid-break"><div class="flex gap-[14mm] mb-3">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
                 }).join('');
                 
-                // ── 🟢 修正點 3：頁首依據版型自動判斷，若是事工負責人則將 ✦ ✦ 改為文字 ──
                 const firstItem = p.items[0];
                 const isMinistryLayout = firstItem && ['MINISTRY_TITLE', 'MINISTRY_NOTITLE'].includes(firstItem.layout);
                 const topRightContent = isMinistryLayout 
@@ -597,12 +607,13 @@
             if (!item) return '';
             const iden = item.role==='(一般組員)'?'':(item.role || ''); const tit = item.title==='(無稱謂)'?'':(item.title || '');
             const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
-            // ── 🟢 修正點 4：支援大類三有標題大標顯示 ──
             const hasTitle = ['MEMBER_TITLE', 'MINISTRY_TITLE'].includes(item.layout);
+            // ── 🟢 修正點 2：在卡片生成時注入微調樣式 ──
+            const sizeStyle = item.fontSizeMode === 'medium' ? 'font-size: 13.5px !important; line-height: 1.62 !important;' : (item.fontSizeMode === 'small' ? 'font-size: 12.5px !important; line-height: 1.45 !important;' : '');
             return `<div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
                 <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black shadow-sm font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${labelStr}</span></div></div>
                 ${hasTitle&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
-                <div class="book-body-text pastor-content w-full px-1">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
+                <div class="book-body-text pastor-content w-full px-1" style="${sizeStyle}">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-3 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
 
@@ -610,12 +621,13 @@
             if(!item) return '';
             const iden = item.role==='(一般組員)'?'':(item.role || ''); const tit = item.title==='(無稱謂)'?'':(item.title || '');
             const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
-            // ── 🟢 修正點 5：支援大類三有標題大標顯示 ──
             const hasTitle = ['MEMBER_TITLE', 'MINISTRY_TITLE'].includes(item.layout);
+            // ── 🟢 修正點 2：在卡片生成時注入微調樣式 ──
+            const sizeStyle = item.fontSizeMode === 'medium' ? 'font-size: 13.5px !important; line-height: 1.62 !important;' : (item.fontSizeMode === 'small' ? 'font-size: 12.5px !important; line-height: 1.45 !important;' : '');
             return `<div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
                 <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${labelStr}</span></div></div>
                 ${hasTitle&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
-                <div class="book-body-text flex-1 px-1">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
+                <div class="book-body-text flex-1 px-1" style="${sizeStyle}">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-3 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
 
