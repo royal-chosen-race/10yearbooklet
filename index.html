@@ -225,12 +225,13 @@
             'MEMBER_NOTITLE': '大類二：肢體同工版 - 無標題標籤 (自動流動)'
         };
         
+        // ── 🟢 修正點 3：新增「事工負責人」、「招待」、「影音」平行小組區段 ──
         const GROUP_OPTIONS = [
             '牧者團隊', '長老團隊', '風吉小組', '風潔小組', '風豪小組', '風光小組', '風發小組', 
             '風欣小組', '風楚小組', '風玲小組', '風梁小組', '風炎小組', 
-            '風誠小組', '風慢小組', '風大小組', '風冠小組', '風鳳小組', 
+            '風誠小組', '風鈞小組', '風大小組', '風冠小組', '風鳳小組', 
             '風儒小組', '風青小組', '銀寶團契', '風隴小組', '風勇小組', 
-            '風娟小組'
+            '風娟小組', '招待', '影音'
         ];
 
         const ROLE_OPTIONS = ['(一般組員)', '主任牧師', '牧師', '長老', '師母', '傳道', '小組長', '副小組長', '區長'];
@@ -365,10 +366,12 @@
 
         function buildPastorItemHTML(item, showDivider = false) {
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
+            // ── 🟢 修正點 2：將排版順序一律改為 [姓名] [稱謂] [職分] ──
+            const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
             let divider = showDivider ? `<div class="w-full my-6 border-t border-dotted border-[#f0a802]/40 opacity-60"></div>` : '';
             return `<div class="pastor-item-block flex flex-col avoid-break" data-id="${item.id}">
                 ${item.layout!=='PASTOR_NOTITLE' && item.headline ? `<div class="headline-quote-box mb-4"><span class="text-[#f0a802] text-4xl font-black self-center -mt-1 font-serif">“</span><span class="text-[20px] px-4 text-center leading-relaxed flex-1 royal-title font-serif">${item.headline}</span><span class="text-[#f0a802] text-4xl font-black self-center mt-3 font-serif">”</span></div>` : ''}
-                <div class="text-center mb-4"><div class="inline-flex items-center gap-3 border-b-2 border-[#f0a802] pb-2 px-6 font-serif"><span class="text-[22px] book-name text-[#01177d]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${iden} ${tit}</span></div></div>
+                <div class="text-center mb-4"><div class="inline-flex items-center gap-3 border-b-2 border-[#f0a802] pb-2 px-6 font-serif"><span class="text-[22px] book-name text-[#01177d]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${labelStr}</span></div></div>
                 <div class="pastor-content book-body-text mb-2">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.8em;">${p}</p>`).join('')}</div>
             </div>${divider}`;
         }
@@ -422,7 +425,6 @@
                     let bal = []; while(regular.length){ bal.push(regular.shift()); if(regular.length) bal.push(regular.pop()); }
                     members = [...leaders, ...bal];
                 } else {
-                    // 🟢 修正點 2：若關閉智慧排版，嚴格尊重手冊自然名單排序，不強制干預職分先後
                     members.sort((a, b) => state.entries.findIndex(x => x.id === a.id) - state.entries.findIndex(x => x.id === b.id));
                 }
                 finalQueue.push(...pastors, ...members);
@@ -434,15 +436,10 @@
                 whiteLayer.style.padding = "14mm 16mm 16mm 16mm";
                 let grid = document.createElement('div'); grid.className = "grid-flow-engine";
                 let rows = chunkItemsIntoRows(items);
-                let testLastG = "";
+                // ── 🟢 修正點 1：拿掉 getFlowHeight 內的橫槓標題區段 ──
                 grid.innerHTML = rows.map(r => {
-                    let banner = ''; 
-                    if (r[0] && (r[0].groupName || '未分配') !== testLastG) { 
-                        banner = `<div class="flex items-center gap-4 mb-4 font-serif text-[#01177d] w-full"><span class="text-sm font-black tracking-widest">${r[0].groupName || '未分配'}</span><div class="h-[1px] bg-gradient-to-r from-[#f0a802]/60 to-transparent flex-1"></div></div>`; 
-                        testLastG = (r[0].groupName || '未分配'); 
-                    }
-                    if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${banner}${buildFullWidthCardHTMLString(r[0])}</div>`;
-                    return `<div class="w-full avoid-break">${banner}<div class="flex gap-[14mm] mb-3">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
+                    if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${buildFullWidthCardHTMLString(r[0])}</div>`;
+                    return `<div class="w-full avoid-break"><div class="flex gap-[14mm] mb-3">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
                 }).join('');
                 whiteLayer.appendChild(grid); 
                 testPage.appendChild(whiteLayer); 
@@ -466,13 +463,11 @@
                 return pageContentHeight;
             }
 
-            // ── 🟢 修正點 1：升級為動態流式累積演算法，完美融合「實體高度測量」與「手動強制分頁」 ──
             function chunkPastorsIntoPages(pastors) {
                 let chunks = []; let currentChunk = [];
                 for (let i = 0; i < pastors.length; i++) {
                     let p = pastors[i];
                     if (currentChunk.length > 0) {
-                        // 如果手動勾選強制新頁，或者加進來後高度會炸掉，就切分出來
                         if (p.forceNewPage || getPastorFlowHeight([...currentChunk, p]) > 820) {
                             chunks.push(currentChunk);
                             currentChunk = [p];
@@ -490,7 +485,6 @@
                 for (let i = 0; i < members.length; i++) {
                     let m = members[i];
                     if (currentChunk.length > 0) {
-                        // 核心：若該篇被勾選了手動分頁，或者合併後高度 > 820px 安全值，則立即開拓新頁
                         if (m.forceNewPage || getFlowHeight([...currentChunk, m]) > 820) {
                             chunks.push(currentChunk);
                             currentChunk = [m];
@@ -580,11 +574,11 @@
                         ${pastorsHTML}
                     </div></div>`;
             } else {
-                let rows = chunkItemsIntoRows(p.items); let lastG = "";
+                let rows = chunkItemsIntoRows(p.items);
+                // ── 🟢 修正點 1：拿掉 buildPageHTML 內的橫槓標題區段 ──
                 let gridHTML = rows.map(r => {
-                    let banner = ''; if (r[0] && (r[0].groupName || '未分配') !== lastG) { banner = `<div class="flex items-center gap-4 mb-3 font-serif text-[#01177d] w-full"><span class="text-sm font-black tracking-widest">${r[0].groupName || '未分配'}</span><div class="h-[1px] bg-gradient-to-r from-[#f0a802]/60 to-transparent flex-1"></div></div>`; lastG = (r[0].groupName || '未分配'); }
-                    if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${banner}${buildFullWidthCardHTMLString(r[0])}</div>`;
-                    return `<div class="w-full avoid-break">${banner}<div class="flex gap-[14mm] mb-3">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
+                    if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${buildFullWidthCardHTMLString(r[0])}</div>`;
+                    return `<div class="w-full avoid-break"><div class="flex gap-[14mm] mb-3">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
                 }).join('');
                 inner = `<div class="white-layer" style="${pd}"><div class="flex justify-between border-b border-gray-200 pb-2 mb-4 font-serif"><div class="text-[12.5px] font-black text-[#01177d]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會 10 週年紀念</span></div><div class="text-[#f0a802] text-lg opacity-60">✦ ✦</div></div><div class="flex-1 overflow-hidden pt-1 grid-flow-engine">${gridHTML}</div></div>`;
             }
@@ -594,8 +588,10 @@
         function buildFullWidthCardHTMLString(item) {
             if (!item) return '';
             const iden = item.role==='(一般組員)'?'':(item.role || ''); const tit = item.title==='(無稱謂)'?'':(item.title || '');
+            // ── 🟢 修正點 2：將排版順序一律改為 [姓名] [稱謂] [職分] ──
+            const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
             return `<div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black shadow-sm font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
+                <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black shadow-sm font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${labelStr}</span></div></div>
                 ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
                 <div class="book-body-text pastor-content w-full px-1">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-3 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
@@ -604,8 +600,10 @@
         function buildCardHTMLString(item) {
             if(!item) return '';
             const iden = item.role==='(一般組員)'?'':(item.role || ''); const tit = item.title==='(無稱謂)'?'':(item.title || '');
+            // ── 🟢 修正點 2：將排版順序一律改為 [姓名] [稱謂] [職分] ──
+            const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
             return `<div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${iden} ${tit}</span></div></div>
+                <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${labelStr}</span></div></div>
                 ${item.layout==='MEMBER_TITLE'&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
                 <div class="book-body-text flex-1 px-1">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
                 <div class="w-full mt-3 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
