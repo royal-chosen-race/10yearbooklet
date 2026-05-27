@@ -540,8 +540,15 @@ for (let i = 0; i < consecutiveMembers.length; i++) {
     }
 
     if (currentChunk.length === 0) {
-        currentChunk.push(m); leftColH = h; continue;
-    }
+
+    currentChunk.push({
+        ...m,
+        __column: 'left'
+    });
+
+    leftColH = h;
+    continue;
+}
 
     // 哪一欄目前比較短，就塞哪一欄
 const putLeft = leftColH <= rightColH;
