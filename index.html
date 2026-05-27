@@ -49,46 +49,63 @@
             isolation: isolate; /* 徹底隔離底層光暈，阻斷方形圖層混合 Bug */
         }
 
-        /* Pure CSS 演色性光暈 */
         .corner-glow {
-            position: absolute;
-            z-index: 1;
-            pointer-events: none;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
+            position: absolute; z-index: 1; pointer-events: none;
         }
-
         .corner-top-right {
             top: -20mm; right: -20mm; width: 160mm; height: 160mm;
-            background: radial-gradient(circle at top right, rgba(232,160,2,0.92) 0%, rgba(232,160,2,0.45) 28%, rgba(232,160,2,0.18) 48%, rgba(232,160,2,0.06) 62%, rgba(232,160,2,0) 78%);
+            background: radial-gradient(circle at top right, rgba(232,160,2,0.92) 0%, rgba(232,160,2,0.45) 28%, rgba(232,160,2,0.18) 48%, rgba(232,160,2,0) 78%);
         }
-
         .corner-bottom-left {
             left: -22mm; bottom: -22mm; width: 170mm; height: 170mm;
-            background: radial-gradient(circle at bottom left, rgba(232,160,2,0.92) 0%, rgba(232,160,2,0.45) 28%, rgba(232,160,2,0.18) 48%, rgba(232,160,2,0.06) 62%, rgba(232,160,2,0) 78%);
+            background: radial-gradient(circle at bottom left, rgba(232,160,2,0.92) 0%, rgba(232,160,2,0.45) 28%, rgba(232,160,2,0.18) 48%, rgba(232,160,2,0) 78%);
         }
 
         #printArea { position: fixed; left: -999999px; top: 0; visibility: hidden; }
         .grid-flow-engine { width: 100%; display: flex; flex-direction: column; }
         .pastor-content { column-count: 2; column-gap: 16mm; column-rule: 1px dotted rgba(217,164,65,0.25); }
 
+        /* ── 🟢 修正點 1：全域改用絕對穩定的出版級 CSS Grid 雙軌網格，走道有感拓寬至大氣的 16mm ── */
+        .member-column-flow {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16mm;
+            width: 100%;
+        }
+        .member-column-flow > div {
+            break-inside: avoid;
+            -webkit-column-break-inside: avoid;
+            page-break-inside: avoid;
+            display: block;
+            width: 100%;
+        }
+
         p { orphans: 2 !important; widows: 2 !important; margin-bottom: 6px; }
         h2, h3, .avoid-break { break-inside: avoid; page-break-inside: avoid; break-after: avoid !important; }
         
-        .entry-card { background: #ffffff; border-radius: 12px; padding: 8px 0px 10px 0px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        /* ── 🟢 修正點 2：卡片加入 padding 左右安全氣墊，防止齊行文字在中央走道「硬碰硬」相撞 ── */
+        .entry-card { background: #ffffff; border-radius: 12px; padding: 6px 4px 8px 4px; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
-        /* 統一出版級字體核心系統 */
+        /* ── 絕對一體化出版級字體系統（統一14px大字，僅保留雙階行距微調） ── */
         .book-body-text {
             font-family: 'Noto Sans TC', sans-serif !important;
-            font-size: 14.2px !important;
-            line-height: 1.92 !important;
-            letter-spacing: 0.02em !important;
+            font-size: 14px !important; /* 全書字級完全等大，絕對物盡其用 */
             font-weight: 400 !important;
             color: #374151 !important;
             text-align: justify !important;
             word-break: break-word !important;
             text-rendering: geometricPrecision !important;
             -webkit-font-smoothing: antialiased !important;
+        }
+        /* 標準行距模式 */
+        .lh-normal {
+            line-height: 1.75 !important;
+            letter-spacing: 0.015em !important;
+        }
+        /* 緊湊行距模式 */
+        .lh-compact {
+            line-height: 1.55 !important;
+            letter-spacing: 0.005em !important;
         }
 
         .book-serif-title {
@@ -106,20 +123,18 @@
         }
 
         .royal-title { font-family: 'Noto Serif TC', serif !important; font-weight: 900 !important; color: var(--primary-blue); letter-spacing: 0.05em; }
-        .royal-headline { font-family: 'Noto Serif TC', serif !important; color: #0A2B66; font-weight: 900 !important; font-size: 18px !important; line-height: 1.55 !important; letter-spacing: 0.035em !important; text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; }
+        .royal-headline { font-family: 'Noto Serif TC', serif !important; color: #0A2B66; font-weight: 900 !important; font-size: 18px !important; line-height: 1.60 !important; letter-spacing: 0.035em !important; }
 
+        /* 金句大標外框「矮化」精簡 */
         .headline-quote-box {
             font-family: 'Noto Serif TC', serif !important; user-select: none; -webkit-user-select: none;
-            margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: center; padding: 1.25rem;
-            border: 1px solid rgba(217, 164, 65, 0.3); background-color: rgba(217, 164, 65, 0.06); border-radius: 1.25rem;
-            position: relative; max-width: 92%; margin: 0 auto 1.75rem; min-height: 86px;
+            margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: center; padding: 0.5rem 1.25rem;
+            border: 1px solid rgba(217, 164, 65, 0.3); background-color: rgba(217, 164, 65, 0.06); border-radius: 0.75rem;
+            position: relative; max-width: 92%; margin: 0 auto 0.75rem; min-height: 60px;
         }
         .headline-quote-box * { user-select: none; -webkit-user-select: none; }
         #canvas ::selection { background: transparent !important; color: inherit !important; }
         #canvas ::-webkit-selection { background: transparent !important; color: inherit !important; }
-
-        .star { position: absolute; border-radius: 50%; background: var(--primary-yellow); animation: twinkle 4s infinite ease-in-out; }
-        @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.1); } }
 
         @media print {
             @page { size: A4; margin: 0; }
@@ -130,12 +145,20 @@
             .preview-area { display: block !important; width: 100% !important; height: auto !important; overflow: visible !important; background: white !important; }
             #canvas { display: none !important; }
             #printArea, #printArea.hidden { display: block !important; visibility: visible !important; position: static !important; width: 100% !important; }
-            .book-page { width: 210mm !important; height: 297mm !important; margin: 0 !important; page-break-after: always !important; break-after: page !important; box-shadow: none !important; overflow: hidden !important; display: flex !important; }
+            .book-page { width: 210mm !important; height: 297mm !important; margin: 0 !important; page-break-after: always !important; box-shadow: none !important; overflow: hidden !important; }
             html { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             body { background: #01177d !important; width: auto !important; height: auto !important; overflow: visible !important; }
             .book-page { background: #01177d !important; position: relative !important; }
             .corner-glow { opacity: 1 !important; visibility: visible !important; display: block !important; }
             .entry-card, .rounded-full, div { box-shadow: none !important; text-shadow: none !important; }
+
+            .member-column-flow {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 16mm !important;
+            }
+            .member-column-flow > div { break-inside: avoid !important; page-break-inside: avoid !important; }
+            * { box-shadow: none !important; text-shadow: none !important; transform: none !important; will-change: auto !important; }
         }
     </style>
 </head>
@@ -152,8 +175,8 @@
             </div>
         </div>
         
-        <div id="safetyBadge" class="ml-8 px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500 text-emerald-400 text-xs font-bold flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 系統狀態：出版編排安全 (✓ 已自動儲存)
+        <div id="safetyBadge" class="ml-8 px-4 py-1.5 rounded-full bg-slate-900 border border-[#D9A441]/40 text-gray-300 text-xs font-bold flex items-center gap-2">
+            📊 本書數據：<span id="lblTotalCount" class="text-[#FBBF24]">0</span> 位肢體感言 ｜ 共 <span id="lblTotalPages" class="text-[#FBBF24]">0</span> 頁完稿紙張
         </div>
 
         <div class="ml-auto flex gap-3 whitespace-nowrap items-center">
@@ -163,10 +186,10 @@
             
             <div class="h-6 w-[1px] bg-white/10 mx-1"></div>
             
-            <button onclick="toggleViewMode()" class="px-4 py-2 rounded-lg border border-white/20 text-white/80 text-sm font-medium hover:bg-white/10 transition-colors">
-                切換至 <span id="lblViewMode">單頁</span> 視角
+            <button onclick="location.reload()" class="px-4 py-2 rounded-lg border border-white/20 text-white/80 text-sm font-medium hover:bg-white/10 transition-colors">
+                🔄 重新整理頁面
             </button>
-            <button id="btnExportPdf" onclick="exportPDF()" class="px-6 py-2 rounded-full bg-gradient-to-r from-[#D9A441] to-[#D97706] text-white font-bold text-sm hover:scale-105 transition-all shadow-lg">📥 匯出印刷 PDF</button>
+            <button id="btnExportPdf" class="px-6 py-2 rounded-full bg-gradient-to-r from-[#D9A441] to-[#D97706] text-white font-bold text-sm hover:scale-105 transition-all shadow-lg" onclick="exportPDF()">📥 匯出印刷 PDF</button>
         </div>
     </header>
 
@@ -175,25 +198,10 @@
             <div class="p-4 border-b border-white/10 shrink-0 space-y-3">
                 <div class="text-[10px] font-bold text-[#D9A441] uppercase tracking-widest">肢體名單 (手動排序)</div>
                 <input type="text" id="searchFilter" oninput="renderSidebar()" placeholder="🔍 搜尋姓名小組..." class="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-xs text-white outline-none focus:border-[#D9A441]">
-                
-                <div class="bg-slate-900/60 p-2.5 rounded-xl border border-white/5 space-y-2">
-                    <label class="flex items-center gap-2 text-[11px] text-gray-300 cursor-pointer select-none">
-                        <input type="checkbox" id="chkSmartSort" onchange="state.smartSort = this.checked; saveState(); renderCanvas();" class="accent-[#D9A441]"> 智慧對稱平衡排版
-                    </label>
-                    <label class="flex items-center gap-2 text-[11px] text-gray-300 cursor-pointer select-none">
-                        <input type="checkbox" id="chkLockLayout" onchange="state.isLocked = this.checked; saveState(); renderSidebar(); renderEditor();" class="accent-[#D9A441]"> 🔒 鎖定全書目前頁面流動
-                    </label>
-                </div>
             </div>
-            
             <div id="sidebarList" class="flex-1 space-y-1.5 overflow-y-auto px-4 py-2"></div>
-            
             <div class="p-4 border-t border-white/10 shrink-0">
                 <button id="btnAddEntryBtn" onclick="addEntry()" class="w-full py-2.5 border border-dashed border-[#D9A441]/50 text-[#D9A441] text-xs font-bold rounded-xl hover:bg-[#D9A441]/10 transition-all">＋ 新增肢體感言</button>
-            </div>
-            <div class="p-4 bg-black/40 text-center shrink-0 border-t border-white/5">
-                <div class="text-3xl font-serif text-[#D9A441] font-black" id="statCount">0</div>
-                <div class="text-[10px] text-white/40 font-sans tracking-widest">TOTAL TESTIMONIES</div>
             </div>
         </aside>
 
@@ -203,7 +211,7 @@
             <div class="preview-nav h-12 bg-white/5 border-b border-white/10 flex items-center px-6 justify-between shrink-0 no-print">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span class="text-[10px] text-white/40 uppercase tracking-widest font-bold">A4 實體出版物預覽 (DOM 實體高度排版)</span>
+                    <span class="text-[10px] text-white/40 uppercase tracking-widest font-bold">A4 實體出版物預覽 (縱向雙欄流式引擎)</span>
                 </div>
                 <div class="flex items-center gap-4">
                     <button onclick="adjustZoom(-10)" class="text-white/40 hover:text-white font-bold text-xl">－</button>
@@ -211,7 +219,7 @@
                     <button onclick="adjustZoom(10)" class="text-white/40 hover:text-white font-bold text-xl">＋</button>
                 </div>
             </div>
-            <div id="scrollViewport" class="flex-1 overflow-auto p-12 flex flex-col items-center scroll-smooth bg-slate-950 w-full no-print">
+            <div id="scrollViewport" class="flex-1 overflow-auto p-12 flex flex-col items-center bg-slate-950 w-full no-print">
                 <div id="canvas" class="origin-top transition-transform duration-200"></div>
             </div>
         </section>
@@ -221,16 +229,13 @@
 
     <script>
         const LAYOUTS = {
-            'PASTOR': '大類一：牧者/長老專屬版 (獨立滿版頁)',
-            'PASTOR_NOTITLE': '大類一：牧者/長老專屬版 - 無標題金句 (獨立滿版頁)',
-            'MEMBER_TITLE': '大類二：肢體同工版 - 有標題金句 (自動流動)',
-            'MEMBER_NOTITLE': '大類二：肢體同工版 - 無標題標籤 (自動流動)',
-            'MINISTRY_TITLE': '大類三：事工負責人 - 有標題標籤 (自動流動)',
-            'MINISTRY_NOTITLE': '大類三：事工負責人 - 無標題標籤 (自動流動)'
+            'LEADER': '大類一與二：牧者/長老/領袖版型',
+            'MEMBER': '大類二：肢體同工常規版型',
+            'MINISTRY': '大類三：事工負責人專屬版型'
         };
         
         const GROUP_OPTIONS = [
-            '牧者團隊', '長老團隊', '風吉小組', '風潔小組', '風豪小組', '風光小組', '風發小組', 
+            '長老團隊', '牧者團隊', '風吉小組', '風潔小組', '風豪小組', '風光小組', '風發小組', 
             '風欣小組', '風楚小組', '風玲小組', '風梁小組', '風炎小組', 
             '風誠小組', '風鈞小組', '風大小組', '風冠小組', '風鳳小組', 
             '風儒小組', '風青小組', '銀寶團契', '風隴小組', '風勇小組', 
@@ -241,60 +246,94 @@
         const TITLE_OPTIONS = ['(無稱謂)', '弟兄', '姊妹'];
 
         let state = {
-            zoom: 80, activeId: '1', viewMode: 'spread', smartSort: false, isLocked: false,
-            collapsedGroups: {}, lastScrolledId: null, groupOrder: [], isEditing: false, shouldAutoScroll: false
+            zoom: 80, activeId: '1', viewMode: 'spread', collapsedGroups: {}, groupOrder: [], isEditing: false, shouldAutoScroll: false
         };
         
         state.entries = [
-            { id: '1', layout: 'PASTOR', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫和恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大大力量，於2016年6月11日成立「中華風一族職場教會」。\n\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的開境：「作耶言華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。', forceNewPage: false, fontSizeMode: 'normal' }
+            { id: '1', type: 'LEADER', groupName: '牧者團隊', name: '葉志偉', role: '主任牧師', title: '(無稱謂)', headline: '從施洗約翰到以利亞', content: '因著神的憐憫 and 恩典的帶領，2011年我開始成立職場讀經小組，靠著主的大能大力，於2016年6月11日成立「中華風一族職場教會」。\n從一開始懷著施洗約翰的心志，在職場上傳：「天國近了，你們應該悔改」的信息，到經歷以利亞的困境‌：「作耶和華的僕人，只剩下我一個人了…」感謝神，祂讓我知道祂為自己留下七千人，是未曾向巴力屈膝。\n這十年來經歷過許多的高山低谷、苦辣酸甜，每當想到愛我的主耶穌，祂都看見，祂都知道，祂仍然掌權，就讓我得到無比的安慰和繼續奔跑的力量。\n我慢不是新約福音的開路先鋒，也非以色列的战車馬兵，但我願意一生成為神良善忠心的僕人，在風一族職場教會裏，忠心地服事神的家。\n恩典浩大，憐憫無窮，但願一切榮耀歸給愛我的主耶穌基督，阿們。', forceNewPage: false, showHeadline: true, autoCompact: false }
         ];
+
+        // 數據轉換平滑移植引擎
+        function migrateLegacyData(entries) {
+            return entries.map(e => {
+                if (e.layout) {
+                    if (e.layout.includes('PASTOR')) e.type = 'LEADER';
+                    else if (e.layout.includes('MINISTRY')) e.type = 'MINISTRY';
+                    else e.type = 'MEMBER';
+                    e.showHeadline = !e.layout.includes('NOTITLE');
+                    e.autoCompact = (e.fontSizeMode === 'compact' || e.lineHeightMode === 'compact' || e.fontSizeMode === 'medium' || e.fontSizeMode === 'small');
+                    delete e.layout; delete e.fontSizeMode; delete e.lineHeightMode;
+                }
+                if (e.showHeadline === undefined) e.showHeadline = true;
+                if (e.autoCompact === undefined) e.autoCompact = false;
+                return e;
+            });
+        }
 
         let renderTimer = null;
         function scheduleCanvasRender() {
             clearTimeout(renderTimer);
-            renderTimer = setTimeout(() => { renderCanvas(); }, 300);
+            renderTimer = setTimeout(() => { renderCanvas(); }, 150);
         }
 
-        async function exportPDF() {
-            if (document.activeElement) { document.activeElement?.blur(); }
-            state.isEditing = false;
-            renderCanvas();
-            await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-            const printArea = document.getElementById('printArea');
-            printArea.style.visibility = 'visible';
-            void printArea.offsetHeight;
-            await document.fonts.ready;
-            try {
-                await Promise.all([
-                    document.fonts.load('600 14px "Noto Serif TC"'),
-                    document.fonts.load('700 14px "Noto Serif TC"'),
-                    document.fonts.load('900 22px "Noto Serif TC"'),
-                    document.fonts.load('400 14px "Noto Sans TC"'),
-                    document.fonts.load('700 14px "Noto Sans TC"')
-                ]);
-            } catch (e) { console.warn("字體加載延遲", e); }
-            renderCanvas();
-            setTimeout(() => { window.print(); }, 150);
-        }
-
-        function exportDataJson() { ensureGroupOrder(); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state)); const downloadAnchor = document.createElement('a'); downloadAnchor.setAttribute("href", dataStr); const timeStamp = new Date().toISOString().slice(0,10); downloadAnchor.setAttribute("download", `風一族手冊專案備份_${timeStamp}.json`); document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove(); }
+        function exportDataJson() { ensureGroupOrder(); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state)); const downloadAnchor = document.createElement('a'); downloadAnchor.setAttribute("href", dataStr); const timeStamp = new Date().toISOString().slice(0,10); downloadAnchor.setAttribute("download", `風一族手冊專案備份_${timeStamp}.json`); downloadAnchor.click(); downloadAnchor.remove(); }
         function triggerImportJson() { document.getElementById('hideJsonImporter').click(); }
-        function importDataJson(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const importedState = JSON.parse(e.target.result); if (importedState && Array.isArray(importedState.entries)) { state = { ...state, ...importedState }; saveState(); render(); alert(`🎉 專案導入成功！已成功載入 ${state.entries.length} 筆肢體感言數據。`); } else { alert("❌ 錯誤檔案"); } } catch (err) { alert("❌ 導入失敗"); } }; reader.readAsText(file); event.target.value = ''; }
-        function ensureGroupOrder() { if (!state.groupOrder || !Array.isArray(state.groupOrder) || state.groupOrder.length === 0) { state.groupOrder = [...GROUP_OPTIONS]; } state.entries.forEach(e => { if (e.groupName && !state.groupOrder.includes(e.groupName)) { state.groupOrder.push(e.groupName); } }); }
-        function saveState() { ensureGroupOrder(); localStorage.setItem('royalChosenRaceBooklet', JSON.stringify({ zoom: state.zoom, activeId: state.activeId, viewMode: state.viewMode, smartSort: state.smartSort, isLocked: state.isLocked, collapsedGroups: state.collapsedGroups, entries: state.entries, groupOrder: state.groupOrder })); }
-        function loadState() { const saved = localStorage.getItem('royalChosenRaceBooklet'); if (saved) { try { const parsed = JSON.parse(saved); if (parsed && Array.isArray(parsed.entries) && parsed.entries.length > 0) { state.entries = parsed.entries; state.activeId = parsed.activeId || state.entries[0].id; state.zoom = parsed.zoom || 80; state.viewMode = parsed.viewMode || 'spread'; state.smartSort = parsed.smartSort || false; state.isLocked = parsed.isLocked || false; state.collapsedGroups = parsed.collapsedGroups || {}; state.groupOrder = parsed.groupOrder || []; } ensureGroupOrder(); setTimeout(() => { if(document.getElementById('chkSmartSort')) document.getElementById('chkSmartSort').checked = state.smartSort; if(document.getElementById('chkLockLayout')) document.getElementById('chkLockLayout').checked = state.isLocked; }, 50); } catch(e) { console.error(e); } } else { ensureGroupOrder(); } }
-        function render() { renderSidebar(); renderEditor(); renderCanvas(); const canvas = document.getElementById('canvas'); if (canvas) canvas.style.transform = `scale(${state.zoom / 100})`; }
+        
+        function importDataJson(event) { 
+            const file = event.target.files[0]; 
+            if (!file) return; 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                try { 
+                    const importedState = JSON.parse(e.target.result); 
+                    if (importedState && Array.isArray(importedState.entries)) { 
+                        importedState.entries = migrateLegacyData(importedState.entries); 
+                        state = { ...state, ...importedState }; 
+                        saveState(); 
+                        render(); 
+                        alert(`🎉 專案導入成功！已成功載入 ${state.entries.length} 筆肢體感言數據。`); 
+                    } else { 
+                        alert("❌ 錯誤檔案格式"); 
+                    } 
+                } catch (err) { 
+                    alert("❌ 導入失敗，請檢查檔案結構"); 
+                } 
+            }; 
+            reader.readAsText(file); 
+            event.target.value = ''; 
+        }
+
+        function ensureGroupOrder() { if (!state.groupOrder || state.groupOrder.length === 0) { state.groupOrder = [...GROUP_OPTIONS]; } }
+        function saveState() { ensureGroupOrder(); localStorage.setItem('royalChosenRaceBookletV3', JSON.stringify({ zoom: state.zoom, activeId: state.activeId, collapsedGroups: state.collapsedGroups, entries: state.entries, groupOrder: state.groupOrder })); }
+        function loadState() { const saved = localStorage.getItem('royalChosenRaceBookletV3'); if (saved) { try { const parsed = JSON.parse(saved); if (parsed && Array.isArray(parsed.entries)) { state.entries = migrateLegacyData(parsed.entries); state.activeId = parsed.activeId || state.entries[0].id; state.zoom = parsed.zoom || 80; state.collapsedGroups = parsed.collapsedGroups || {}; state.groupOrder = parsed.groupOrder || []; } ensureGroupOrder(); } catch(e) { console.error(e); } } else { ensureGroupOrder(); } }
+        function render() { renderSidebar(); renderEditor(); renderCanvas(); }
         function adjustZoom(v) { state.zoom = Math.max(30, Math.min(200, state.zoom + v)); document.getElementById('zoomVal').innerText = `${state.zoom}%`; document.getElementById('canvas').style.transform = `scale(${state.zoom / 100})`; saveState(); }
-        function toggleViewMode() { state.viewMode = state.viewMode === 'spread' ? 'single' : 'spread'; saveState(); state.lastScrolledId = null; renderCanvas(); }
-        function moveGroup(g, dir) { if (state.isLocked) return; ensureGroupOrder(); const idx = state.groupOrder.indexOf(g); const tIdx = dir === 'up' ? idx - 1 : idx + 1; if (tIdx >= 0 && tIdx < state.groupOrder.length) { [state.groupOrder[idx], state.groupOrder[tIdx]] = [state.groupOrder[tIdx], state.groupOrder[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
-        function moveEntry(id, dir) { if (state.isLocked) return; const idx = state.entries.findIndex(e => e.id === id); const g = state.entries[idx].groupName; let gIdxs = state.entries.map((e,i) => e.groupName === g ? i : -1).filter(i => i !== -1); let pos = gIdxs.indexOf(idx); let tPos = dir === 'up' ? pos - 1 : pos + 1; if (tPos >= 0 && tPos < gIdxs.length) { [state.entries[idx], state.entries[gIdxs[tPos]]] = [state.entries[gIdxs[tPos]], state.entries[idx]]; state.shouldAutoScroll = true; saveState(); render(); } }
-        function handleDelete(id) { if (state.isLocked) return; if (confirm('確定刪除？')) { state.entries = state.entries.filter(e => e.id !== id); state.activeId = state.entries.length ? state.entries[0].id : null; state.shouldAutoScroll = true; saveState(); render(); } }
-        function duplicateEntry(id, mode) { if(state.isLocked) { alert('目前排版已鎖定'); return; } const idx = state.entries.findIndex(e => e.id === id); const source = state.entries[idx]; const newId = Date.now().toString(); let newEntry = {}; if (mode === 'clone') { newEntry = { ...source, id: newId, name: source.name + ' (副本)', forceNewPage: false, fontSizeMode: source.fontSizeMode || 'normal' }; } else if (mode === 'same_group') { newEntry = { id: newId, layout: source.layout, groupName: source.groupName, name: '新肢體成員', role: source.role, title: source.title, headline: source.headline, content: '', forceNewPage: false, fontSizeMode: 'normal' }; } state.entries.splice(idx + 1, 0, newEntry); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
-        function addEntry() { if(state.isLocked) { alert('目前排版已鎖定'); return; } const newId = Date.now().toString(); state.entries.push({ id: newId, layout: 'MEMBER_TITLE', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩感言...', forceNewPage: false, fontSizeMode: 'normal' }); state.activeId = newId; state.shouldAutoScroll = true; saveState(); render(); }
-        function updateEntry(id, field, val) { if(state.isLocked) return; const entry = state.entries.find(e => e.id === id); if (entry) entry[field] = val; saveState(); if (['groupName', 'layout', 'role', 'title', 'forceNewPage', 'fontSizeMode'].includes(field)) { renderSidebar(); scheduleCanvasRender(); return; } scheduleCanvasRender(); }
+        function moveGroup(g, dir) { ensureGroupOrder(); const idx = state.groupOrder.indexOf(g); const tIdx = dir === 'up' ? idx - 1 : idx + 1; if (tIdx >= 0 && tIdx < state.groupOrder.length) { [state.groupOrder[idx], state.groupOrder[tIdx]] = [state.groupOrder[tIdx], state.groupOrder[idx]]; saveState(); render(); } }
+        function moveEntry(id, dir) { const idx = state.entries.findIndex(e => e.id === id); const g = state.entries[idx].groupName; let gIdxs = state.entries.map((e,i) => e.groupName === g ? i : -1).filter(i => i !== -1); let pos = gIdxs.indexOf(idx); let tPos = dir === 'up' ? pos - 1 : pos + 1; if (tPos >= 0 && tPos < gIdxs.length) { [state.entries[idx], state.entries[gIdxs[tPos]]] = [state.entries[gIdxs[tPos]], state.entries[idx]]; saveState(); render(); } }
+        function handleDelete(id) { if (confirm('確定刪除該成員？')) { state.entries = state.entries.filter(e => e.id !== id); state.activeId = state.entries.length ? state.entries[0].id : null; saveState(); render(); } }
+        function duplicateEntry(id, mode) { const idx = state.entries.findIndex(e => e.id === id); const source = state.entries[idx]; const newId = Date.now().toString(); let newEntry = {}; if (mode === 'clone') { newEntry = { ...source, id: newId, name: source.name + ' (副本)', forceNewPage: false }; } else if (mode === 'same_group') { newEntry = { id: newId, type: source.type, groupName: source.groupName, name: '新肢體成員', role: source.role, title: source.title, headline: '請輸入標題', content: '', forceNewPage: false, showHeadline: true, autoCompact: false }; } state.entries.splice(idx + 1, 0, newEntry); state.activeId = newId; saveState(); render(); }
+        function addEntry() { const newId = Date.now().toString(); state.entries.push({ id: newId, type: 'MEMBER', groupName: '風吉小組', name: '新肢體成員', role: '(一般組員)', title: '弟兄', headline: '請輸入金句大標', content: '在此輸入感恩見證內文...', forceNewPage: false, showHeadline: true, autoCompact: false }); state.activeId = newId; saveState(); render(); }
+        
+        function updateEntryDataOnly(id, field, val) { 
+            const entry = state.entries.find(e => e.id === id); 
+            if (entry) {
+                entry[field] = val; 
+            }
+            saveState(); 
+        }
+        
+        function updateEntry(id, field, val) { 
+            updateEntryDataOnly(id, field, val); 
+            if (['groupName', 'type', 'role', 'title', 'forceNewPage', 'showHeadline', 'autoCompact'].includes(field)) { 
+                renderSidebar(); 
+                scheduleCanvasRender(); 
+                return; 
+            } 
+            scheduleCanvasRender(); 
+        }
+
         function getCanvasRelativeTop(el) { const canvas = document.getElementById('canvas'); let top = 0; while (el && el !== canvas) { top += el.offsetTop; el = el.offsetParent; } return top; }
-        function handleEditorBlur() { requestAnimationFrame(() => { const editor = document.getElementById('editorUI'); if (editor && editor.contains(document.activeElement)) return; state.isEditing = false; renderCanvas(); }); }
-        function chunkItemsIntoRows(items) { let rows = []; let curR = []; let curG = ""; items.forEach(it => { if (!it) return; if ((it.groupName || '未分配') !== curG || it.isFullWidth) { if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); curR = []; } curG = (it.groupName || '未分配'); } if (it.isFullWidth) { rows.push([it, "FULL_WIDTH"]); } else { curR.push(it); if (curR.length === 2) { rows.push(curR); curR = []; } } }); if (curR.length > 0) { while (curR.length < 2) curR.push(null); rows.push(curR); } return rows; }
+        function handleEditorBlur() { requestAnimationFrame(() => { const editor = document.getElementById('editorUI'); if (editor && editor.contains(document.activeElement)) return; renderCanvas(); }); }
 
         function renderSidebar() {
             const list = document.getElementById('sidebarList'); if (!list) return;
@@ -305,274 +344,267 @@
                 let items = grouped[groupName]; if (!items || items.length === 0) return '';
                 if (keyword && !items.some(e => e.name.toLowerCase().includes(keyword) || groupName.toLowerCase().includes(keyword))) return '';
                 let isCollapsed = state.collapsedGroups[groupName];
-                return `<div class="mb-2">
-                    <div class="text-xs font-bold text-[#f0a802] bg-slate-900/80 p-2 rounded-lg flex items-center justify-between select-none hover:bg-slate-800 cursor-pointer transition-colors" onclick="state.collapsedGroups['${groupName}']=!${isCollapsed}; renderSidebar();">
+                return `<div class="mb-2 bg-slate-900/40 rounded-xl overflow-hidden border border-white/5">
+                    <div class="text-xs font-bold text-[#f0a802] bg-slate-900/80 p-2.5 flex items-center justify-between select-none hover:bg-slate-800 cursor-pointer group" onclick="state.collapsedGroups['${groupName}']=!${isCollapsed}; renderSidebar();">
                         <span>${isCollapsed?'▶':'▼'} ${groupName} (${items.length})</span>
-                        <div class="flex gap-2" onclick="event.stopPropagation();">
-                            <button onclick="moveGroup('${groupName}','up')" class="hover:text-white p-0.5">▲</button><button onclick="moveGroup('${groupName}','down')" class="hover:text-white p-0.5">▼</button>
+                        <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity" onclick="event.stopPropagation();">
+                            <button onclick="moveGroup('${groupName}','up')" class="hover:text-white px-0.5">▲</button><button onclick="moveGroup('${groupName}','down')" class="hover:text-white px-0.5">▼</button>
                         </div>
                     </div>
-                    <div class="${isCollapsed?'hidden':''} pl-2 mt-1 space-y-1">${items.map(e => `
+                    <div class="${isCollapsed?'hidden':''} pl-2 pr-1.5 py-1 space-y-0.5">${items.map(e => `
                         <div class="flex items-center gap-1 group">
-                            <div onclick="state.activeId='${e.id}'; state.shouldAutoScroll=true; render();" class="flex-1 p-2.5 rounded-xl cursor-pointer border ${state.activeId===e.id?'bg-[#f0a802]/20 border-[#f0a802]':'border-transparent hover:bg-white/5'}">
-                                <div class="text-xs font-bold font-serif text-white flex items-center justify-between">
-                                    <span>${e.name || '未命名'} ${e.forceNewPage?'<span class="text-[9px] text-[#f0a802] border border-[#f0a802]/40 px-1 rounded">✂️新頁</span>':''}</span>
-                                    <span class="text-[10px] opacity-40 font-sans font-normal">${e.role==='(一般組員)'?'':e.role}</span>
+                            <div onclick="state.activeId='${e.id}'; render();" class="flex-1 p-2 rounded-lg cursor-pointer border ${state.activeId===e.id?'bg-[#f0a802]/20 border-[#f0a802]/60':'border-transparent hover:bg-white/5'}">
+                                <div class="text-xs font-serif text-white flex items-center justify-between">
+                                    <span>${e.name || '未命名'}</span>
+                                    <span class="text-[10px] opacity-40 font-sans">${e.role==='(一般組員)'?'':e.role}</span>
                                 </div>
                             </div>
-                            <div class="opacity-0 group-hover:opacity-100 flex flex-col gap-0.5 pr-1"><button onclick="moveEntry('${e.id}','up')" class="text-[9px] hover:text-[#f0a802]">▲</button><button onclick="moveEntry('${e.id}','down')" class="text-[9px] hover:text-[#f0a802]">▼</button></div>
+                            <div class="opacity-0 group-hover:opacity-100 flex flex-col text-[8px] text-gray-400 pr-1"><button onclick="moveEntry('${e.id}','up')" class="hover:text-[#f0a802]">▲</button><button onclick="moveEntry('${e.id}','down')" class="hover:text-[#f0a802]">▼</button></div>
                         </div>`).join('')}</div>
                 </div>`;
             }).join('');
-            document.getElementById('statCount').innerText = state.entries.length;
+            document.getElementById('lblTotalCount').innerText = state.entries.length;
         }
 
         function renderEditor() {
             const ui = document.querySelector('.editor-panel');
             const e = state.entries.find(x => x.id === state.activeId);
-            if (!e) { ui.innerHTML = '<div class="m-auto opacity-30 font-serif text-center p-4">✦ 請選擇肢體 ✦</div>'; return; }
-            ui.innerHTML = `<div id="editorUI" class="p-6 space-y-5 flex-1 overflow-y-auto">
-                <h2 class="font-bold text-[#f0a802] mb-4">✍ 手冊落版控制台</h2>
-                <div class="space-y-4">
-                    <div><label class="text-[11px] opacity-60 font-bold">套用版型</label><select onchange="updateEntry('${e.id}','layout',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none focus:border-[#f0a802]">${Object.keys(LAYOUTS).map(k=>`<option value="${k}" ${e.layout===k?'selected':''}>${LAYOUTS[k]}</option>`).join('')}</select></div>
+            if (!e) { ui.innerHTML = '<div class="m-auto opacity-30 font-serif text-center p-4">✦ 請選擇肢體進行編輯 ✦</div>'; return; }
+            
+            const currentLh = e.autoCompact ? 'compact' : 'normal';
+
+            ui.innerHTML = `<div id="editorUI" class="p-5 space-y-4 flex-1 overflow-y-auto text-sm">
+                <div class="bg-slate-950/40 p-4 rounded-xl border border-white/5 space-y-3">
+                    <div class="text-xs font-bold text-[#f0a802] uppercase tracking-wider mb-1">基本屬性</div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="text-[11px] opacity-60 font-bold">小組 / 團契別</label>
-                            <select onchange="updateEntry('${e.id}','groupName',this.value); render();" 
-                                class="w-full bg-slate-800 border border-white/10 rounded-lg p-3 text-sm text-white outline-none">
+                            <label class="text-[11px] opacity-50 block mb-1">所屬小組別</label>
+                            <select onchange="updateEntry('${e.id}','groupName',this.value); render();" class="w-full bg-slate-800 border border-white/10 rounded-lg p-2 text-xs outline-none">
                                 ${GROUP_OPTIONS.map(g => `<option value="${g}" ${e.groupName === g ? 'selected' : ''}>${g}</option>`).join('')}
                             </select>
                         </div>
-                        <div><label class="text-[11px] opacity-60 font-bold">姓名</label><input onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','name',this.value)" value="${e.name}" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none"/></div>
+                        <div><label class="text-[11px] opacity-50 block mb-1">姓名</label><input oninput="updateEntry('${e.id}','name',this.value); renderSidebar();" value="${e.name}" class="w-full bg-slate-800 p-2 rounded-lg text-xs outline-none border border-white/5 focus:border-[#f0a802]"/></div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div><label class="text-[11px] opacity-60 font-bold">身份 (職分)</label><select onchange="updateEntry('${e.id}','role',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none">${ROLE_OPTIONS.map(r=>`<option value="${r}" ${e.role===r?'selected':''}>${r}</option>`).join('')}</select></div>
-                        <div><label class="text-[11px] opacity-60 font-bold">稱謂</label><select onchange="updateEntry('${e.id}','title',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm text-white outline-none">${TITLE_OPTIONS.map(t=>`<option value="${t}" ${e.title===t?'selected':''}>${t}</option>`).join('')}</select></div>
+                        <div><label class="text-[11px] opacity-50 block mb-1">身份職分</label><select onchange="updateEntry('${e.id}','role',this.value)" class="w-full bg-slate-800 p-2 rounded-lg text-xs outline-none">${ROLE_OPTIONS.map(r=>`<option value="${r}" ${e.role===r?'selected':''}>${r}</option>`).join('')}</select></div>
+                        <div><label class="text-[11px] opacity-50 block mb-1">稱謂</label><select onchange="updateEntry('${e.id}','title',this.value)" class="w-full bg-slate-800 p-2 rounded-lg text-xs outline-none">${TITLE_OPTIONS.map(t=>`<option value="${t}" ${e.title===t?'selected':''}>${t}</option>`).join('')}</select></div>
                     </div>
-                    
-                    <div class="bg-slate-950/60 p-3 rounded-xl border border-white/10 mt-1 space-y-3">
-                        <label class="flex items-center gap-2 text-xs text-gray-200 cursor-pointer select-none">
-                            <input type="checkbox" onchange="updateEntry('${e.id}','forceNewPage',this.checked)" ${e.forceNewPage?'checked':''} class="accent-[#f0a802]"> 
-                            <span class="text-[#f0a802] font-bold">✂️ 強制此篇起新頁 (手動分頁控制)</span>
-                        </label>
-                        <div class="pt-1">
-                            <label class="text-[11px] opacity-60 font-bold block mb-1 text-gray-300">🔍 本篇文字大小微調 (長文防溢出)</label>
-                            <select onchange="updateEntry('${e.id}','fontSizeMode',this.value)" class="w-full bg-slate-800 p-2 rounded-lg text-xs text-white outline-none focus:border-[#f0a802]">
-                                <option value="normal" ${e.fontSizeMode==='normal'||!e.fontSizeMode?'selected':''}>標準級 (適合一般字數)</option>
-                                <option value="medium" ${e.fontSizeMode==='medium'?'selected':''}>精簡級 (適合字數偏多)</option>
-                                <option value="small" ${e.fontSizeMode==='small'?'selected':''}>緊湊級 (適合極多字長文)</option>
-                            </select>
+                </div>
+
+                <div class="bg-slate-950/40 p-4 rounded-xl border border-white/5 space-y-3">
+                    <div class="text-xs font-bold text-[#f0a802] uppercase tracking-wider mb-1">呈現與排版設定</div>
+                    <div>
+                        <label class="text-[11px] opacity-50 block mb-1.5">專屬落版大類</label>
+                        <div class="flex gap-4 text-xs pt-0.5">
+                            <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="pType" value="LEADER" ${e.type==='LEADER'?'checked':''} onchange="updateEntry('${e.id}','type',this.value)" class="accent-[#f0a802]"> 牧者團隊</label>
+                            <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="pType" value="MEMBER" ${e.type==='MEMBER'?'checked':''} onchange="updateEntry('${e.id}','type',this.value)" class="accent-[#f0a802]"> 肢體同工</label>
+                            <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="pType" value="MINISTRY" ${e.type==='MINISTRY'?'checked':''} onchange="updateEntry('${e.id}','type',this.value)" class="accent-[#f0a802]"> 事工負責</label>
                         </div>
                     </div>
-
-                    <div class="${(e.layout==='MEMBER_NOTITLE'||e.layout==='PASTOR_NOTITLE'||e.layout==='MINISTRY_NOTITLE')?'hidden':''}"><label class="text-[11px] opacity-60 text-[#f0a802] font-bold">金句大標</label><input onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#f0a802]/10 border border-[#f0a802]/30 p-3 rounded-lg text-sm text-[#f0a802] font-serif font-black outline-none"/></div>
-                    <div><label class="text-[11px] opacity-60 font-bold">見證內文</label><textarea onfocus="state.isEditing=true" onblur="handleEditorBlur()" oninput="updateEntry('${e.id}','content',this.value)" class="w-full bg-slate-800 p-3 rounded-lg text-sm h-48 text-white outline-none font-sans leading-relaxed">${e.content || ''}</textarea></div>
+                    <div class="h-[1px] bg-white/5 my-1"></div>
+                    <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+                        <label class="flex items-center gap-2 cursor-pointer select-none"><input type="checkbox" onchange="updateEntry('${e.id}','showHeadline',this.checked)" ${e.showHeadline?'checked':''} class="accent-[#f0a802]"> ☑️ 顯示金句大標</label>
+                        <label class="flex items-center gap-2 cursor-pointer select-none"><input type="checkbox" onchange="updateEntry('${e.id}','forceNewPage',this.checked)" ${e.forceNewPage?'checked':''} class="accent-[#f0a802]"> ✂️ 此篇另起新頁</label>
+                    </div>
+                    <label class="flex items-center gap-2 text-xs pt-1 cursor-pointer select-none text-gray-300"><input type="checkbox" onchange="updateEntry('${e.id}','autoCompact',this.checked)" ${e.autoCompact?'checked':''} class="accent-[#f0a802]"> ⚡ 啟用自動壓縮修復 (長文防溢出)</label>
                 </div>
-                <div class="pt-4 border-t border-white/10 space-y-2">
-                    <div class="grid grid-cols-2 gap-2"><button onclick="duplicateEntry('${e.id}','same_group')" class="py-2.5 rounded-lg bg-blue-950 border border-blue-700/60 text-blue-300 text-xs font-bold hover:bg-blue-900/40 flex items-center justify-center gap-1">👥 ＋同小組新增</button><button onclick="duplicateEntry('${e.id}','clone')" class="py-2.5 rounded-lg bg-slate-800 border border-white/10 text-white/80 text-xs font-bold hover:bg-slate-700/50 flex items-center justify-center gap-1">⧉複製目前成員</button></div>
-                    <button onclick="handleDelete('${e.id}')" class="w-full border border-red-500/30 py-2.5 rounded-lg text-red-400 text-xs font-bold hover:bg-red-500/10 block text-center">❌刪除此肢體</button>
+
+                <div class="flex-1 flex flex-col space-y-2">
+                    <div><label class="text-[11px] opacity-50 block mb-1">金句大標內容</label><input oninput="updateEntry('${e.id}','headline',this.value)" value="${e.headline || ''}" class="w-full bg-[#f0a802]/5 border border-[#f0a802]/20 p-2.5 rounded-lg text-xs text-[#f0a802] font-serif font-bold outline-none"/></div>
+                    <div class="flex-1 flex flex-col"><label class="text-[11px] opacity-50 block mb-1">感恩見證內文</label><textarea oninput="updateEntry('${e.id}','content',this.value)" class="w-full flex-1 bg-slate-800 p-3 rounded-lg text-xs h-64 outline-none font-sans leading-relaxed resize-none focus:border-white/20">${e.content || ''}</textarea></div>
+                </div>
+
+                <div class="pt-2 grid grid-cols-3 gap-2 shrink-0">
+                    <button onclick="duplicateEntry('${e.id}','same_group')" class="py-2 rounded-lg bg-blue-950/60 border border-blue-800/40 text-blue-300 text-xs font-bold hover:bg-blue-900/40">＋同組新增</button>
+                    <button onclick="duplicateEntry('${e.id}','clone')" class="py-2 rounded-lg bg-slate-800 border border-white/5 text-white/70 text-xs hover:bg-slate-700">⧉ 複製副本</button>
+                    <button onclick="handleDelete('${e.id}')" class="py-2 border border-red-500/20 rounded-lg text-red-400 text-xs hover:bg-red-500/10">❌ 刪除成員</button>
                 </div>
             </div>`;
+        }
+
+        function getLhClass(item) {
+            if (!item) return 'lh-normal';
+            return item.autoCompact ? 'lh-compact' : 'lh-normal';
         }
 
         function buildPastorItemHTML(item, showDivider = false) {
             const iden = item.role==='(一般組員)'?'':item.role; const tit = item.title==='(無稱謂)'?'':item.title;
             const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
-            const sizeStyle = item.fontSizeMode === 'medium' ? 'font-size: 13.5px !important; line-height: 1.62 !important;' : (item.fontSizeMode === 'small' ? 'font-size: 12.5px !important; line-height: 1.45 !important;' : '');
-            let divider = showDivider ? `<div class="w-full my-6 border-t border-dotted border-[#f0a802]/40 opacity-60"></div>` : '';
+            const lhClass = getLhClass(item);
+            let divider = showDivider ? `<div class="w-full my-4 border-t border-dotted border-[#f0a802]/30 opacity-40"></div>` : '';
             return `<div class="pastor-item-block flex flex-col avoid-break" data-id="${item.id}">
-                ${item.layout!=='PASTOR_NOTITLE' && item.headline ? `<div class="headline-quote-box mb-4"><span class="text-[#f0a802] text-4xl font-black self-center -mt-1 font-serif">“</span><span class="text-[20px] px-4 text-center leading-relaxed flex-1 royal-title font-serif">${item.headline}</span><span class="text-[#f0a802] text-4xl font-black self-center mt-3 font-serif">”</span></div>` : ''}
-                <div class="text-center mb-4"><div class="inline-flex items-center gap-3 border-b-2 border-[#f0a802] pb-2 px-6 font-serif"><span class="text-[22px] book-name text-[#01177d]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${labelStr}</span></div></div>
-                <div class="pastor-content book-body-text mb-2" style="${sizeStyle}">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.8em;">${p}</p>`).join('')}</div>
+                ${item.showHeadline && item.headline ? `<div class="headline-quote-box"><span class="text-[#f0a802] text-3xl font-black self-center -mt-0.5 font-serif">“</span><span class="text-[20px] px-4 text-center leading-relaxed flex-1 royal-title font-serif">${item.headline}</span><span class="text-[#f0a802] text-3xl font-black self-center mt-1 font-serif">”</span></div>` : ''}
+                <div class="text-center mb-3"><div class="inline-flex items-center gap-3 border-b-2 border-[#f0a802] pb-2 px-6 font-serif"><span class="text-[22px] book-name text-[#01177d]">${item.name}</span><span class="text-[14px] text-gray-500 font-sans">${labelStr}</span></div></div>
+                <div class="pastor-content book-body-text ${lhClass} mb-2">${item.content.split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
             </div>${divider}`;
         }
 
-        // ── 🟢 修正點 1：將自動排版分頁的實體高度臨界值全面從 820px 調降至 760px，給底部留出絕對安全的緩衝 ──
         function renderCanvas() {
-            const container = document.getElementById('canvas'); if (!container || state.isEditing) return;
+            const container = document.getElementById('canvas'); if (!container) return;
             ensureGroupOrder();
-            const viewport = document.getElementById('scrollViewport'); const zoomRatio = state.zoom / 100;
             
             const editorHasFocus = document.querySelector('.editor-panel :focus');
-            if (editorHasFocus) return;
-
-            let activeRect = null;
-            if (viewport) {
-                const activeCard = document.querySelector(`#canvas [data-id="${state.activeId}"]`);
-                if (activeCard) { activeRect = (getCanvasRelativeTop(activeCard) * zoomRatio) - viewport.scrollTop; }
-            }
             container.innerHTML = ''; 
-            
             let scratchpad = document.createElement('div'); scratchpad.style.cssText = "position: absolute; visibility: hidden; width: 210mm; top: -9999px;"; document.body.appendChild(scratchpad);
-            let groupStats = {}; state.entries.forEach(e => { groupStats[e.groupName] = (groupStats[e.groupName] || 0) + 1; });
-            
-            let flattened = [];
-            state.entries.forEach(entry => {
-                let testCard = document.createElement('div'); testCard.style.width = "85mm"; testCard.innerHTML = buildCardHTMLString(entry);
-                scratchpad.appendChild(testCard); let h = testCard.getBoundingClientRect().height; scratchpad.removeChild(testCard);
-                if (h > 390 && !['PASTOR','PASTOR_NOTITLE'].includes(entry.layout)) { flattened.push({ ...entry, isFullWidth: true }); }
-                else { flattened.push(entry); }
-            });
-            
-            let itemsByGroup = {}; state.groupOrder.forEach(g => itemsByGroup[g] = []);
-            flattened.forEach(e => { (itemsByGroup[e.groupName || '未分配'] = itemsByGroup[e.groupName || '未分配'] || []).push(e); });
             
             let finalQueue = [];
             state.groupOrder.forEach(g => {
-                let items = itemsByGroup[g] || []; if (!items.length) return;
-                let pastors = items.filter(e => ['PASTOR','PASTOR_NOTITLE'].includes(e.layout));
-                let members = items.filter(e => !['PASTOR','PASTOR_NOTITLE'].includes(e.layout));
-                
-                if (state.smartSort) {
-                    let leaders = members.filter(e => ['區長', '小組長', '副小組長'].includes(e.role));
-                    let regular = members.filter(e => !['區長', '小組長', '副小組長'].includes(e.role));
-                    
-                    leaders.sort((a, b) => {
-                        const getRoleScore = (r) => r === '區長' ? 3 : (r === '小組長' ? 2 : 1);
-                        if (getRoleScore(a.role) !== getRoleScore(b.role)) return getRoleScore(b.role) - getRoleScore(a.role);
-                        return state.entries.findIndex(x => x.id === a.id) - state.entries.findIndex(x => x.id === b.id);
-                    });
-
-                    regular.sort((a,b) => b.content.length - a.content.length);
-                    let bal = []; while(regular.length){ bal.push(regular.shift()); if(regular.length) bal.push(regular.pop()); }
-                    members = [...leaders, ...bal];
-                } else {
-                    members.sort((a, b) => state.entries.findIndex(x => x.id === a.id) - state.entries.findIndex(x => x.id === b.id));
-                }
+                let items = state.entries.filter(e => e.groupName === g); if (!items.length) return;
+                let pastors = items.filter(e => e.type === 'LEADER');
+                let members = items.filter(e => e.type !== 'LEADER');
+                members.sort((a, b) => state.entries.findIndex(x => x.id === a.id) - state.entries.findIndex(x => x.id === b.id));
                 finalQueue.push(...pastors, ...members);
             });
 
-            function getFlowHeight(items) {
-                let testPage = document.createElement('div'); testPage.className = "book-page";
-                let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
-                whiteLayer.style.padding = "14mm 16mm 16mm 16mm";
-                let grid = document.createElement('div'); grid.className = "grid-flow-engine";
-                let rows = chunkItemsIntoRows(items);
-                grid.innerHTML = rows.map(r => {
-                    if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${buildFullWidthCardHTMLString(r[0])}</div>`;
-                    return `<div class="w-full avoid-break"><div class="flex gap-[14mm] mb-3">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
-                }).join('');
-                whiteLayer.appendChild(grid); 
-                testPage.appendChild(whiteLayer); 
-                scratchpad.appendChild(testPage);
-                const pageContentHeight = grid.scrollHeight;
-                scratchpad.removeChild(testPage);
-                return pageContentHeight;
+            function getEntryCardHeight(item) {
+                let testCard = document.createElement('div');
+                testCard.style.cssText = "width: 69mm; position: absolute; visibility: hidden; padding: 0; margin: 0; left: -9999px;";
+                testCard.innerHTML = buildCardHTMLString(item);
+                document.body.appendChild(testCard);
+                let h = testCard.offsetHeight;
+                document.body.removeChild(testCard);
+                return h;
             }
 
-            function getPastorFlowHeight(items) {
-                let testPage = document.createElement('div'); testPage.className = "book-page";
-                let whiteLayer = document.createElement('div'); whiteLayer.className = "white-layer";
-                whiteLayer.style.padding = "14mm 16mm 16mm 16mm";
-                let grid = document.createElement('div'); grid.className = "grid-flow-engine";
-                grid.innerHTML = items.map((item, idx) => buildPastorItemHTML(item, idx < items.length - 1)).join('');
-                whiteLayer.appendChild(grid); 
-                testPage.appendChild(whiteLayer); 
-                scratchpad.appendChild(testPage);
-                const pageContentHeight = grid.scrollHeight;
-                scratchpad.removeChild(testPage);
-                return pageContentHeight;
+            function getPastorFlowHeight(item) {
+                let testCard = document.createElement('div');
+                testCard.style.cssText = "width: 154mm; position: absolute; visibility: hidden; padding: 0; margin: 0; left: -9999px;";
+                testCard.innerHTML = buildPastorItemHTML(item, false);
+                document.body.appendChild(testCard);
+                let h = testCard.offsetHeight;
+                document.body.removeChild(testCard);
+                return h;
             }
 
-            // ── 🟢 修正點 1：死守 760px 排版臨界高，絕不硬塞長文到同一頁 ──
-            function chunkPastorsIntoPages(pastors) {
-                let chunks = []; let currentChunk = [];
-                for (let i = 0; i < pastors.length; i++) {
-                    let p = pastors[i];
-                    if (currentChunk.length > 0) {
-                        if (p.forceNewPage || getPastorFlowHeight([...currentChunk, p]) > 760) {
-                            chunks.push(currentChunk);
-                            currentChunk = [p];
-                            continue;
-                        }
-                    }
-                    currentChunk.push(p);
-                }
-                if (currentChunk.length > 0) chunks.push(currentChunk);
-                return chunks;
-            }
-
-            function chunkMembersIntoPages(members) {
-                let chunks = []; let currentChunk = [];
-                for (let i = 0; i < members.length; i++) {
-                    let m = members[i];
-                    if (currentChunk.length > 0) {
-                        if (m.forceNewPage || getFlowHeight([...currentChunk, m]) > 760) {
-                            chunks.push(currentChunk);
-                            currentChunk = [m];
-                            continue;
-                        }
-                    }
-                    currentChunk.push(m);
-                }
-                if (currentChunk.length > 0) chunks.push(currentChunk);
-                return chunks;
-            }
-
-            let pages = [];
-            let pIdx = 0;
+            let pages = []; let pIdx = 0;
             while (pIdx < finalQueue.length) {
                 let entry = finalQueue[pIdx];
-                if (['PASTOR','PASTOR_NOTITLE'].includes(entry.layout)) {
+                if (entry.type === 'LEADER') {
                     let consecutivePastors = [];
-                    while (pIdx < finalQueue.length && ['PASTOR','PASTOR_NOTITLE'].includes(finalQueue[pIdx].layout)) {
-                        consecutivePastors.push(finalQueue[pIdx]);
-                        pIdx++;
+                    while (pIdx < finalQueue.length && finalQueue[pIdx].type === 'LEADER') {
+                        consecutivePastors.push(finalQueue[pIdx]); pIdx++;
                     }
-                    let chunks = chunkPastorsIntoPages(consecutivePastors);
-                    chunks.forEach(chunk => {
-                        let h = getPastorFlowHeight(chunk);
-                        pages.push({ type: 'PASTOR', items: chunk, pageContentHeight: h });
-                    });
+                    
+                    let currentChunk = [];
+                    let currentHeight = 0;
+                    const MAX_H = 730;
+                    const GAP = 16;
+
+                    for (let i = 0; i < consecutivePastors.length; i++) {
+                        let p = consecutivePastors[i];
+                        let h = getPastorFlowHeight(p);
+                        
+                        if (currentChunk.length === 0) {
+                            currentChunk.push(p);
+                            currentHeight = h;
+                        } else {
+                            if (p.forceNewPage || (currentHeight + GAP + h > MAX_H)) {
+                                pages.push({ type: 'PASTOR', items: currentChunk, pageContentHeight: currentHeight });
+                                currentChunk = [p];
+                                currentHeight = h;
+                            } else {
+                                currentChunk.push(p);
+                                currentHeight += GAP + h;
+                            }
+                        }
+                    }
+                    if (currentChunk.length > 0) {
+                        pages.push({ type: 'PASTOR', items: currentChunk, pageContentHeight: currentHeight });
+                    }
                 } else {
-                    let currentGroupMembers = [];
-                    let gName = entry.groupName;
-                    while (pIdx < finalQueue.length && !['PASTOR','PASTOR_NOTITLE'].includes(finalQueue[pIdx].layout) && finalQueue[pIdx].groupName === gName) {
-                        currentGroupMembers.push(finalQueue[pIdx]);
-                        pIdx++;
+                    let consecutiveMembers = [];
+                    while (pIdx < finalQueue.length && finalQueue[pIdx].type !== 'LEADER') {
+                        consecutiveMembers.push(finalQueue[pIdx]); pIdx++;
                     }
-                    let chunks = chunkMembersIntoPages(currentGroupMembers);
-                    chunks.forEach(chunk => {
-                        let h = getFlowHeight(chunk);
-                        pages.push({ type: 'FLOW', items: chunk, pageContentHeight: h });
-                    });
+                    
+                    let currentChunk = [];
+                    let leftColH = 0;
+                    let rightColH = 0;
+                    const MAX_H = 730;
+                    const GAP = 14;
+
+                    for (let i = 0; i < consecutiveMembers.length; i++) {
+                        let m = consecutiveMembers[i];
+                        let h = getEntryCardHeight(m);
+                        
+                        if (currentChunk.length === 0) {
+                            currentChunk.push(m);
+                            leftColH = h;
+                            rightColH = 0;
+                        } else {
+                            if (m.forceNewPage) {
+                                pages.push({ type: 'FLOW', items: currentChunk, pageContentHeight: Math.max(leftColH, rightColH) });
+                                currentChunk = [m];
+                                leftColH = h;
+                                rightColH = 0;
+                                continue;
+                            }
+                            
+                            if (leftColH + GAP + h <= MAX_H) {
+                                currentChunk.push(m);
+                                leftColH += GAP + h;
+                            } 
+                            else if (rightColH + GAP + h <= MAX_H) {
+                                currentChunk.push(m);
+                                if (rightColH === 0) rightColH = h;
+                                else rightColH += GAP + h;
+                            } 
+                            else {
+                                pages.push({ type: 'FLOW', items: currentChunk, pageContentHeight: Math.max(leftColH, rightColH) });
+                                currentChunk = [m];
+                                leftColH = h;
+                                rightColH = 0;
+                            }
+                        }
+                    }
+                    if (currentChunk.length > 0) {
+                        pages.push({ type: 'FLOW', items: currentChunk, pageContentHeight: Math.max(leftColH, rightColH) });
+                    }
                 }
             }
 
             document.body.removeChild(scratchpad);
-            let pageNum = 7; let displayPages = [...pages]; if (state.viewMode === 'spread' && pageNum % 2 !== 0) displayPages.unshift({ type: 'BLANK' });
+            let pageNum = 1; let displayPages = [...pages]; if (pageNum % 2 !== 0) displayPages.unshift({ type: 'BLANK' });
+            
             container.innerHTML = '';
             displayPages.forEach((p,i) => {
-                const spread = document.createElement('div'); spread.className = state.viewMode==='spread'?"flex shadow-2xl mb-12 relative":"mb-12 shadow-2xl relative";
+                const spread = document.createElement('div'); spread.className = "flex shadow-2xl mb-12 relative";
                 let pN = (p.type==='BLANK')?null:pageNum;
-                spread.innerHTML = buildPageHTML(p, pN, groupStats);
+                spread.innerHTML = buildPageHTML(p, pN);
                 if (pN) pageNum++; container.appendChild(spread);
             });
-            document.getElementById('printArea').innerHTML = pages.map((p,i) => buildPageHTML(p, 7+i, groupStats)).join('');
-            if (viewport) { viewport.scrollHeight; if (activeRect !== null && state.shouldAutoScroll) {
-                const newCard = document.querySelector(`#canvas [data-id="${state.activeId}"]`);
-                if (newCard) viewport.scrollTop = (getCanvasRelativeTop(newCard) * zoomRatio) - activeRect;
-            } }
+            
+            const printHTML = pages.map((p, i) => buildPageHTML(p, 1 + i)).join('');
+            const pArea = document.getElementById('printArea');
+            if (pArea) {
+                pArea.replaceChildren();
+                pArea.insertAdjacentHTML('beforeend', printHTML);
+            }
+            document.getElementById('lblTotalPages').innerText = pages.length;
         }
 
-        function buildPageHTML(p, pageNum, groupStats) {
-            const isLeft = pageNum % 2 === 0; const pd = isLeft ? 'padding: 14mm 18mm 16mm 14mm;' : 'padding: 14mm 14mm 16mm 18mm;';
+        function buildPageHTML(p, pageNum) {
+            const isLeft = pageNum ? pageNum % 2 === 0 : false; 
+            const pd = isLeft ? 'padding: 14mm 18mm 16mm 14mm;' : 'padding: 14mm 14mm 16mm 18mm;';
             const pageIdSuffix = pageNum || 'blank_' + Math.floor(Math.random() * 1000);
             const glowCorners = `<div class="corner-glow corner-top-right"></div><div class="corner-glow corner-bottom-left"></div>`;
             
+            if (p.type === 'BLANK') return `<div class="book-page" id="page_${pageIdSuffix}">${glowCorners}<div class="white-layer bg-[#fcfbf9] flex items-center justify-center text-gray-300 italic">Royal Chosen Race Church</div></div>`;
+            
             let shrinkStyle = "";
             if (p.pageContentHeight > 740) {
-                if (p.pageContentHeight > 880) {
-                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 13.5px !important; line-height: 1.48 !important; } #page_${pageIdSuffix} .headline-quote-box { padding: 0.75rem !important; margin-bottom: 0.75rem !important; min-height: 72px !important; } #page_${pageIdSuffix} .headline-quote-box .royal-title { font-size: 16px !important; } #page_${pageIdSuffix} .entry-card { padding-top: 4px !important; padding-bottom: 4px !important; }</style>`;
-                } else if (p.pageContentHeight > 800) {
-                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 13.8px !important; line-height: 1.58 !important; } #page_${pageIdSuffix} .headline-quote-box { padding: 1rem !important; margin-bottom: 1.25rem !important; }</style>`;
+                if (p.pageContentHeight > 840) {
+                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 13.5px !important; line-height: 1.48 !important; } #page_${pageIdSuffix} .headline-quote-box { padding: 0.75rem !important; margin-bottom: 0.75rem !important; min-height: 54px !important; } #page_${pageIdSuffix} .entry-card { padding-top: 4px !important; padding-bottom: 4px !important; }</style>`;
+                } else if (p.pageContentHeight > 780) {
+                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 13.8px !important; line-height: 1.58 !important; } #page_${pageIdSuffix} .headline-quote-box { padding: 0.85rem !important; margin-bottom: 1rem !important; }</style>`;
                 } else {
-                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { font-size: 14.1px !important; line-height: 1.68 !important; }</style>`;
+                    shrinkStyle = `<style>#page_${pageIdSuffix} .book-body-text { line-height: 1.68 !important; }</style>`;
                 }
             }
 
-            if (p.type === 'BLANK') return `<div class="book-page" id="page_${pageIdSuffix}">${glowCorners}<div class="white-layer bg-[#fcfbf9] flex items-center justify-center text-gray-300 italic">Royal Chosen Race Church</div></div>`;
-            
+            const isOverflow = p.pageContentHeight > 745;
+            const warningBanner = isOverflow ? `<div class="absolute top-2 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold text-[10px] px-4 py-0.5 rounded-full z-50 animate-pulse no-print">⚠️ 此頁內容擁擠，建議勾選個別成員的 [自動壓縮修復]</div>` : '';
+
             let inner = '';
             if (p.type === 'PASTOR') {
                 const firstItem = p.items[0];
@@ -582,57 +614,125 @@
                         <div class="text-[12.5px] font-black text-[#01177d]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會十週年感言</span></div>
                         <div class="text-[#f0a802] text-xs font-bold tracking-widest">${(firstItem.groupName || "牧者").substring(0,2)}</div>
                     </div>
-                    <div class="flex flex-col flex-1 h-full pt-1 grid-flow-engine">
-                        ${pastorsHTML}
-                    </div></div>`;
+                    <div class="flex flex-col flex-1 h-full pt-1 grid-flow-engine">${pastorsHTML}</div></div>`;
             } else {
-                let rows = chunkItemsIntoRows(p.items);
-                let gridHTML = rows.map(r => {
-                    if (r[1] === "FULL_WIDTH") return `<div class="w-full avoid-break">${buildFullWidthCardHTMLString(r[0])}</div>`;
-                    return `<div class="w-full avoid-break"><div class="flex gap-[14mm] mb-3">${buildCardHTMLString(r[0])}${r[1]?buildCardHTMLString(r[1]):'<div class="flex-1"></div>'}</div></div>`;
-                }).join('');
-                
+                let gridHTML = p.items.map(item => `<div class="avoid-break">${buildCardHTMLString(item)}</div>`).join('');
                 const firstItem = p.items[0];
-                const isMinistryLayout = firstItem && ['MINISTRY_TITLE', 'MINISTRY_NOTITLE'].includes(firstItem.layout);
+                const isMinistryLayout = firstItem && firstItem.type === 'MINISTRY';
                 const topRightContent = isMinistryLayout 
                     ? `<div class="text-[#f0a802] text-xs font-bold tracking-wider">事工負責人</div>` 
                     : `<div class="text-[#f0a802] text-lg opacity-60">✦ ✦</div>`;
 
-                inner = `<div class="white-layer" style="${pd}"><div class="flex justify-between border-b border-gray-200 pb-2 mb-4 font-serif"><div class="text-[12.5px] font-black text-[#01177d]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會 10 週年紀念</span></div>${topRightContent}</div><div class="flex-1 overflow-hidden pt-1 grid-flow-engine">${gridHTML}</div></div>`;
+                inner = `<div class="white-layer" style="${pd}"><div class="flex justify-between border-b border-gray-200 pb-2 mb-4 font-serif"><div class="text-[12.5px] font-black text-[#01177d]">十載主恩 ‧ 憐憫無窮<br><span class="text-[9.5px] text-gray-400 font-sans font-normal">風一族職場教會 10 週年紀念</span></div>${topRightContent}</div><div class="flex-1 overflow-hidden pt-1 member-column-flow">${gridHTML}</div></div>`;
             }
-            return `${shrinkStyle}<div class="book-page" id="page_${pageIdSuffix}">${glowCorners}${inner}${pageNum?`<div class="absolute bottom-[16mm] ${isLeft?'left-[24mm]':'right-[24mm]'} text-[11px] font-sans font-bold text-gray-300 tracking-[3px] z-20">Royal Chosen Race Church ‧ P.${pageNum}</div>`:''}</div>`;
+            return `${shrinkStyle}<div class="book-page" id="page_${pageIdSuffix}">${warningBanner}${glowCorners}${inner}${pageNum?`<div class="absolute bottom-[16mm] ${isLeft?'left-[24mm]':'right-[24mm]'} text-[11px] font-sans font-bold text-gray-300 tracking-[3px] z-20">Royal Chosen Race Church ‧ P.${pageNum}</div>`:''}</div>`;
         }
 
         function buildFullWidthCardHTMLString(item) {
-            if (!item) return '';
-            const iden = item.role==='(一般組員)'?'':(item.role || ''); const tit = item.title==='(無稱謂)'?'':(item.title || '');
-            const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
-            const hasTitle = ['MEMBER_TITLE', 'MINISTRY_TITLE'].includes(item.layout);
-            // ── 🟢 修正點 2：在卡片生成時注入微調樣式 ──
-            const sizeStyle = item.fontSizeMode === 'medium' ? 'font-size: 13.5px !important; line-height: 1.62 !important;' : (item.fontSizeMode === 'small' ? 'font-size: 12.5px !important; line-height: 1.45 !important;' : '');
-            return `<div class="entry-card w-full flex flex-col relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black shadow-sm font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${labelStr}</span></div></div>
-                ${hasTitle&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
-                <div class="book-body-text pastor-content w-full px-1" style="${sizeStyle}">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
-                <div class="w-full mt-3 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
+            return buildCardHTMLString(item); 
         }
 
         function buildCardHTMLString(item) {
             if(!item) return '';
             const iden = item.role==='(一般組員)'?'':(item.role || ''); const tit = item.title==='(無稱謂)'?'':(item.title || '');
             const labelStr = `${tit}${tit && iden ? ' ' : ''}${iden}`;
-            const hasTitle = ['MEMBER_TITLE', 'MINISTRY_TITLE'].includes(item.layout);
-            // ── 🟢 修正點 2：在卡片生成時注入微調樣式 ──
-            const sizeStyle = item.fontSizeMode === 'medium' ? 'font-size: 13.5px !important; line-height: 1.62 !important;' : (item.fontSizeMode === 'small' ? 'font-size: 12.5px !important; line-height: 1.45 !important;' : '');
-            return `<div class="entry-card flex-1 flex flex-col h-full relative" data-id="${item.id}">
-                <div class="flex items-center gap-3 mb-3 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${labelStr}</span></div></div>
-                ${hasTitle&&item.headline?`<div class="text-left mb-3 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
-                <div class="book-body-text flex-1 px-1" style="${sizeStyle}">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
-                <div class="w-full mt-3 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
+            const lhClass = getLhClass(item);
+            return `<div class="entry-card flex flex-col h-full relative" data-id="${item.id}" style="margin-bottom: 14px;">
+                <div class="flex items-center gap-3 mb-2 font-serif shrink-0"><div class="w-12 h-12 rounded-full bg-[#01177d] flex items-center justify-center text-white text-base font-black font-sans">${(item.groupName || '肢體').substring(0,2)}</div><div class="text-[22px] book-name text-[#01177d] flex items-baseline"><span class="text-[#f0a802] text-xs mr-1 relative -top-0.5">✦</span>${item.name || '未命名'}<span class="text-xs text-gray-400 ml-2 font-sans">${labelStr}</span></div></div>
+                ${item.showHeadline&&item.headline?`<div class="text-left mb-2 font-serif border-l-4 border-[#f0a802] pl-3"><h3 class="royal-headline">${item.headline}</h3></div>`:''}
+                <div class="book-body-text ${lhClass} flex-1 px-1">${(item.content || '').split('\n').map(p=>`<p style="text-indent: 2em; margin-bottom: 0.5em;">${p}</p>`).join('')}</div>
+                <div class="w-full mt-2 border-t border-dotted border-[#f0a802]/40 opacity-60"></div></div>`;
         }
 
-        window.addEventListener('beforeprint', () => { state.isEditing = false; renderCanvas(); document.getElementById('printArea').style.visibility = 'visible'; });
-        window.addEventListener('afterprint', () => { document.getElementById('printArea').style.visibility = 'hidden'; });
+        /* ─────────────────────────────
+           出版級穩定 PDF 匯出引擎 v6
+        ───────────────────────────── */
+        let isPrinting = false;
+
+        async function exportPDF() {
+            if (isPrinting) return;
+            isPrinting = true;
+
+            const btn = document.getElementById('btnExportPdf');
+            const printArea = document.getElementById('printArea');
+
+            try {
+                btn.disabled = true;
+                btn.innerText = '⏳ PDF 生成中...';
+
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
+
+                state.isEditing = false;
+                printArea.innerHTML = '';
+                renderCanvas();
+
+                await waitForDOMRender();
+                await waitForFonts();
+                await sleep(200);
+
+                printArea.classList.add('ready-print');
+                void printArea.offsetHeight;
+                await waitForDOMRender();
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        window.print();
+                    });
+                });
+
+                const cleanup = () => {
+                    printArea.classList.remove('ready-print');
+                    btn.disabled = false;
+                    btn.innerText = '📥 匯出印刷 PDF';
+                    isPrinting = false;
+                    window.removeEventListener('afterprint', cleanup);
+                };
+
+                window.addEventListener('afterprint', cleanup);
+                setTimeout(cleanup, 4000);
+
+            } catch (err) {
+                console.error('PDF 匯出失敗：', err);
+                btn.disabled = false;
+                btn.innerText = '📥 匯出印刷 PDF';
+                if (printArea) printArea.classList.remove('ready-print');
+                isPrinting = false;
+                alert('❌ PDF 匯出失敗\n\n請重新整理頁面後再試一次。');
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function waitForDOMRender() {
+            return new Promise(resolve => {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        resolve();
+                    });
+                });
+            });
+        }
+
+        async function waitForFonts() {
+            try {
+                await Promise.race([
+                    Promise.all([
+                        document.fonts.load('600 14px "Noto Serif TC"'),
+                        document.fonts.load('700 14px "Noto Serif TC"'),
+                        document.fonts.load('900 22px "Noto Serif TC"'),
+                        document.fonts.load('400 14px "Noto Sans TC"'),
+                        document.fonts.load('700 14px "Noto Sans TC"')
+                    ]),
+                    new Promise(resolve => setTimeout(resolve, 2500))
+                ]);
+            } catch (e) {
+                console.warn('字體等待略過');
+            }
+        }
 
         loadState(); render();
     </script>
