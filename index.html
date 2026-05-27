@@ -153,10 +153,16 @@
             .entry-card, .rounded-full, div { box-shadow: none !important; text-shadow: none !important; }
 
             .member-column-flow {
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                gap: 16mm !important;
-            }
+    display: flex;
+    gap: 16mm;
+    align-items: flex-start;
+}
+
+.member-column-flow > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
             .member-column-flow > div { break-inside: avoid !important; page-break-inside: avoid !important; }
             * { box-shadow: none !important; text-shadow: none !important; transform: none !important; will-change: auto !important; }
         }
@@ -457,14 +463,15 @@
             });
 
             function getEntryCardHeight(item) {
-                let testCard = document.createElement('div');
-                testCard.style.cssText = "width: 69mm; position: absolute; visibility: hidden; padding: 0; margin: 0; left: -9999px;";
-                testCard.innerHTML = buildCardHTMLString(item);
-                document.body.appendChild(testCard);
-                let h = testCard.offsetHeight;
-                document.body.removeChild(testCard);
-                return h;
-            }
+    let testCard = document.createElement('div');
+    // 改 69mm → 82mm，更接近實際單欄渲染寬度
+    testCard.style.cssText = "width: 82mm; position: absolute; visibility: hidden; padding: 0; margin: 0; left: -9999px;";
+    testCard.innerHTML = buildCardHTMLString(item);
+    document.body.appendChild(testCard);
+    let h = testCard.offsetHeight;
+    document.body.removeChild(testCard);
+    return h;
+}
 
             function getPastorFlowHeight(item) {
                 let testCard = document.createElement('div');
@@ -518,48 +525,97 @@
                     }
                     
                     let currentChunk = [];
-                    let leftColH = 0;
-                    let rightColH = 0;
-                    const MAX_H = 730;
-                    const GAP = 14;
+let leftColH = 0;
+let rightColH = 0;
+const MAX_H = 710;  // 改小，留更多緩衝防估算偏差
+const GAP = 14;
 
-                    for (let i = 0; i < consecutiveMembers.length; i++) {
-                        let m = consecutiveMembers[i];
-                        let h = getEntryCardHeight(m);
-                        
-                        if (currentChunk.length === 0) {
-                            currentChunk.push(m);
-                            leftColH = h;
-                            rightColH = 0;
-                        } else {
-                            if (m.forceNewPage) {
-                                pages.push({ type: 'FLOW', items: currentChunk, pageContentHeight: Math.max(leftColH, rightColH) });
-                                currentChunk = [m];
-                                leftColH = h;
-                                rightColH = 0;
-                                continue;
-                            }
-                            
-                            if (leftColH + GAP + h <= MAX_H) {
-                                currentChunk.push(m);
-                                leftColH += GAP + h;
-                            } 
-                            else if (rightColH + GAP + h <= MAX_H) {
-                                currentChunk.push(m);
-                                if (rightColH === 0) rightColH = h;
-                                else rightColH += GAP + h;
-                            } 
-                            else {
-                                pages.push({ type: 'FLOW', items: currentChunk, pageContentHeight: Math.max(leftColH, rightColH) });
-                                currentChunk = [m];
-                                leftColH = h;
-                                rightColH = 0;
-                            }
-                        }
-                    }
-                    if (currentChunk.length > 0) {
-                        pages.push({ type: 'FLOW', items: currentChunk, pageContentHeight: Math.max(leftColH, rightColH) });
-                    }
+for (let i = 0; i < consecutiveMembers.length; i++) {
+    let m = consecutiveMembers[i];
+    let h = getEntryCardHeight(m);
+
+    if (m.forceNewPage && currentChunk.length > 0) {
+        pages.push({ type: 'FLOW', items: currentChunk, pageContentHeight: Math.max(leftColH, rightColH) });
+        currentChunk = []; leftColH = 0; rightColH = 0;
+    }
+
+    if (currentChunk.length === 0) {
+        currentChunk.push(m); leftColH = h; continue;
+    }
+
+    // 哪一欄目前比較短，就塞哪一欄
+const putLeft = leftColH <= rightColH;
+
+if (putLeft) {
+
+    const newLeft =
+        leftColH === 0
+            ? h
+            : leftColH + GAP + h;
+
+    if (newLeft <= MAX_H) {
+
+        currentChunk.push({
+            ...m,
+            __column: 'left'
+        });
+
+        leftColH = newLeft;
+
+    } else {
+
+        pages.push({
+            type: 'FLOW',
+            items: currentChunk,
+            pageContentHeight: Math.max(leftColH, rightColH)
+        });
+
+        currentChunk = [{
+            ...m,
+            __column: 'left'
+        }];
+
+        leftColH = h;
+        rightColH = 0;
+    }
+
+} else {
+
+    const newRight =
+        rightColH === 0
+            ? h
+            : rightColH + GAP + h;
+
+    if (newRight <= MAX_H) {
+
+        currentChunk.push({
+            ...m,
+            __column: 'right'
+        });
+
+        rightColH = newRight;
+
+    } else {
+
+        pages.push({
+            type: 'FLOW',
+            items: currentChunk,
+            pageContentHeight: Math.max(leftColH, rightColH)
+        });
+
+        currentChunk = [{
+            ...m,
+            __column: 'left'
+        }];
+
+        leftColH = h;
+        rightColH = 0;
+    }
+}
+}
+if (currentChunk.length > 0) {
+    pages.push({ type: 'FLOW', items: currentChunk, pageContentHeight: Math.max(leftColH, rightColH) });
+}
                 }
             }
 
@@ -616,7 +672,29 @@
                     </div>
                     <div class="flex flex-col flex-1 h-full pt-1 grid-flow-engine">${pastorsHTML}</div></div>`;
             } else {
-                let gridHTML = p.items.map(item => `<div class="avoid-break">${buildCardHTMLString(item)}</div>`).join('');
+                const leftItems = p.items
+    .filter(x => x.__column === 'left');
+
+const rightItems = p.items
+    .filter(x => x.__column === 'right');
+
+let gridHTML = `
+    <div class="flex flex-col gap-[14px]">
+        ${leftItems.map(item => `
+            <div class="avoid-break">
+                ${buildCardHTMLString(item)}
+            </div>
+        `).join('')}
+    </div>
+
+    <div class="flex flex-col gap-[14px]">
+        ${rightItems.map(item => `
+            <div class="avoid-break">
+                ${buildCardHTMLString(item)}
+            </div>
+        `).join('')}
+    </div>
+`;
                 const firstItem = p.items[0];
                 const isMinistryLayout = firstItem && firstItem.type === 'MINISTRY';
                 const topRightContent = isMinistryLayout 
